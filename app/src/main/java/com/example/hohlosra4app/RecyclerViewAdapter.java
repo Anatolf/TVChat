@@ -8,11 +8,7 @@ import android.view.ViewGroup;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
-
-import androidx.annotation.NonNull;
-
 import androidx.recyclerview.widget.RecyclerView;
-
 import java.util.ArrayList;
 
 
@@ -25,16 +21,11 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
     private OnChannelClickListner onChannelClickListner;  // для передачи данных в MainActivity
 
 //// конструктор для передачи данных из RecyclerView в MainActivity:
-    public RecyclerViewAdapter(OnChannelClickListner onChannelClickListner) {
+    public RecyclerViewAdapter(Context mainActivityContext, OnChannelClickListner onChannelClickListner) {
         this.onChannelClickListner = onChannelClickListner;
+        this.mainActivityContext = mainActivityContext;
     }
 
-//// Create one constructor with three parameters which will passed from MainActivity class
-    public RecyclerViewAdapter(Context mainActivityContext, ArrayList<String> channelsArrayList, ArrayList<Integer> countUsersArrayList) {
-        this.mainActivityContext = mainActivityContext;
-      //  this.channelsArrayList = channelsArrayList;
-      //  this.usersIntoChatArrayList = countUsersArrayList;
-    }
 
 //// Устанавливает список Каналов и список активных Юзеров в канале:
     public void setChannelAndUsersIntoList(ArrayList<String> channels, ArrayList<Integer> usersInto){
@@ -81,11 +72,10 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
     }
 
 
-////////////// experiment ////////////////////
     public interface OnChannelClickListner{  // для передачи данных в майн создаем слушатель
         void onChannelClick(Integer channel, Integer usersIntoChat);
     }
-//end////////////////////////////////////////
+
 
 
     public class ViewHolder extends RecyclerView.ViewHolder{
@@ -102,7 +92,6 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
             tvChannelName = itemView.findViewById(R.id.tv_channel_name);
             tvUsersIntoChat =  itemView.findViewById(R.id.tvUsersIntoChat);
 
-////////////experiment////////////
             itemView.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
@@ -111,20 +100,6 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
                     onChannelClickListner.onChannelClick(channelNumber, usersIntoChat);
                 }
             });
-//end//////////////////////////////
-//            llItemTvChannels.setOnClickListener(new View.OnClickListener() {
-//                @Override
-//                public void onClick(View v) {
-////                    Toast.makeText(mainActivityContext,
-////                            "You clicked item number: " + getAdapterPosition(),
-////                            Toast.LENGTH_SHORT).show();
-//
-//                  //  Intent chatIntent = new Intent(mainActivityContext, ChatActivity.class);
-//
-//                  //  startActivity(chatIntent);
-//
-//                }
-//            });
 
         }
     }
