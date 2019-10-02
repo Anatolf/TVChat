@@ -1,9 +1,11 @@
 package com.example.hohlosra4app;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.ListView;
+import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 
@@ -62,6 +64,20 @@ public class ChatActivity extends AppCompatActivity implements RoomListener {
                 System.err.println(reason);
             }
         });
+
+////////////////////// получаем Интент из Майн /////////////////////
+
+        Intent intentFromMain = getIntent();
+        if(intentFromMain.hasExtra(Intent.EXTRA_INDEX) && intentFromMain.hasExtra("count_users_into_this_chart")){
+            int indexChannel = intentFromMain.getIntExtra(Intent.EXTRA_INDEX,0);
+            int usersIntoChat = intentFromMain.getIntExtra("count_users_into_this_chart",0);
+                Toast.makeText(ChatActivity.this,
+                            "мы в ChatActivity, Канал " + indexChannel + ", количество обсуждающих " + usersIntoChat,
+                            Toast.LENGTH_SHORT).show();
+        }
+
+//end//////////////////////////////////////////////////////////////
+
     }
 
     public void sendMessage(View view) {

@@ -83,7 +83,7 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
 
 ////////////// experiment ////////////////////
     public interface OnChannelClickListner{  // для передачи данных в майн создаем слушатель
-        void onChannelClick(Integer channel);
+        void onChannelClick(Integer channel, Integer usersIntoChat);
     }
 //end////////////////////////////////////////
 
@@ -106,8 +106,9 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
             itemView.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                   int channelNumber = getAdapterPosition();  // передаём в MainActivity индекс элемента по которому нажали
-                    onChannelClickListner.onChannelClick(channelNumber);
+                    int channelNumber = getAdapterPosition();  // передаём в MainActivity индекс элемента по которому нажали
+                    int usersIntoChat = usersIntoChatArrayList.get(getAdapterPosition());
+                    onChannelClickListner.onChannelClick(channelNumber, usersIntoChat);
                 }
             });
 //end//////////////////////////////

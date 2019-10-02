@@ -58,10 +58,16 @@ public class MainActivity extends AppCompatActivity {
 // при нажатии на элемент получаем его порядковый номер в Тоаст
         RecyclerViewAdapter.OnChannelClickListner onChannelClickListner = new RecyclerViewAdapter.OnChannelClickListner() {
             @Override
-            public void onChannelClick(Integer channel) {
-                Toast.makeText(MainActivity.this,
-                            "Into MainActivity: " + channel,
-                            Toast.LENGTH_SHORT).show();
+            public void onChannelClick(Integer channel, Integer usersIntoChat) {
+//                Toast.makeText(MainActivity.this,
+//                            "Into MainActivity: " + channel,
+//                            Toast.LENGTH_SHORT).show();
+
+                // передаем в ChatActivity порядковый номер канала на который нажали
+                Intent intent = new Intent(MainActivity.this, ChatActivity.class);
+                intent.putExtra(Intent.EXTRA_INDEX, channel);
+                intent.putExtra("count_users_into_this_chart", usersIntoChat);
+                startActivity(intent);
             }
         };
 
@@ -72,7 +78,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void loadChannels(){
-        // набиваем Демо лист значениями:
+        // заполняем Демо лист значениями:
         // Каналы:
         tvChannelArrayList.add("TvChannel 1");
         tvChannelArrayList.add("TvChannel 2");
