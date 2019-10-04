@@ -1,13 +1,12 @@
 package com.example.hohlosra4app;
 
 import android.content.Context;
-import android.content.Intent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.LinearLayout;
 import android.widget.TextView;
-import android.widget.Toast;
+
 import androidx.recyclerview.widget.RecyclerView;
 import java.util.ArrayList;
 
@@ -15,8 +14,10 @@ import java.util.ArrayList;
 public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapter.ViewHolder> {
     // Create two empty arrayList and one context variable;
     Context mainActivityContext;
-    ArrayList<String> channelsArrayList = new ArrayList<>();
+    ArrayList<String> nameTvChannelsList = new ArrayList<>();
     ArrayList<Integer> usersIntoChatArrayList = new ArrayList<>();
+//    ArrayList<String> urlTvChannelsList = new ArrayList<>();
+
 
     private OnChannelClickListner onChannelClickListner;  // для передачи данных в MainActivity
 
@@ -27,16 +28,23 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
     }
 
 
+//// Устанавливает список Каналов и список активных Юзеров в канале(если оба листа с параметрами формировать в Майн):
+//    public void setChannelAndUsersIntoList(ArrayList<String> channels, ArrayList<Integer> usersInto){
+//        nameTvChannelsList.addAll(channels);
+//        usersIntoChatArrayList.addAll(usersInto);
+//        notifyDataSetChanged();
+//    }
+
 //// Устанавливает список Каналов и список активных Юзеров в канале:
-    public void setChannelAndUsersIntoList(ArrayList<String> channels, ArrayList<Integer> usersInto){
-        channelsArrayList.addAll(channels);
-        usersIntoChatArrayList.addAll(usersInto);
+    public void setChannelAndUsersIntoList(MainActivity.Channel channel){
+        nameTvChannelsList.add(channel.name);
+        usersIntoChatArrayList.add(channel.number);
         notifyDataSetChanged();
     }
 
 //// Очищает список Каналов и список активных Юзеров в канале:
     public void clearChannelAndUsersIntoList(){
-        channelsArrayList.clear();
+        nameTvChannelsList.clear();
         usersIntoChatArrayList.clear();
         notifyDataSetChanged();
     }
@@ -57,7 +65,7 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
     public void onBindViewHolder(RecyclerViewAdapter.ViewHolder holder, int position) {
         //Used to set data in each row of recycler view // обновляет при прокрутке
 
-        String currentTvChannel = channelsArrayList.get(position);
+        String currentTvChannel = nameTvChannelsList.get(position);
         String countUsers = usersIntoChatArrayList.get(position).toString();
 
         holder.tvChannelName.setText(currentTvChannel);
@@ -68,7 +76,7 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
     @Override
     public int getItemCount() {
         //Returns total number of rows inside recycler view  // возвращает количество элементов списка
-        return channelsArrayList.size();
+        return nameTvChannelsList.size();
     }
 
 

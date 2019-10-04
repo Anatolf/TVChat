@@ -21,9 +21,7 @@ import java.util.ArrayList;
 
 public class MainActivity extends AppCompatActivity {
 
-    ArrayList<String> nameTvChannelsList = new ArrayList<>();
-    ArrayList<String> urlTvChannelsList = new ArrayList<>();
-    ArrayList<Integer> usersIntoChatArrayList = new ArrayList<>();
+    ArrayList<Channel> tvChannels = new ArrayList<>();
 
     private RecyclerView rvTvChannelsList;
     private RecyclerView.LayoutManager rvLayoutManager;
@@ -42,7 +40,6 @@ public class MainActivity extends AppCompatActivity {
 //        startActivity(intent);
 
         initRecyclerView();
-//        loadChannels(); // фейковые каналы
         downloadChannelsFromFireBase();
 
     }
@@ -61,35 +58,31 @@ public class MainActivity extends AppCompatActivity {
                 Channel channel = dataSnapshot.getValue(Channel.class);
                 // adapter.add(channel);
 
-                // наполняем ArrayList's значениями из Firebase
-                assert channel != null;
-                nameTvChannelsList.add(channel.name);
-                usersIntoChatArrayList.add(channel.number);
-                // urlTvChannelsList.add(channel.urlChannel);
+                // наполняем ArrayList's твКаналами из Firebase
+                tvChannels.add(channel);
+                tvChannelsAdapter.setChannelAndUsersIntoList(channel);
 
-                // отправляем их в ТВ-адаптер
-                tvChannelsAdapter.setChannelAndUsersIntoList(nameTvChannelsList,usersIntoChatArrayList);
+//                // наполняем ArrayList's значениями из Firebase
+//                assert channel != null;
+//                nameTvChannelsList.add(channel.name);
+//                usersIntoChatArrayList.add(channel.number);
+//                // urlTvChannelsList.add(channel.urlChannel);
+//
+//                // отправляем их в ТВ-адаптер
+//                tvChannelsAdapter.setChannelAndUsersIntoList(nameTvChannelsList,usersIntoChatArrayList);
             }
 
             @Override
-            public void onChildChanged(DataSnapshot dataSnapshot, String s) {
-
-            }
+            public void onChildChanged(DataSnapshot dataSnapshot, String s) { }
 
             @Override
-            public void onChildRemoved(DataSnapshot dataSnapshot) {
-
-            }
+            public void onChildRemoved(DataSnapshot dataSnapshot) { }
 
             @Override
-            public void onChildMoved(DataSnapshot dataSnapshot, String s) {
-
-            }
+            public void onChildMoved(DataSnapshot dataSnapshot, String s) { }
 
             @Override
-            public void onCancelled(DatabaseError databaseError) {
-
-            }
+            public void onCancelled(DatabaseError databaseError) { }
         });
     }
 
@@ -122,36 +115,6 @@ public class MainActivity extends AppCompatActivity {
         rvTvChannelsList.setAdapter(tvChannelsAdapter);
     }
 
-
-
-//    private void loadChannels(){
-//        // заполняем Демо лист значениями:
-//        // Каналы:
-//        nameTvChannelsList.add("TvChannel 1");
-//        nameTvChannelsList.add("TvChannel 2");
-//        nameTvChannelsList.add("TvChannel 3");
-//        nameTvChannelsList.add("TvChannel 4");
-//        nameTvChannelsList.add("TvChannel 5");
-//        nameTvChannelsList.add("TvChannel 6");
-//        nameTvChannelsList.add("TvChannel 7");
-//        nameTvChannelsList.add("TvChannel 8");
-//        nameTvChannelsList.add("TvChannel 9");
-//        nameTvChannelsList.add("TvChannel 10");
-//
-//        // Юзеры в чате:
-//        usersIntoChatArrayList.add(45);
-//        usersIntoChatArrayList.add(0);
-//        usersIntoChatArrayList.add(0);
-//        usersIntoChatArrayList.add(6);
-//        usersIntoChatArrayList.add(123);
-//        usersIntoChatArrayList.add(0);
-//        usersIntoChatArrayList.add(0);
-//        usersIntoChatArrayList.add(15);
-//        usersIntoChatArrayList.add(0);
-//        usersIntoChatArrayList.add(0);
-//
-//        tvChannelsAdapter.setChannelAndUsersIntoList(nameTvChannelsList,usersIntoChatArrayList);
-//    }
 
     // Класс Channel - один элемент с тремя параметрами (для добавления в базу данных firebase)
     @IgnoreExtraProperties
