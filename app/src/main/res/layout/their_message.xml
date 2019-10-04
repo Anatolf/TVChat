@@ -16,7 +16,7 @@
         android:layout_height="34dp" />
 
     <TextView
-        android:id="@+id/name"
+        android:id="@+id/channel_et"
         android:layout_marginLeft="15dp"
         android:layout_toRightOf="@+id/avatar"
         android:layout_alignTop="@+id/avatar"
@@ -29,8 +29,8 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:id="@+id/message_body"
-        android:layout_below="@+id/name"
-        android:layout_alignLeft="@+id/name"
+        android:layout_below="@+id/channel_et"
+        android:layout_alignLeft="@+id/channel_et"
         android:background="@drawable/their_message"
         android:paddingVertical="12dp"
         android:paddingHorizontal="16dp"
