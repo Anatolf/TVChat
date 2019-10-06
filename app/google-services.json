@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "1039203651912",
+    "firebase_url": "https://tvsrach-fb609.firebaseio.com",
+    "project_id": "tvsrach-fb609",
+    "storage_bucket": "tvsrach-fb609.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1039203651912:android:1502e9362961b47f60e37d",
+        "android_client_info": {
+          "package_name": "com.example.hohlosra4app"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "1039203651912-2n0e9g67gu0obcr1ku3drdf4n0vk4pnu.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.hohlosra4app",
+            "certificate_hash": "cd0a61eef13b58f0adf6a4a72ef7422e3dcb69dd"
+          }
+        },
+        {
+          "client_id": "1039203651912-afvpvhdm9lralpki123gfbqdcj3i6fbc.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDWA0yqhgTQYMs2ZLPuh3qRusk5DF2yJdg"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "1039203651912-afvpvhdm9lralpki123gfbqdcj3i6fbc.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

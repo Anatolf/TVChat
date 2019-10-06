@@ -2,6 +2,7 @@ package com.example.hohlosra4app;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.ListView;
@@ -11,11 +12,18 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.Query;
+import com.google.firebase.database.ValueEventListener;
 import com.scaledrone.lib.Listener;
 import com.scaledrone.lib.Room;
 import com.scaledrone.lib.RoomListener;
 import com.scaledrone.lib.Scaledrone;
 
+import java.util.HashMap;
 import java.util.Random;
 
 public class ChatActivity extends AppCompatActivity implements RoomListener {
@@ -27,6 +35,9 @@ public class ChatActivity extends AppCompatActivity implements RoomListener {
     private Scaledrone scaledrone;
     private MessageAdapter messageAdapter;
     private ListView messagesView;
+
+    private DatabaseReference database;
+    private DatabaseReference ref;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -78,6 +89,42 @@ public class ChatActivity extends AppCompatActivity implements RoomListener {
 
 //end//////////////////////////////////////////////////////////////
 
+        database = FirebaseDatabase.getInstance().getReference();
+        ref = database.child("Comments").child("1TV");
+
+    }
+
+
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+
+        Query messagesQuery = ref.orderByKey();
+        messagesQuery.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+
+                // todo tut poluchit vse soobshenia i otobrazit ih v spiske
+
+
+
+                for (DataSnapshot singleSnapshot : dataSnapshot.getChildren()){
+                    ChatMessage message = singleSnapshot.getValue(ChatMessage.class);
+                    Log.d("ChatActivity", "onDataChange: " + message.message);
+                }
+            }
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+                Log.e("ChatActivity", "onCancelled", databaseError.toException());
+            }
+        });
+    }
+
+    public static class ChatMessage {
+        String message;
+        String time_stamp;
+        String user_id;
     }
 
     public void sendMessage(View view) {
@@ -168,4 +215,9 @@ class MemberData {
                 ", color='" + color + '\'' +
                 '}';
     }
+
+
+//    Long timeStamp = System.currentTimeMillis();
+//    String user_id = "pidor_na_androide";
+//    String message = "coockooepta";
 }
