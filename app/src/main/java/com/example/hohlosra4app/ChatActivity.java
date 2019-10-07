@@ -4,10 +4,15 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
+import android.view.ViewGroup;
+import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.ListView;
+import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -16,6 +21,7 @@ import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.IgnoreExtraProperties;
 import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
 import com.scaledrone.lib.Listener;
@@ -23,6 +29,8 @@ import com.scaledrone.lib.Room;
 import com.scaledrone.lib.RoomListener;
 import com.scaledrone.lib.Scaledrone;
 
+import java.io.Serializable;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Random;
 
@@ -36,8 +44,8 @@ public class ChatActivity extends AppCompatActivity implements RoomListener {
     private MessageAdapter messageAdapter;
     private ListView messagesView;
 
-    private DatabaseReference database;
-    private DatabaseReference ref;
+    private FirebaseDatabase database;
+    private DatabaseReference myRef;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -89,8 +97,13 @@ public class ChatActivity extends AppCompatActivity implements RoomListener {
 
 //end//////////////////////////////////////////////////////////////
 
-        database = FirebaseDatabase.getInstance().getReference();
-        ref = database.child("Comments").child("1TV");
+
+        // подключили базу для отправки сообщения на fireBase в методе sendMessage()
+        database = FirebaseDatabase.getInstance();
+        //        database.setPersistenceEnabled(true);  // добавление элементов во время оффлайн
+        myRef = database.getReference("Comments").child("1TV");
+        //   myRef.removeValue();  // удалить из базы весь раздел "1TV"  и всё что внутри (комментарии "Comments")
+        //  myRef = database.getReference("items").child("users").child("newUser"); // многопользовательская ветка
 
     }
 
@@ -100,19 +113,21 @@ public class ChatActivity extends AppCompatActivity implements RoomListener {
     protected void onResume() {
         super.onResume();
 
-        Query messagesQuery = ref.orderByKey();
+        Query messagesQuery = myRef.orderByKey();
         messagesQuery.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
 
                 // todo tut poluchit vse soobshenia i otobrazit ih v spiske
 
+// активити для заполнения базы)
+//        Intent intent = new Intent(ChatActivity.this,UploadChannelsToFirebaseActivity.class);
+//        startActivity(intent);
 
-
-                for (DataSnapshot singleSnapshot : dataSnapshot.getChildren()){
-                    ChatMessage message = singleSnapshot.getValue(ChatMessage.class);
-                    Log.d("ChatActivity", "onDataChange: " + message.message);
-                }
+//                for (DataSnapshot singleSnapshot : dataSnapshot.getChildren()){
+//                    ChatMessage message = singleSnapshot.getValue(ChatMessage.class);
+//                    Log.d("ChatActivity", "onDataChange: " + message.message);
+//                }
             }
             @Override
             public void onCancelled(DatabaseError databaseError) {
@@ -121,17 +136,22 @@ public class ChatActivity extends AppCompatActivity implements RoomListener {
         });
     }
 
-    public static class ChatMessage {
-        String message;
-        String time_stamp;
-        String user_id;
-    }
 
+// метод на кнопке "отправить сообщение"
     public void sendMessage(View view) {
-        String message = editText.getText().toString();
+        String user_id = "pidor na Androide";  // имя пользователя
+        String message = editText.getText().toString();  // получаем сообщение с поля ввода
+        long time_stamp = System.currentTimeMillis();   // время сообщения
+
         if (message.length() > 0) {
-            scaledrone.publish(roomName, message);
-            editText.getText().clear();
+          //  scaledrone.publish(roomName, message);  //оригинальный метод
+
+                    //создаем экземпляр одного Cообщения Юзера
+            ChatMessage chatMessage = new ChatMessage(user_id,message, time_stamp);
+                    // оправляем его в базу данных firebase
+            myRef.push().setValue(chatMessage);
+
+            editText.getText().clear();  //очищаем поле ввода
         }
     }
 
@@ -186,7 +206,31 @@ public class ChatActivity extends AppCompatActivity implements RoomListener {
         }
         return sb.toString().substring(0, 7);
     }
+
+
+    // Класс ChatMessage - объект одного отправляемого Сообщения Юзера в выбранный чат (для добавления в базу данных firebase)
+    @IgnoreExtraProperties
+    static class ChatMessage implements Serializable{
+
+        public String user_id; // = "pidor_na_androide";
+        public String message; // = "кукуепта";
+        public long timeStamp; // = System.currentTimeMillis();
+
+        public ChatMessage() {
+        }
+
+        public ChatMessage(String user_id, String message, long timeStamp) {
+            this.user_id = user_id;
+            this.message = message;
+            this.timeStamp = timeStamp;
+        }
+    }
 }
+
+
+
+
+
 
 class MemberData {
     private String name;
@@ -216,8 +260,4 @@ class MemberData {
                 '}';
     }
 
-
-//    Long timeStamp = System.currentTimeMillis();
-//    String user_id = "pidor_na_androide";
-//    String message = "coockooepta";
 }
