@@ -17,6 +17,7 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -30,6 +31,7 @@ import com.scaledrone.lib.RoomListener;
 import com.scaledrone.lib.Scaledrone;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Random;
@@ -46,6 +48,8 @@ public class ChatActivity extends AppCompatActivity implements RoomListener {
 
     private FirebaseDatabase database;
     private DatabaseReference myRef;
+
+    ArrayList<ChatMessage> allMessage = new ArrayList<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -108,36 +112,93 @@ public class ChatActivity extends AppCompatActivity implements RoomListener {
     }
 
 
-
     @Override
     protected void onResume() {
         super.onResume();
 
-        Query messagesQuery = myRef.orderByKey();
-        messagesQuery.addListenerForSingleValueEvent(new ValueEventListener() {
+     //   messageAdapter.notifyDataSetChanged();
+     //   allMessage.clear();
+        setAllMessageList();
+        showMessages();
+
+
+
+//        Query messagesQuery = myRef.orderByKey();
+//        messagesQuery.addListenerForSingleValueEvent(new ValueEventListener() {
+//            @Override
+//            public void onDataChange(DataSnapshot dataSnapshot) {
+//
+//                // todo tut poluchit vse soobshenia i otobrazit ih v spiske
+//
+//// активити для заполнения базы)
+////        Intent intent = new Intent(ChatActivity.this,UploadChannelsToFirebaseActivity.class);
+////        startActivity(intent);
+//
+////                for (DataSnapshot singleSnapshot : dataSnapshot.getChildren()){
+////                    ChatMessage message = singleSnapshot.getValue(ChatMessage.class);
+////                    Log.d("ChatActivity", "onDataChange: " + message.message);
+////                }
+//            }
+//            @Override
+//            public void onCancelled(DatabaseError databaseError) {
+//                Log.e("ChatActivity", "onCancelled", databaseError.toException());
+//            }
+//        });
+    }
+
+    private void setAllMessageList(){
+        // делаем запрос в базу данных firebase
+        Query myQuery = myRef;
+        //  Query myQuery = myRef.orderByChild("numberChannel").equalTo(111);   // редактирование: сортирует ответ по "numberChannel" и 111
+        myQuery.addChildEventListener(new ChildEventListener() {
             @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
+            public void onChildAdded(DataSnapshot dataSnapshot, String s) {
+                ChatMessage chatMessage = dataSnapshot.getValue(ChatMessage.class);
+                allMessage.add(chatMessage);
 
-                // todo tut poluchit vse soobshenia i otobrazit ih v spiske
 
-// активити для заполнения базы)
-//        Intent intent = new Intent(ChatActivity.this,UploadChannelsToFirebaseActivity.class);
-//        startActivity(intent);
+//               // adapter.add(channel);
+//                Toast.makeText(ChatActivity.this,
+//                        "ChatActivity, сообщение из FireBase " + chatMessage.message + ", от пользователя: " + chatMessage.user_id,
+//                        Toast.LENGTH_SHORT).show();
 
-//                for (DataSnapshot singleSnapshot : dataSnapshot.getChildren()){
-//                    ChatMessage message = singleSnapshot.getValue(ChatMessage.class);
-//                    Log.d("ChatActivity", "onDataChange: " + message.message);
-//                }
             }
+
             @Override
-            public void onCancelled(DatabaseError databaseError) {
-                Log.e("ChatActivity", "onCancelled", databaseError.toException());
-            }
+            public void onChildChanged(DataSnapshot dataSnapshot, String s) { }
+
+            @Override
+            public void onChildRemoved(DataSnapshot dataSnapshot) { }
+
+            @Override
+            public void onChildMoved(DataSnapshot dataSnapshot, String s) { }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) { }
         });
     }
 
 
-// метод на кнопке "отправить сообщение"
+
+    private void showMessages() {
+        boolean belongToCurrentUser; // флаг Юзер я, не я?
+
+        for (ChatMessage chM:allMessage) {
+
+            if (chM.user_id.equals("pidor na Androide")) {
+                belongToCurrentUser = true;
+            } else {
+                belongToCurrentUser = false;
+            }
+
+            MemberData memb = new MemberData(getRandomName(), getRandomColor()); // создаёт рандомных собеседников Имя и цвет сообщения
+            Message m1 = new Message(chM.message, memb, belongToCurrentUser);
+            messageAdapter.add(m1); // Message message
+        }
+    }
+
+
+    // метод на кнопке "отправить сообщение"
     public void sendMessage(View view) {
         String user_id = "pidor na Androide";  // имя пользователя
         String message = editText.getText().toString();  // получаем сообщение с поля ввода
