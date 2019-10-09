@@ -24,7 +24,6 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.IgnoreExtraProperties;
 import com.google.firebase.database.Query;
-import com.google.firebase.database.ValueEventListener;
 import com.scaledrone.lib.Listener;
 import com.scaledrone.lib.Room;
 import com.scaledrone.lib.RoomListener;
@@ -32,12 +31,10 @@ import com.scaledrone.lib.Scaledrone;
 
 import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashMap;
 import java.util.Random;
 
 public class ChatActivity extends AppCompatActivity implements RoomListener {
-
+    private static final String TAG = "myLogs";
     // replace this with a real channelID from Scaledrone dashboard
     private String channelID = "CHANNEL_ID_FROM_YOUR_SCALEDRONE_DASHBOARD";
     private String roomName = "observable-room";
@@ -116,51 +113,34 @@ public class ChatActivity extends AppCompatActivity implements RoomListener {
     protected void onResume() {
         super.onResume();
 
-     //   messageAdapter.notifyDataSetChanged();
-     //   allMessage.clear();
-        setAllMessageList();
-        showMessages();
-
-
-
-//        Query messagesQuery = myRef.orderByKey();
-//        messagesQuery.addListenerForSingleValueEvent(new ValueEventListener() {
-//            @Override
-//            public void onDataChange(DataSnapshot dataSnapshot) {
-//
-//                // todo tut poluchit vse soobshenia i otobrazit ih v spiske
-//
-//// активити для заполнения базы)
-////        Intent intent = new Intent(ChatActivity.this,UploadChannelsToFirebaseActivity.class);
-////        startActivity(intent);
-//
-////                for (DataSnapshot singleSnapshot : dataSnapshot.getChildren()){
-////                    ChatMessage message = singleSnapshot.getValue(ChatMessage.class);
-////                    Log.d("ChatActivity", "onDataChange: " + message.message);
-////                }
-//            }
-//            @Override
-//            public void onCancelled(DatabaseError databaseError) {
-//                Log.e("ChatActivity", "onCancelled", databaseError.toException());
-//            }
-//        });
+        // очищаем в адаптере Message список messages перед каждым перезапуском активити
+        messageAdapter.messages.clear();
+        showAllMessages();
     }
 
-    private void setAllMessageList(){
+    private void showAllMessages(){
+
         // делаем запрос в базу данных firebase
         Query myQuery = myRef;
         //  Query myQuery = myRef.orderByChild("numberChannel").equalTo(111);   // редактирование: сортирует ответ по "numberChannel" и 111
         myQuery.addChildEventListener(new ChildEventListener() {
             @Override
             public void onChildAdded(DataSnapshot dataSnapshot, String s) {
+                /////// Получаем из FireBase из раздела "1TV", подраздела "Comments" по одному объекту ChatMessage
+                /////// и отправляем его в messageAdapter для отображения
                 ChatMessage chatMessage = dataSnapshot.getValue(ChatMessage.class);
-                allMessage.add(chatMessage);
 
+                    boolean belongToCurrentUser; // флаг Юзер я, не я?
 
-//               // adapter.add(channel);
-//                Toast.makeText(ChatActivity.this,
-//                        "ChatActivity, сообщение из FireBase " + chatMessage.message + ", от пользователя: " + chatMessage.user_id,
-//                        Toast.LENGTH_SHORT).show();
+                    if (chatMessage.user_id.equals("pidor na Androide")) {
+                        belongToCurrentUser = true;
+                    } else {
+                        belongToCurrentUser = false;
+                    }
+
+                    MemberData memb = new MemberData(getRandomName(), getRandomColor()); // создаёт рандомных собеседников Имя и цвет сообщения
+                    Message singleMessage = new Message(chatMessage.message, memb, belongToCurrentUser);
+                    messageAdapter.add(singleMessage);
 
             }
 
@@ -179,28 +159,9 @@ public class ChatActivity extends AppCompatActivity implements RoomListener {
     }
 
 
-
-    private void showMessages() {
-        boolean belongToCurrentUser; // флаг Юзер я, не я?
-
-        for (ChatMessage chM:allMessage) {
-
-            if (chM.user_id.equals("pidor na Androide")) {
-                belongToCurrentUser = true;
-            } else {
-                belongToCurrentUser = false;
-            }
-
-            MemberData memb = new MemberData(getRandomName(), getRandomColor()); // создаёт рандомных собеседников Имя и цвет сообщения
-            Message m1 = new Message(chM.message, memb, belongToCurrentUser);
-            messageAdapter.add(m1); // Message message
-        }
-    }
-
-
-    // метод на кнопке "отправить сообщение"
+    // По нажатию кнопки создаём в FireBase новое "сообщение" с введённым текстом из поля EditText
     public void sendMessage(View view) {
-        String user_id = "pidor na Androide";  // имя пользователя
+        String user_id = "pidor na Androide";  // имя пользователя "pidor na Androide"
         String message = editText.getText().toString();  // получаем сообщение с поля ввода
         long time_stamp = System.currentTimeMillis();   // время сообщения
 
@@ -216,9 +177,6 @@ public class ChatActivity extends AppCompatActivity implements RoomListener {
         }
     }
 
-//    public void goToChat(View v) {
-//        startActivity(this);
-//    }
 
     @Override
     public void onOpen(Room room) {

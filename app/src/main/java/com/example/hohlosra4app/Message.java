@@ -1,6 +1,8 @@
 package com.example.hohlosra4app;
 
-public class Message {
+import java.io.Serializable;
+
+public class Message implements Serializable {
     private String text;
     private MemberData memberData;
     private boolean belongsToCurrentUser;
