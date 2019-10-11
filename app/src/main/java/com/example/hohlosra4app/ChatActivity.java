@@ -57,6 +57,8 @@ public class ChatActivity extends AppCompatActivity implements RoomListener {
 
         messageAdapter = new MessageAdapter(this);
         messagesView = (ListView) findViewById(R.id.messages_view);
+        // при добавлении нового сообщения сразу же его отображает (скроллит список вниз ("вниз" установлено в activity_chat - android:stackFromBottom="true"))
+        messagesView.setTranscriptMode(ListView.TRANSCRIPT_MODE_ALWAYS_SCROLL);
         messagesView.setAdapter(messageAdapter);
 
         MemberData data = new MemberData(getRandomName(), getRandomColor());
@@ -172,7 +174,7 @@ public class ChatActivity extends AppCompatActivity implements RoomListener {
             ChatMessage chatMessage = new ChatMessage(user_id,message, time_stamp);
                     // оправляем его в базу данных firebase
             myRef.push().setValue(chatMessage);
-
+            messagesView.smoothScrollToPosition(messageAdapter.getCount() -1);
             editText.getText().clear();  //очищаем поле ввода
         }
     }
@@ -199,7 +201,6 @@ public class ChatActivity extends AppCompatActivity implements RoomListener {
                 @Override
                 public void run() {
                     messageAdapter.add(message);
-                    messagesView.setSelection(messagesView.getCount() - 1);
                 }
             });
         } catch (JsonProcessingException e) {
