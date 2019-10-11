@@ -4,19 +4,12 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
-import android.view.ViewGroup;
-import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.ListView;
-import android.widget.TextView;
 import android.widget.Toast;
 
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -24,29 +17,24 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.IgnoreExtraProperties;
 import com.google.firebase.database.Query;
-import com.scaledrone.lib.Listener;
-import com.scaledrone.lib.Room;
-import com.scaledrone.lib.RoomListener;
-import com.scaledrone.lib.Scaledrone;
 
 import java.io.Serializable;
-import java.util.ArrayList;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.Random;
+import java.util.TimeZone;
 
-public class ChatActivity extends AppCompatActivity implements RoomListener {
+public class ChatActivity extends AppCompatActivity {
     private static final String TAG = "myLogs";
-    // replace this with a real channelID from Scaledrone dashboard
-    private String channelID = "CHANNEL_ID_FROM_YOUR_SCALEDRONE_DASHBOARD";
-    private String roomName = "observable-room";
+
     private EditText editText;
-    private Scaledrone scaledrone;
     private MessageAdapter messageAdapter;
     private ListView messagesView;
 
     private FirebaseDatabase database;
     private DatabaseReference myRef;
 
-    ArrayList<ChatMessage> allMessage = new ArrayList<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -57,35 +45,11 @@ public class ChatActivity extends AppCompatActivity implements RoomListener {
 
         messageAdapter = new MessageAdapter(this);
         messagesView = (ListView) findViewById(R.id.messages_view);
-        // при добавлении нового сообщения сразу же его отображает (скроллит список вниз ("вниз" установлено в activity_chat - android:stackFromBottom="true"))
+        // при добавлении нового сообщения сразу же его отображает (скроллит список вниз)
+        // ("вниз" установлено в activity_chat - android:stackFromBottom="true")
         messagesView.setTranscriptMode(ListView.TRANSCRIPT_MODE_ALWAYS_SCROLL);
         messagesView.setAdapter(messageAdapter);
 
-        MemberData data = new MemberData(getRandomName(), getRandomColor());
-
-        scaledrone = new Scaledrone(channelID, data);
-        scaledrone.connect(new Listener() {
-            @Override
-            public void onOpen() {
-                System.out.println("Scaledrone connection open");
-                scaledrone.subscribe(roomName, ChatActivity.this);
-            }
-
-            @Override
-            public void onOpenFailure(Exception ex) {
-                System.err.println(ex);
-            }
-
-            @Override
-            public void onFailure(Exception ex) {
-                System.err.println(ex);
-            }
-
-            @Override
-            public void onClosed(String reason) {
-                System.err.println(reason);
-            }
-        });
 
 ////////////////////// получаем Интент из Майн /////////////////////
 
@@ -133,14 +97,20 @@ public class ChatActivity extends AppCompatActivity implements RoomListener {
                 ChatMessage chatMessage = dataSnapshot.getValue(ChatMessage.class);
 
                     boolean belongToCurrentUser; // флаг Юзер я, не я?
-
                     if (chatMessage.user_id.equals("pidor na Androide")) {
                         belongToCurrentUser = true;
                     } else {
                         belongToCurrentUser = false;
                     }
 
-                    MemberData memb = new MemberData(getRandomName(), getRandomColor()); // создаёт рандомных собеседников Имя и цвет сообщения
+                    // берём дату из chatMessage и переводим её в "00:00:00" по Москве
+                Date date = new Date(chatMessage.timeStamp);
+                DateFormat formatter = new SimpleDateFormat("HH:mm:ss");
+                formatter.setTimeZone(TimeZone.getTimeZone("Europe/Moscow"));
+                String currentTime = formatter.format(date);
+
+                    // создаёт рандомных собеседников Имя и цвет сообщения, время передаём через memb для всех собеседников и себя
+                    MemberData memb = new MemberData(getRandomName(), getRandomColor(), currentTime);
                     Message singleMessage = new Message(chatMessage.message, memb, belongToCurrentUser);
                     messageAdapter.add(singleMessage);
 
@@ -163,7 +133,7 @@ public class ChatActivity extends AppCompatActivity implements RoomListener {
 
     // По нажатию кнопки создаём в FireBase новое "сообщение" с введённым текстом из поля EditText
     public void sendMessage(View view) {
-        String user_id = "pidor na Androide";  // имя пользователя "pidor na Androide"
+        String user_id = "kakaya to pizda";  // имя пользователя "pidor na Androide"
         String message = editText.getText().toString();  // получаем сообщение с поля ввода
         long time_stamp = System.currentTimeMillis();   // время сообщения
 
@@ -179,34 +149,6 @@ public class ChatActivity extends AppCompatActivity implements RoomListener {
         }
     }
 
-
-    @Override
-    public void onOpen(Room room) {
-        System.out.println("Conneted to room");
-    }
-
-    @Override
-    public void onOpenFailure(Room room, Exception ex) {
-        System.err.println(ex);
-    }
-
-    @Override
-    public void onMessage(Room room, com.scaledrone.lib.Message receivedMessage) {
-        final ObjectMapper mapper = new ObjectMapper();
-        try {
-            final MemberData data = mapper.treeToValue(receivedMessage.getMember().getClientData(), MemberData.class);
-            boolean belongsToCurrentUser = receivedMessage.getClientID().equals(scaledrone.getClientID());
-            final Message message = new Message(receivedMessage.getData().asText(), data, belongsToCurrentUser);
-            runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-                    messageAdapter.add(message);
-                }
-            });
-        } catch (JsonProcessingException e) {
-            e.printStackTrace();
-        }
-    }
 
     private String getRandomName() {
         String[] adjs = {"autumn", "hidden", "bitter", "misty", "silent", "empty", "dry", "dark", "summer", "icy", "delicate", "quiet", "white", "cool", "spring", "winter", "patient", "twilight", "dawn", "crimson", "wispy", "weathered", "blue", "billowing", "broken", "cold", "damp", "falling", "frosty", "green", "long", "late", "lingering", "bold", "little", "morning", "muddy", "old", "red", "rough", "still", "small", "sparkling", "throbbing", "shy", "wandering", "withered", "wild", "black", "young", "holy", "solitary", "fragrant", "aged", "snowy", "proud", "floral", "restless", "divine", "polished", "ancient", "purple", "lively", "nameless"};
@@ -255,10 +197,12 @@ public class ChatActivity extends AppCompatActivity implements RoomListener {
 class MemberData {
     private String name;
     private String color;
+    private String time;
 
-    public MemberData(String name, String color) {
+    public MemberData(String name, String color, String time) {
         this.name = name;
         this.color = color;
+        this.time = time;
     }
 
     public MemberData() {
@@ -271,6 +215,8 @@ class MemberData {
     public String getColor() {
         return color;
     }
+
+    public String getTime() { return time; }
 
     @Override
     public String toString() {

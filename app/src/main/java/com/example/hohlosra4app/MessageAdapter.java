@@ -53,16 +53,22 @@ public class MessageAdapter extends BaseAdapter {
         if (message.isBelongsToCurrentUser()) {
             convertView = messageInflater.inflate(R.layout.my_message, null);
             holder.messageBody = (TextView) convertView.findViewById(R.id.message_body);
+            holder.time = (TextView) convertView.findViewById(R.id.time_et);
             convertView.setTag(holder);
+
+            holder.time.setText(message.getMemberData().getTime());
             holder.messageBody.setText(message.getText());
+
         } else {
             convertView = messageInflater.inflate(R.layout.their_message, null);
             holder.avatar = (View) convertView.findViewById(R.id.avatar);
             holder.name = (TextView) convertView.findViewById(R.id.channel_et);
+            holder.time = (TextView) convertView.findViewById(R.id.time_et);
             holder.messageBody = (TextView) convertView.findViewById(R.id.message_body);
             convertView.setTag(holder);
 
             holder.name.setText(message.getMemberData().getName());
+            holder.time.setText(message.getMemberData().getTime());
             holder.messageBody.setText(message.getText());
             GradientDrawable drawable = (GradientDrawable) holder.avatar.getBackground();
             drawable.setColor(Color.parseColor(message.getMemberData().getColor()));
@@ -77,4 +83,5 @@ class MessageViewHolder {
     public View avatar;
     public TextView name;
     public TextView messageBody;
+    public TextView time;
 }

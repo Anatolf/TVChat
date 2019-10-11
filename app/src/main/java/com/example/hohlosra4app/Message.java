@@ -6,6 +6,7 @@ public class Message implements Serializable {
     private String text;
     private MemberData memberData;
     private boolean belongsToCurrentUser;
+    //private String time;
 
     public Message(String text, MemberData data, boolean belongsToCurrentUser) {
         this.text = text;
