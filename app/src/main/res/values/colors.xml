@@ -5,4 +5,10 @@
     <color name="colorAccent">#D81B60</color>
     <color name="orange">#FEC130</color>
     <color name="red">#FA7955</color>
+    <color name="textBottom">#c9c9c9</color>
+    <color name="rippleEffect">#D81B60</color>
+    <color name="btn_sing_in">#A95B00</color>
+    <color name="btn_sing_in_stroke">#DB0</color>
+    <color name="btn_register">#D95B00</color>
+    <color name="btn_register_stroke">#DB0</color>
 </resources>

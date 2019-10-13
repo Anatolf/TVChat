@@ -1,15 +1,27 @@
 package com.example.hohlosra4app;
 
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
+import android.text.TextUtils;
 import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.View;
+import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ListView;
+import android.widget.RelativeLayout;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.material.snackbar.Snackbar;
+import com.google.firebase.auth.AuthResult;
+import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -25,6 +37,14 @@ import java.util.Date;
 import java.util.Random;
 import java.util.TimeZone;
 
+import com.rengwuxian.materialedittext.MaterialEditText;
+import com.vk.sdk.VKAccessToken;
+import com.vk.sdk.VKAccessTokenTracker;
+import com.vk.sdk.VKCallback;
+import com.vk.sdk.VKScope;
+import com.vk.sdk.VKSdk;
+import com.vk.sdk.api.VKError;
+
 public class ChatActivity extends AppCompatActivity {
     private static final String TAG = "myLogs";
 
@@ -35,11 +55,33 @@ public class ChatActivity extends AppCompatActivity {
     private FirebaseDatabase database;
     private DatabaseReference myRef;
 
+// for registration window
+    private FirebaseAuth auth;
+    private RelativeLayout root_chat;
+
+    private String[] scope = new String[]{VKScope.EMAIL,VKScope.FRIENDS};
+
+//    VKAccessTokenTracker vkAccessTokenTracker = new VKAccessTokenTracker() {
+//        @Override
+//        public void onVKAccessTokenChanged(VKAccessToken oldToken, VKAccessToken newToken) {
+//            if (newToken == null) {
+//// VKAccessToken is invalid
+//                Intent intent = new Intent(ChatActivity.this,RegistrationActivity.class);
+//                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK|Intent.FLAG_ACTIVITY_CLEAR_TOP);
+//                startActivity(intent);
+//            }
+//        }
+//    };
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_chat);
+
+//        vkAccessTokenTracker.startTracking();
+        VKSdk.initialize(this);
+        VKSdk.login(this, scope);
+       // VK.login(activity, arrayListOf(VKScope.WALL, VKScope.PHOTOS));
 
         editText = (EditText) findViewById(R.id.editText);
 
@@ -50,7 +92,7 @@ public class ChatActivity extends AppCompatActivity {
         messagesView.setTranscriptMode(ListView.TRANSCRIPT_MODE_ALWAYS_SCROLL);
         messagesView.setAdapter(messageAdapter);
 
-
+        root_chat = findViewById(R.id.root_element_chat);
 ////////////////////// получаем Интент из Майн /////////////////////
 
         Intent intentFromMain = getIntent();
@@ -72,9 +114,62 @@ public class ChatActivity extends AppCompatActivity {
         //   myRef.removeValue();  // удалить из базы весь раздел "1TV"  и всё что внутри (комментарии "Comments")
         //  myRef = database.getReference("items").child("users").child("newUser"); // многопользовательская ветка
 
+
+
+/////////////// REGISTER SING IN ////////////////////////////
+
+//        btnSingIn = findViewById(R.id.btnSingIn);
+//        btnRegister = findViewById(R.id.btnRegister);
+//
+//        root = findViewById(R.id.root_element);
+//
+//        auth = FirebaseAuth.getInstance();
+//        database = FirebaseDatabase.getInstance();
+//        myRef = database.getReference("Users");
+
+//        btnRegister.setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View v) {
+//                showRegisterWindow();
+//            }
+//        });
+//        btnSingIn.setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View v) {
+//                showSignInWindow();
+//            }
+//        });
+
+
+
+// END ////////////////////////////////////////////////////////
+
+    }
+
+/////////VK VK VK ///////////////////////
+    String ema;
+    String use;
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if (!VKSdk.onActivityResult(requestCode, resultCode, data, new VKCallback<VKAccessToken>() {
+            @Override
+            public void onResult(VKAccessToken res) {
+// Пользователь успешно авторизовался
+                ema = res.email;
+                use = res.userId;
+
+            }
+            @Override
+            public void onError(VKError error) {
+// Произошла ошибка авторизации (например, пользователь запретил авторизацию)
+            }
+        })) {
+            super.onActivityResult(requestCode, resultCode, data);
+        }
     }
 
 
+// END ////////////////////////////////////////////
     @Override
     protected void onResume() {
         super.onResume();
@@ -137,16 +232,110 @@ public class ChatActivity extends AppCompatActivity {
         String message = editText.getText().toString();  // получаем сообщение с поля ввода
         long time_stamp = System.currentTimeMillis();   // время сообщения
 
-        if (message.length() > 0) {
-          //  scaledrone.publish(roomName, message);  //оригинальный метод
+        AlertDialog.Builder dialog = new AlertDialog.Builder(this);
+        dialog.setTitle("Войти");
+        dialog.setMessage("Чтобы отправлять сообщения, зарегестрируйтесь:");
 
-                    //создаем экземпляр одного Cообщения Юзера
-            ChatMessage chatMessage = new ChatMessage(user_id,message, time_stamp);
-                    // оправляем его в базу данных firebase
-            myRef.push().setValue(chatMessage);
-            messagesView.smoothScrollToPosition(messageAdapter.getCount() -1);
-            editText.getText().clear();  //очищаем поле ввода
-        }
+        LayoutInflater inflater = LayoutInflater.from(this);
+        View sign_in_window = inflater.inflate(R.layout.sing_in_window2, null);
+        dialog.setView(sign_in_window);
+
+//        final MaterialEditText email = sign_in_window.findViewById(R.id.email_field);
+//        final MaterialEditText password = sign_in_window.findViewById(R.id.pass_field);
+        final Button btnRegVk = sign_in_window.findViewById(R.id.reg_from_vk_btn);
+        final Button btnRegOk = sign_in_window.findViewById(R.id.reg_from_ok_btn);
+        final Button btnRegMail = sign_in_window.findViewById(R.id.reg_from_email_btn);
+
+        // по кнопке "Через Вк"
+        btnRegVk.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+
+
+
+                Toast.makeText(ChatActivity.this,
+                        "ema= "+ ema + ", use= " + use,
+                        Toast.LENGTH_SHORT).show();
+
+
+            }
+        });
+
+        // по кнопке "Через Ок"
+        btnRegOk.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Toast.makeText(ChatActivity.this,
+                        "функция пока не доступна",
+                        Toast.LENGTH_SHORT).show();
+            }
+        });
+
+        // по кнопке "Через Майл"
+        btnRegMail.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                // сделать а возвращением результата //
+                startActivity(new Intent(ChatActivity.this, RegistrationActivity.class));
+            }
+        });
+
+        dialog.setNegativeButton("Отменить", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialogInterface, int which) {
+                Snackbar.make(root_chat, "Без регистрации Вы можете только наблюдать", Snackbar.LENGTH_SHORT).show();
+                dialogInterface.dismiss();
+            }
+        });
+        dialog.setPositiveButton("Войти", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialogInterface, int which) {
+//                if (TextUtils.isEmpty(email.getText().toString())) {
+//                    Snackbar.make(root, "Введите вашу почту", Snackbar.LENGTH_SHORT).show();
+//                    return;
+//                }
+//                if (password.getText().toString().length() < 5) {
+//                    Snackbar.make(root, "Введите пароль длиннее 5 символов", Snackbar.LENGTH_SHORT).show();
+//                    return;
+//                }
+                Snackbar.make(root_chat, "Мы нажали Войти", Snackbar.LENGTH_SHORT).show();
+
+//                auth.signInWithEmailAndPassword(email.getText().toString(), password.getText().toString())
+//                        .addOnSuccessListener(new OnSuccessListener<AuthResult>() {
+//                            @Override
+//                            public void onSuccess(AuthResult authResult) {
+//                                //    startActivity(new Intent(RegistrationActivity.this, MapActivity.class));
+//                                Toast.makeText(RegistrationActivity.this,
+//                                        "Тест Регистрации = Успешно! ",
+//                                        Toast.LENGTH_SHORT).show();
+
+
+                              //  finish();  // после завершения всех действий в диалоговом окне
+                            }
+//                        }).addOnFailureListener(new OnFailureListener() {
+//                    @Override
+//                    public void onFailure(@NonNull Exception e) {
+//                        Snackbar.make(root, "Ошибка авторизации: " + e.getMessage(), Snackbar.LENGTH_SHORT).show();
+//                    }
+//                });
+//            }
+        });
+
+        dialog.show();
+
+        // переходит на активити регистрации Гоша Дударь
+//        Intent intent = new Intent(ChatActivity.this, RegistrationActivity.class);
+//        startActivity(intent);
+
+        //отправляет введённое сообщение в базу данных
+//        if (message.length() > 0) {
+//                    //создаем экземпляр одного Cообщения Юзера
+//            ChatMessage chatMessage = new ChatMessage(user_id,message, time_stamp);
+//                    // оправляем его в базу данных firebase
+//            myRef.push().setValue(chatMessage);
+//            messagesView.smoothScrollToPosition(messageAdapter.getCount() -1);
+//            editText.getText().clear();  //очищаем поле ввода
+//        }
     }
 
 
@@ -187,6 +376,134 @@ public class ChatActivity extends AppCompatActivity {
             this.timeStamp = timeStamp;
         }
     }
+  /////////////////// РЕГИСТРАЦИЯ И ВХОД //////////////////////////
+//  private void showSignInWindow() {
+//      AlertDialog.Builder dialog = new AlertDialog.Builder(this);
+//      dialog.setTitle("Войти");
+//      dialog.setMessage("Введите данные для входа");
+//
+//      LayoutInflater inflater = LayoutInflater.from(this);
+//      View sign_in_window = inflater.inflate(R.layout.singin_window, null);
+//      dialog.setView(sign_in_window);
+//
+//      final MaterialEditText email = sign_in_window.findViewById(R.id.email_field);
+//      final MaterialEditText password = sign_in_window.findViewById(R.id.pass_field);
+//
+//
+//      dialog.setNegativeButton("Отменить", new DialogInterface.OnClickListener() {
+//          @Override
+//          public void onClick(DialogInterface dialogInterface, int which) {
+//              dialogInterface.dismiss();
+//          }
+//      });
+//      dialog.setPositiveButton("Войти", new DialogInterface.OnClickListener() {
+//          @Override
+//          public void onClick(DialogInterface dialogInterface, int which) {
+//              if (TextUtils.isEmpty(email.getText().toString())) {
+//                  Snackbar.make(root, "Введите вашу почту", Snackbar.LENGTH_SHORT).show();
+//                  return;
+//              }
+//              if (password.getText().toString().length() < 5) {
+//                  Snackbar.make(root, "Введите пароль длиннее 5 символов", Snackbar.LENGTH_SHORT).show();
+//                  return;
+//              }
+//
+//              auth.signInWithEmailAndPassword(email.getText().toString(), password.getText().toString())
+//                      .addOnSuccessListener(new OnSuccessListener<AuthResult>() {
+//                          @Override
+//                          public void onSuccess(AuthResult authResult) {
+//                             // startActivity(new Intent(ChatActivity.this, MapActivity.class));
+//                              Toast.makeText(ChatActivity.this,
+//                                      "Тест Регистрации = Успешно! ",
+//                                      Toast.LENGTH_SHORT).show();
+//                              finish();
+//                          }
+//                      }).addOnFailureListener(new OnFailureListener() {
+//                  @Override
+//                  public void onFailure(@NonNull Exception e) {
+//                      Snackbar.make(root, "Ошибка авторизации: " + e.getMessage(), Snackbar.LENGTH_SHORT).show();
+//                  }
+//              });
+//          }
+//      });
+//
+//      dialog.show();
+//
+//  }
+//
+//    private void showRegisterWindow() {
+//        AlertDialog.Builder dialog = new AlertDialog.Builder(this);
+//        dialog.setTitle("Зарегистрироваться");
+//        dialog.setMessage("Введите данные для регистрации");
+//
+//        LayoutInflater inflater = LayoutInflater.from(this);
+//        View register_window = inflater.inflate(R.layout.register_window, null);
+//        dialog.setView(register_window);
+//
+//        final MaterialEditText email = register_window.findViewById(R.id.email_field);
+//        final MaterialEditText password = register_window.findViewById(R.id.pass_field);
+//        final MaterialEditText name = register_window.findViewById(R.id.name_field);
+//        final MaterialEditText phoneNumber = register_window.findViewById(R.id.phone_field);
+//
+//        dialog.setNegativeButton("Отменить", new DialogInterface.OnClickListener() {
+//            @Override
+//            public void onClick(DialogInterface dialogInterface, int which) {
+//                dialogInterface.dismiss();
+//            }
+//        });
+//        dialog.setPositiveButton("Добавить", new DialogInterface.OnClickListener() {
+//            @Override
+//            public void onClick(DialogInterface dialogInterface, int which) {
+//                if (TextUtils.isEmpty(email.getText().toString())) {
+//                    Snackbar.make(root, "Введите вашу почту", Snackbar.LENGTH_SHORT).show();
+//                    return;
+//                }
+//                if (password.getText().toString().length() < 5) {
+//                    Snackbar.make(root, "Введите пароль длиннее 5 символов", Snackbar.LENGTH_SHORT).show();
+//                    return;
+//                }
+//                if (TextUtils.isEmpty(name.getText().toString())) {
+//                    Snackbar.make(root, "Введите ваше имя", Snackbar.LENGTH_SHORT).show();
+//                    return;
+//                }
+//                if (TextUtils.isEmpty(phoneNumber.getText().toString())) {
+//                    Snackbar.make(root, "Введите ваш телефон", Snackbar.LENGTH_SHORT).show();
+//                    return;
+//                }
+//                // регистрация пользователя
+//                auth.createUserWithEmailAndPassword(email.getText().toString(), password.getText().toString())
+//                        .addOnSuccessListener(new OnSuccessListener<AuthResult>() {
+//                            @Override
+//                            public void onSuccess(AuthResult authResult) {
+//                                User user = new User();
+//                                user.setEmail(email.getText().toString());
+//                                user.setPassword(password.getText().toString());
+//                                user.setName(name.getText().toString());
+//                                user.setPhoneNumber(phoneNumber.getText().toString());
+//
+//                                myRef.child(FirebaseAuth.getInstance().getCurrentUser().getUid())
+//                                        .setValue(user)
+//                                        .addOnSuccessListener(new OnSuccessListener<Void>() {
+//                                            @Override
+//                                            public void onSuccess(Void aVoid) {
+//                                                Snackbar.make(root, "Пользователь добавлен", Snackbar.LENGTH_SHORT).show();
+//                                            }
+//                                        });
+//                            }
+//                        }).addOnFailureListener(new OnFailureListener() {
+//                    @Override
+//                    public void onFailure(@NonNull Exception e) {
+//                        Snackbar.make(root, "Ошибка Косяк авторизации: " + e.getMessage(), Snackbar.LENGTH_SHORT).show();
+//                    }
+//                });
+//            }
+//        });
+//
+//        dialog.show();
+//
+//    }
+
+  //end //////////////////////////////////////////////////////////
 }
 
 
