@@ -79,7 +79,7 @@ public class ChatActivity extends AppCompatActivity {
         setContentView(R.layout.activity_chat);
 
 //        vkAccessTokenTracker.startTracking();
-        VKSdk.initialize(this);
+      //  VKSdk.initialize(this);
         VKSdk.login(this, scope);
        // VK.login(activity, arrayListOf(VKScope.WALL, VKScope.PHOTOS));
 
@@ -147,6 +147,7 @@ public class ChatActivity extends AppCompatActivity {
     }
 
 /////////VK VK VK ///////////////////////
+   // String tok;
     String ema;
     String use;
     @Override
@@ -155,6 +156,7 @@ public class ChatActivity extends AppCompatActivity {
             @Override
             public void onResult(VKAccessToken res) {
 // Пользователь успешно авторизовался
+              //  tok = res.accessToken;
                 ema = res.email;
                 use = res.userId;
 
@@ -254,7 +256,7 @@ public class ChatActivity extends AppCompatActivity {
 
 
                 Toast.makeText(ChatActivity.this,
-                        "ema= "+ ema + ", use= " + use,
+                        "ema= "+ ema + ", use= " + use ,   // + ", tok= "+ tok
                         Toast.LENGTH_SHORT).show();
 
 
