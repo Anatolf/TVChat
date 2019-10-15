@@ -6,56 +6,52 @@
     tools:context=".ChatActivity"
     android:id="@+id/root_element_chat">
 
-
-
-
-
-<LinearLayout
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:orientation="vertical"
-    android:clipToPadding="false"
-    android:focusableInTouchMode="true">
-
-    <ListView
-        android:layout_width="match_parent"
-        android:id="@+id/messages_view"
-        android:layout_weight="2"
-        android:divider="#fff"
-        android:layout_height="wrap_content"
-        android:stackFromBottom="true"
-        />
-
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:background="#fff"
-        android:orientation="horizontal">
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:clipToPadding="false"
+        android:focusableInTouchMode="true">
 
-        <EditText
-            android:id="@+id/editText"
+        <ListView
+            android:layout_width="match_parent"
+            android:id="@+id/messages_view"
+            android:layout_weight="2"
+            android:divider="#fff"
+            android:layout_height="wrap_content"
+            android:stackFromBottom="true"
+            />
+
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_weight="2"
-            android:ems="10"
-            android:hint="Write a message"
-            android:inputType="text"
-            android:paddingHorizontal="10dp"
-            android:text="" />
+            android:background="#fff"
+            android:orientation="horizontal">
+
+            <EditText
+                android:id="@+id/editText"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_weight="2"
+                android:ems="10"
+                android:hint="Write a message"
+                android:inputType="text"
+                android:paddingHorizontal="10dp"
+                android:text="" />
 
 
-        <ImageButton
-            android:id="@+id/send_msg_btn"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:layout_marginHorizontal="10dp"
-            android:background="@drawable/ic_send_black_24dp"
-            android:onClick="sendMessage"
-            android:padding="20dp"
-            android:scaleType="fitCenter" />
+            <ImageButton
+                android:id="@+id/send_msg_btn"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:layout_marginHorizontal="10dp"
+                android:background="@drawable/ic_send_black_24dp"
+                android:onClick="sendMessage"
+                android:padding="20dp"
+                android:scaleType="fitCenter" />
+        </LinearLayout>
     </LinearLayout>
-</LinearLayout>
 
 
 </RelativeLayout>

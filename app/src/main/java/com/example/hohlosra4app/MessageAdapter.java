@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.content.Context;
 import android.graphics.Color;
 import android.graphics.drawable.GradientDrawable;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -15,6 +16,7 @@ import java.util.List;
 
 
 public class MessageAdapter extends BaseAdapter {
+    private static final String TAG = "myLogs";
 
     List<Message> messages = new ArrayList<Message>();
     Context context;
@@ -58,6 +60,7 @@ public class MessageAdapter extends BaseAdapter {
 
             holder.time.setText(message.getMemberData().getTime());
             holder.messageBody.setText(message.getText());
+            Log.d(TAG, "inAdapter, Me: message= " + message.getText() + " , messages.size= " + messages.size());
 
         } else {
             convertView = messageInflater.inflate(R.layout.their_message, null);
@@ -72,6 +75,7 @@ public class MessageAdapter extends BaseAdapter {
             holder.messageBody.setText(message.getText());
             GradientDrawable drawable = (GradientDrawable) holder.avatar.getBackground();
             drawable.setColor(Color.parseColor(message.getMemberData().getColor()));
+            Log.d(TAG, "inAdapter, Their: message= " + message.getText() + " , messages.size= " + messages.size());
         }
 
         return convertView;

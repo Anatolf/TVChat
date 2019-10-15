@@ -58,14 +58,14 @@ public class ChatActivity extends AppCompatActivity {
     private FirebaseDatabase database;
     private DatabaseReference myRef;
 
-// for registration window
+    // for registration window
     private FirebaseAuth auth;
     private RelativeLayout root_chat;
 
     private Set<String> usersIds = new HashSet<>();
 
-// for VK api
-    private String[] scope = new String[]{VKScope.EMAIL,VKScope.FRIENDS, VKScope.PHOTOS};
+    // for VK api
+    private String[] scope = new String[]{VKScope.EMAIL, VKScope.FRIENDS, VKScope.PHOTOS};
 
 
     @Override
@@ -86,12 +86,12 @@ public class ChatActivity extends AppCompatActivity {
 
 ////////////////////// получаем Интент из Майн /////////////////////
         Intent intentFromMain = getIntent();
-        if(intentFromMain.hasExtra(Intent.EXTRA_INDEX) && intentFromMain.hasExtra("count_users_into_this_chart")){
-            int indexChannel = intentFromMain.getIntExtra(Intent.EXTRA_INDEX,0);
-            int usersIntoChat = intentFromMain.getIntExtra("count_users_into_this_chart",0);
-                Toast.makeText(ChatActivity.this,
-                            "мы в ChatActivity, Канал " + indexChannel + ", количество обсуждающих " + usersIntoChat,
-                            Toast.LENGTH_SHORT).show();
+        if (intentFromMain.hasExtra(Intent.EXTRA_INDEX) && intentFromMain.hasExtra("count_users_into_this_chart")) {
+            int indexChannel = intentFromMain.getIntExtra(Intent.EXTRA_INDEX, 0);
+            int usersIntoChat = intentFromMain.getIntExtra("count_users_into_this_chart", 0);
+            Toast.makeText(ChatActivity.this,
+                    "мы в ChatActivity, Канал " + indexChannel + ", количество обсуждающих " + usersIntoChat,
+                    Toast.LENGTH_SHORT).show();
         }
 //end//////////////////////////////////////////////////////////////
 
@@ -102,38 +102,41 @@ public class ChatActivity extends AppCompatActivity {
         myRef = database.getReference("Comments").child("1TV");
         //   myRef.removeValue();  // удалить из базы весь раздел "1TV"  и всё что внутри (комментарии "Comments")
         //  myRef = database.getReference("items").child("users").child("newUser"); // многопользовательская ветка
-        
+
     }
 
     private String accessToken_VK;
     private String email_VK;
     private String userId_VK;
 
-/////////VK VK VK Response autorisation ///////////////////////
+    private boolean isAutorisationVk = false;
+
+    /////////VK VK VK Response autorisation ///////////////////////
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (!VKSdk.onActivityResult(requestCode, resultCode, data, new VKCallback<VKAccessToken>() {
 
-         //   VKRequest vkRequest = new VKRequest("photos.saveOwnerPhoto", VKParameters.from(VKApiConst.PHOTO, "album_id.profile"));
+            //   VKRequest vkRequest = new VKRequest("photos.saveOwnerPhoto", VKParameters.from(VKApiConst.PHOTO, "album_id.profile"));
 
             @Override
             public void onResult(VKAccessToken res) {
                 // Пользователь успешно авторизовался
-
-                // тут мы получаем ответ от авторизовавшегося пользователя и создаём его объект Юзер, 
+                isAutorisationVk = true;
+                // тут мы получаем ответ от авторизовавшегося пользователя и создаём его объект ВкЮзер,
                 accessToken_VK = res.accessToken;
                 email_VK = res.email;
                 userId_VK = res.userId;
 
                 Toast.makeText(ChatActivity.this,
-                        "Teper vi mozhete otpravlat soobsheniya!",
+                        "Теперь вы можете отправлять сообщения!",
                         Toast.LENGTH_SHORT).show();
 
-                Toast.makeText(ChatActivity.this,
-                        "ema= "+ email_VK + ", use= " + userId_VK + ", tok= "+ accessToken_VK,
-                        Toast.LENGTH_SHORT).show();
+//                Toast.makeText(ChatActivity.this,
+//                        "ema= " + email_VK + ", use= " + userId_VK + ", tok= " + accessToken_VK,
+//                        Toast.LENGTH_SHORT).show();
 
             }
+
             @Override
             public void onError(VKError error) {
                 // Произошла ошибка авторизации (например, пользователь запретил авторизацию)
@@ -143,48 +146,48 @@ public class ChatActivity extends AppCompatActivity {
         }
     }
 
-    private VKRequest createUserRequest() {
-
-        String usersIdsStr = "";
-        for (String userId : usersIds) {
-            usersIdsStr = usersIdsStr + userId + ",";
-        }
-
-        return new VKRequest(
-                "users.get",
-                VKParameters.from(
-                        VKApiConst.USER_IDS, usersIdsStr,
-                        VKApiConst.FIELDS, "sex,photo_50"));
-    }
-
-
-    private void getUsersInfo() {
-
-        createUserRequest().executeWithListener(new VKRequest.VKRequestListener() {
-            @Override
-            public void onComplete(VKResponse response) {
-                Log.d(TAG, "onComplete: " + response.responseString);
-
-
-               //] String jsonVk = response.json;
-            }
-
-            @Override
-            public void attemptFailed(VKRequest request, int attemptNumber, int totalAttempts) {
-                Log.d(TAG, "attemptFailed: ");
-            }
-
-            @Override
-            public void onError(VKError error) {
-                Log.d(TAG, "onError: " + error.errorMessage);
-            }
-
-            @Override
-            public void onProgress(VKRequest.VKProgressType progressType, long bytesLoaded, long bytesTotal) {
-                Log.d(TAG, "onProgress: ");
-            }
-        });
-    }
+//    private VKRequest createUserRequest() {
+//
+//        String usersIdsStr = "";
+//        for (String userId : usersIds) {
+//            usersIdsStr = usersIdsStr + userId + ",";
+//        }
+//
+//        return new VKRequest(
+//                "users.get",
+//                VKParameters.from(
+//                        VKApiConst.USER_IDS, usersIdsStr,
+//                        VKApiConst.FIELDS, "sex,photo_50"));
+//    }
+//
+//
+//    private void getUsersInfo() {
+//
+//        createUserRequest().executeWithListener(new VKRequest.VKRequestListener() {
+//            @Override
+//            public void onComplete(VKResponse response) {
+//                Log.d(TAG, "onComplete: " + response.responseString);
+//
+//
+//                //] String jsonVk = response.json;
+//            }
+//
+//            @Override
+//            public void attemptFailed(VKRequest request, int attemptNumber, int totalAttempts) {
+//                Log.d(TAG, "attemptFailed: ");
+//            }
+//
+//            @Override
+//            public void onError(VKError error) {
+//                Log.d(TAG, "onError: " + error.errorMessage);
+//            }
+//
+//            @Override
+//            public void onProgress(VKRequest.VKProgressType progressType, long bytesLoaded, long bytesTotal) {
+//                Log.d(TAG, "onProgress: ");
+//            }
+//        });
+//    }
 // VK END ////////////////////////////////////////////
 
 
@@ -197,7 +200,7 @@ public class ChatActivity extends AppCompatActivity {
         showAllMessages();
     }
 
-    private void showAllMessages(){
+    private void showAllMessages() {
 
         // делаем запрос в базу данных firebase
         Query myQuery = myRef;
@@ -209,43 +212,46 @@ public class ChatActivity extends AppCompatActivity {
                 /////// и отправляем его в messageAdapter для отображения
                 ChatMessage chatMessage = dataSnapshot.getValue(ChatMessage.class);
 
-                    boolean belongToCurrentUser; // флаг Юзер я, не я?
-                    if (chatMessage.user_id.equals("pidor na Androide")) {
-                        belongToCurrentUser = true;
-                    } else {
-                        belongToCurrentUser = false;
-                    }
+                boolean belongToCurrentUser; // флаг Юзер я, не я?
+                if (chatMessage.user_id.equals(userId_VK)) {  // мой id вконтакте // ex "pidor na Androide"
+                    belongToCurrentUser = true;
+                } else {
+                    belongToCurrentUser = false;
+                }
 
-                    // берём дату из chatMessage и переводим её в "00:00:00" по Москве
+                // берём дату из chatMessage и переводим её в "00:00:00" по Москве
                 Date date = new Date(chatMessage.timeStamp);
                 DateFormat formatter = new SimpleDateFormat("HH:mm:ss");
                 formatter.setTimeZone(TimeZone.getTimeZone("Europe/Moscow"));
                 String currentTime = formatter.format(date);
 
-                    // создаёт рандомных собеседников Имя и цвет сообщения, время передаём через memb для всех собеседников и себя
-                    MemberData memb = new MemberData(getRandomName(), getRandomColor(), currentTime);
-                    Message singleMessage = new Message(chatMessage.message, memb, belongToCurrentUser);
+                // создаёт рандомных собеседников Имя и цвет сообщения, время передаём через memb для всех собеседников и себя
+                MemberData memb = new MemberData(getRandomName(), getRandomColor(), currentTime);
+                Message singleMessage = new Message(chatMessage.message, memb, belongToCurrentUser);
 
-                    if (!TextUtils.isEmpty(chatMessage.user_id)) {
-                        usersIds.add(chatMessage.user_id);
-                    }
+//                if (!TextUtils.isEmpty(chatMessage.user_id)) {   //берём все id сообщений из базы и добавляем в лист
+//                    usersIds.add(chatMessage.user_id);
+//                }
 
-
-                    messageAdapter.add(singleMessage);
-
+                messageAdapter.add(singleMessage);  // посылаем на отображение
+                Log.d(TAG, "showAllMessages: message= " + chatMessage.message + " , ________messages.size= " + messageAdapter.messages.size());
             }
 
             @Override
-            public void onChildChanged(DataSnapshot dataSnapshot, String s) { }
+            public void onChildChanged(DataSnapshot dataSnapshot, String s) {
+            }
 
             @Override
-            public void onChildRemoved(DataSnapshot dataSnapshot) { }
+            public void onChildRemoved(DataSnapshot dataSnapshot) {
+            }
 
             @Override
-            public void onChildMoved(DataSnapshot dataSnapshot, String s) { }
+            public void onChildMoved(DataSnapshot dataSnapshot, String s) {
+            }
 
             @Override
-            public void onCancelled(DatabaseError databaseError) { }
+            public void onCancelled(DatabaseError databaseError) {
+            }
         });
     }
 
@@ -261,74 +267,75 @@ public class ChatActivity extends AppCompatActivity {
             return;
         }
 
+        if (!isAutorisationVk) {
 // Алерт Дайлог авторизации:
-        final AlertDialog.Builder dialog = new AlertDialog.Builder(this);
-        dialog.setTitle("Войти:");
-        dialog.setMessage("Чтобы отправлять сообщения, зарегестрируйтесь:");
+            final AlertDialog.Builder dialog = new AlertDialog.Builder(this);
+            dialog.setTitle("Войти:");
+            dialog.setMessage("Чтобы отправлять сообщения, зарегестрируйтесь:");
 
-        LayoutInflater inflater = LayoutInflater.from(this);
-        View sign_in_window = inflater.inflate(R.layout.sing_in_window2, null);
-        dialog.setView(sign_in_window);
+            LayoutInflater inflater = LayoutInflater.from(this);
+            View sign_in_window = inflater.inflate(R.layout.sing_in_window2, null);
+            dialog.setView(sign_in_window);
 
-        dialog.setNegativeButton("Отменить", new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialogInterface, int which) {
-                Snackbar.make(root_chat, "Без регистрации Вы можете только наблюдать", Snackbar.LENGTH_SHORT).show();
-                dialogInterface.dismiss();
-            }
-        });
-        dialog.create();
-        final AlertDialog adTrueDialog = dialog.show();  // adTrueDialog для выхода из диалога после нажатия кнопок
+            dialog.setNegativeButton("Отменить", new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialogInterface, int which) {
+                    Snackbar.make(root_chat, "Без регистрации Вы можете только наблюдать", Snackbar.LENGTH_SHORT).show();
+                    dialogInterface.dismiss();
+                }
+            });
+            dialog.create();
+            final AlertDialog adTrueDialog = dialog.show();  // adTrueDialog для выхода из диалога после нажатия кнопок
 
 // Кнопки в Алерт Дайлог для авторизации:
-        final Button btnRegVk = sign_in_window.findViewById(R.id.reg_from_vk_btn);
-        final Button btnRegOk = sign_in_window.findViewById(R.id.reg_from_ok_btn);
-        final Button btnRegMail = sign_in_window.findViewById(R.id.reg_from_email_btn);
+            final Button btnRegVk = sign_in_window.findViewById(R.id.reg_from_vk_btn);
+            final Button btnRegOk = sign_in_window.findViewById(R.id.reg_from_ok_btn);
+            final Button btnRegMail = sign_in_window.findViewById(R.id.reg_from_email_btn);
 
-        // по кнопке "Через Вк"
-        btnRegVk.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                VKSdk.login(ChatActivity.this,scope);
-                adTrueDialog.dismiss();
-            }
-        });
+            // по кнопке "Через Вк"
+            btnRegVk.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    VKSdk.login(ChatActivity.this, scope);
+                    adTrueDialog.dismiss();
+                }
+            });
 
-        // по кнопке "Через Ок"
-        btnRegOk.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Toast.makeText(ChatActivity.this,
-                        "функция пока не доступна",
-                        Toast.LENGTH_SHORT).show();
-                adTrueDialog.dismiss();
-            }
-        });
+            // по кнопке "Через Ок"
+            btnRegOk.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    Toast.makeText(ChatActivity.this,
+                            "функция пока не доступна",
+                            Toast.LENGTH_SHORT).show();
+                    adTrueDialog.dismiss();
+                }
+            });
 
-        // по кнопке "Через Майл"
-        btnRegMail.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                // сделать а возвращением результата //
-                startActivity(new Intent(ChatActivity.this, RegistrationActivity.class));
-                adTrueDialog.dismiss();
-            }
-        });
+            // по кнопке "Через Майл"
+            btnRegMail.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    // сделать а возвращением результата //
+                    startActivity(new Intent(ChatActivity.this, RegistrationActivity.class));
+                    adTrueDialog.dismiss();
+                }
+            });
+        }
 
-
-        final String user_id = userId_VK;  // имя пользователя "pidor na Androide"
+        final String user_id = userId_VK;  // имя пользователя // ex "pidor na Androide"
         String message = editText.getText().toString();  // получаем сообщение с поля ввода
         long time_stamp = System.currentTimeMillis();   // время сообщения
 
         //отправляет введённое сообщение в базу данных
-//        if (message.length() > 0) {
-//                    //создаем экземпляр одного Cообщения Юзера
-//            ChatMessage chatMessage = new ChatMessage(user_id,message, time_stamp);
-//                    // оправляем его в базу данных firebase
-//            myRef.push().setValue(chatMessage);
-//            messagesView.smoothScrollToPosition(messageAdapter.getCount() -1);
-//            editText.getText().clear();  //очищаем поле ввода
-//        }
+        if (message.length() > 0 && isAutorisationVk) {
+            //создаем экземпляр одного Cообщения Юзера
+            ChatMessage chatMessage = new ChatMessage(user_id, message, time_stamp);
+            // оправляем его в базу данных firebase
+            myRef.push().setValue(chatMessage);
+            messagesView.smoothScrollToPosition(messageAdapter.getCount() - 1);
+            editText.getText().clear();  //очищаем поле ввода
+        }
     }
 
 
@@ -336,16 +343,16 @@ public class ChatActivity extends AppCompatActivity {
         String[] adjs = {"autumn", "hidden", "bitter", "misty", "silent", "empty", "dry", "dark", "summer", "icy", "delicate", "quiet", "white", "cool", "spring", "winter", "patient", "twilight", "dawn", "crimson", "wispy", "weathered", "blue", "billowing", "broken", "cold", "damp", "falling", "frosty", "green", "long", "late", "lingering", "bold", "little", "morning", "muddy", "old", "red", "rough", "still", "small", "sparkling", "throbbing", "shy", "wandering", "withered", "wild", "black", "young", "holy", "solitary", "fragrant", "aged", "snowy", "proud", "floral", "restless", "divine", "polished", "ancient", "purple", "lively", "nameless"};
         String[] nouns = {"waterfall", "river", "breeze", "moon", "rain", "wind", "sea", "morning", "snow", "lake", "sunset", "pine", "shadow", "leaf", "dawn", "glitter", "forest", "hill", "cloud", "meadow", "sun", "glade", "bird", "brook", "butterfly", "bush", "dew", "dust", "field", "fire", "flower", "firefly", "feather", "grass", "haze", "mountain", "night", "pond", "darkness", "snowflake", "silence", "sound", "sky", "shape", "surf", "thunder", "violet", "water", "wildflower", "wave", "water", "resonance", "sun", "wood", "dream", "cherry", "tree", "fog", "frost", "voice", "paper", "frog", "smoke", "star"};
         return (
-            adjs[(int) Math.floor(Math.random() * adjs.length)] +
-            "_" +
-            nouns[(int) Math.floor(Math.random() * nouns.length)]
+                adjs[(int) Math.floor(Math.random() * adjs.length)] +
+                        "_" +
+                        nouns[(int) Math.floor(Math.random() * nouns.length)]
         );
     }
 
     private String getRandomColor() {
         Random r = new Random();
         StringBuffer sb = new StringBuffer("#");
-        while(sb.length() < 7){
+        while (sb.length() < 7) {
             sb.append(Integer.toHexString(r.nextInt()));
         }
         return sb.toString().substring(0, 7);
@@ -354,7 +361,7 @@ public class ChatActivity extends AppCompatActivity {
 
     // Класс ChatMessage - объект одного отправляемого Сообщения Юзера в выбранный чат (для добавления в базу данных firebase)
     @IgnoreExtraProperties
-    static class ChatMessage implements Serializable{
+    static class ChatMessage implements Serializable {
 
         public String user_id; // = "pidor_na_androide";
         public String message; // = "кукуепта";
@@ -370,10 +377,6 @@ public class ChatActivity extends AppCompatActivity {
         }
     }
 }
-
-
-
-
 
 
 class MemberData {
@@ -398,7 +401,9 @@ class MemberData {
         return color;
     }
 
-    public String getTime() { return time; }
+    public String getTime() {
+        return time;
+    }
 
     @Override
     public String toString() {
