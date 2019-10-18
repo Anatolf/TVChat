@@ -40,8 +40,7 @@ dependencies {
     implementation 'uk.co.chrisjenx:calligraphy:2.3.0'
     implementation 'com.google.android.material:material:1.0.0'
     implementation 'com.android.support:design:28.+'
-   // implementation project(':vksdk_library')
     implementation 'com.vk:androidsdk:1.6.9'
-   // implementation 'com.vk:androidsdk:[MAVEN_CENTRAL_VERSION]'
 
+    implementation 'com.squareup.picasso:picasso:2.5.2'
 }

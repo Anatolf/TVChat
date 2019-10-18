@@ -2,6 +2,7 @@ package com.example.hohlosra4app;
 
 import android.app.Activity;
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.graphics.drawable.GradientDrawable;
 import android.util.Log;
@@ -11,8 +12,14 @@ import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.TextView;
 
+import com.squareup.picasso.Picasso;
+import com.vk.sdk.VKSdk;
+
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Random;
+import java.util.Set;
 
 
 public class MessageAdapter extends BaseAdapter {
@@ -27,8 +34,8 @@ public class MessageAdapter extends BaseAdapter {
 
 
     public void add(Message message) {
-        this.messages.add(message);
-        notifyDataSetChanged();
+            this.messages.add(message);
+            notifyDataSetChanged();
     }
 
     @Override
@@ -52,35 +59,69 @@ public class MessageAdapter extends BaseAdapter {
         LayoutInflater messageInflater = (LayoutInflater) context.getSystemService(Activity.LAYOUT_INFLATER_SERVICE);
         Message message = messages.get(i);
 
-        if (message.isBelongsToCurrentUser()) {
-            convertView = messageInflater.inflate(R.layout.my_message, null);
-            holder.messageBody = (TextView) convertView.findViewById(R.id.message_body);
-            holder.time = (TextView) convertView.findViewById(R.id.time_et);
-            convertView.setTag(holder);
 
-            holder.time.setText(message.getMemberData().getTime());
-            holder.messageBody.setText(message.getText());
-            Log.d(TAG, "inAdapter, Me: message= " + message.getText() + " , messages.size= " + messages.size());
+        // Если пользователь зарегестрировался через Вк, то отображаем сообщения с аватарками:
+        if (VKSdk.isLoggedIn()) {
+            // Picasso.with(context).load()
 
+
+            if (message.isBelongsToCurrentUser()) {
+                convertView = messageInflater.inflate(R.layout.my_message, null);
+                holder.messageBody = (TextView) convertView.findViewById(R.id.message_body);
+                holder.time = (TextView) convertView.findViewById(R.id.time_et);
+                convertView.setTag(holder);
+
+                holder.time.setText(message.getTime());
+                holder.messageBody.setText(message.getText());
+               // Log.d(TAG, "inAdapter, Me: message= " + message.getText() + " , messages.size= " + messages.size());
+
+            } else {
+                convertView = messageInflater.inflate(R.layout.their_message, null);
+                holder.avatar = (View) convertView.findViewById(R.id.avatar);
+                holder.name = (TextView) convertView.findViewById(R.id.channel_et);
+                holder.time = (TextView) convertView.findViewById(R.id.time_et);
+                holder.messageBody = (TextView) convertView.findViewById(R.id.message_body);
+                convertView.setTag(holder);
+
+                holder.name.setText(message.getName());
+                holder.time.setText(message.getTime());
+                holder.messageBody.setText(message.getText());
+               // GradientDrawable drawable = (GradientDrawable) holder.avatar.getBackground();
+               // drawable.setColor(Color.parseColor(message.getColor()));
+               // Log.d(TAG, "inAdapter, Their: message= " + message.getText() + " , messages.size= " + messages.size());
+            }
+
+        // Если пользователь НЕ зарегестрировался через Вк, то отображаем сообщения цветными заглушками и рандомными именами:
         } else {
-            convertView = messageInflater.inflate(R.layout.their_message, null);
-            holder.avatar = (View) convertView.findViewById(R.id.avatar);
-            holder.name = (TextView) convertView.findViewById(R.id.channel_et);
-            holder.time = (TextView) convertView.findViewById(R.id.time_et);
-            holder.messageBody = (TextView) convertView.findViewById(R.id.message_body);
-            convertView.setTag(holder);
+            if (message.isBelongsToCurrentUser()) {
+                convertView = messageInflater.inflate(R.layout.my_message, null);
+                holder.messageBody = (TextView) convertView.findViewById(R.id.message_body);
+                holder.time = (TextView) convertView.findViewById(R.id.time_et);
+                convertView.setTag(holder);
 
-            holder.name.setText(message.getMemberData().getName());
-            holder.time.setText(message.getMemberData().getTime());
-            holder.messageBody.setText(message.getText());
-            GradientDrawable drawable = (GradientDrawable) holder.avatar.getBackground();
-            drawable.setColor(Color.parseColor(message.getMemberData().getColor()));
-            Log.d(TAG, "inAdapter, Their: message= " + message.getText() + " , messages.size= " + messages.size());
+                holder.time.setText(message.getTime());
+                holder.messageBody.setText(message.getText());
+              //  Log.d(TAG, "inAdapter, Me: message= " + message.getText() + " , messages.size= " + messages.size());
+
+            } else {
+                convertView = messageInflater.inflate(R.layout.their_message, null);
+                holder.avatar = (View) convertView.findViewById(R.id.avatar);
+                holder.name = (TextView) convertView.findViewById(R.id.channel_et);
+                holder.time = (TextView) convertView.findViewById(R.id.time_et);
+                holder.messageBody = (TextView) convertView.findViewById(R.id.message_body);
+                convertView.setTag(holder);
+
+                holder.name.setText(message.getName());
+                holder.time.setText(message.getTime());
+                holder.messageBody.setText(message.getText());
+                GradientDrawable drawable = (GradientDrawable) holder.avatar.getBackground();
+                drawable.setColor(Color.parseColor(message.getColor()));
+              //  Log.d(TAG, "inAdapter, Their: message= " + message.getText() + " , messages.size= " + messages.size());
+            }
         }
 
         return convertView;
     }
-
 }
 
 class MessageViewHolder {
