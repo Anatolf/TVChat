@@ -3,16 +3,27 @@ package com.example.hohlosra4app;
 import android.app.Activity;
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.graphics.Bitmap;
+import android.graphics.BitmapShader;
+import android.graphics.Canvas;
 import android.graphics.Color;
+import android.graphics.Paint;
+import android.graphics.PorterDuff;
+import android.graphics.PorterDuffXfermode;
+import android.graphics.Rect;
+import android.graphics.Shader;
 import android.graphics.drawable.GradientDrawable;
+import android.media.Image;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.squareup.picasso.Picasso;
+import com.squareup.picasso.Transformation;
 import com.vk.sdk.VKSdk;
 
 import java.util.ArrayList;
@@ -62,8 +73,6 @@ public class MessageAdapter extends BaseAdapter {
 
         // Если пользователь зарегестрировался через Вк, то отображаем сообщения с аватарками:
         if (VKSdk.isLoggedIn()) {
-            // Picasso.with(context).load()
-
 
             if (message.isBelongsToCurrentUser()) {
                 convertView = messageInflater.inflate(R.layout.my_message, null);
@@ -73,22 +82,26 @@ public class MessageAdapter extends BaseAdapter {
 
                 holder.time.setText(message.getTime());
                 holder.messageBody.setText(message.getText());
-               // Log.d(TAG, "inAdapter, Me: message= " + message.getText() + " , messages.size= " + messages.size());
 
             } else {
                 convertView = messageInflater.inflate(R.layout.their_message, null);
                 holder.avatar = (View) convertView.findViewById(R.id.avatar);
+                holder.avatarPhoto = (ImageView) convertView.findViewById(R.id.avatarPhoto);
                 holder.name = (TextView) convertView.findViewById(R.id.channel_et);
                 holder.time = (TextView) convertView.findViewById(R.id.time_et);
                 holder.messageBody = (TextView) convertView.findViewById(R.id.message_body);
                 convertView.setTag(holder);
 
+                holder.avatar.setVisibility(View.INVISIBLE);
+                Picasso.with(context)
+                        .load(message.getAvatar())
+                        .transform(new CircularTransformation(0)) // 0 - радиус по умолчанию делает максимальный кроп углов от квадрата
+                        .error(R.drawable.ic_launcher_foreground)
+                        .into(holder.avatarPhoto);
+
                 holder.name.setText(message.getName());
                 holder.time.setText(message.getTime());
                 holder.messageBody.setText(message.getText());
-               // GradientDrawable drawable = (GradientDrawable) holder.avatar.getBackground();
-               // drawable.setColor(Color.parseColor(message.getColor()));
-               // Log.d(TAG, "inAdapter, Their: message= " + message.getText() + " , messages.size= " + messages.size());
             }
 
         // Если пользователь НЕ зарегестрировался через Вк, то отображаем сообщения цветными заглушками и рандомными именами:
@@ -126,7 +139,49 @@ public class MessageAdapter extends BaseAdapter {
 
 class MessageViewHolder {
     public View avatar;
+    public ImageView avatarPhoto;
     public TextView name;
     public TextView messageBody;
     public TextView time;
+}
+
+
+// for Picasso:
+class CircularTransformation implements Transformation {
+    private int mRadius = 10;
+
+    public CircularTransformation() {
+    }
+
+    public CircularTransformation(final int radius) {
+        this.mRadius = radius;
+    }
+    
+    @Override
+    public Bitmap transform(final Bitmap source) {
+
+
+        final Paint paint = new Paint();
+        paint.setAntiAlias(true);
+        paint.setShader(new BitmapShader(source, Shader.TileMode.CLAMP, Shader.TileMode.CLAMP));
+
+        final Bitmap output = Bitmap.createBitmap(source.getWidth(), source.getHeight(), Bitmap.Config.ARGB_8888);
+        final Canvas canvas = new Canvas(output);
+
+        if (mRadius == 0) {
+            canvas.drawCircle(source.getWidth() / 2, source.getHeight() / 2, source.getWidth() / 2, paint);
+        } else {
+            canvas.drawCircle(source.getWidth() / 2, source.getHeight() / 2, mRadius, paint);
+        }
+
+        if (source != output)
+            source.recycle();
+
+        return output;
+    }
+
+    @Override
+    public String key() {
+        return "circle";
+    }
 }
