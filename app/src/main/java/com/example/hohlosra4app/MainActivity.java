@@ -21,14 +21,15 @@ import java.util.ArrayList;
 
 public class MainActivity extends AppCompatActivity {
 
-    ArrayList<Channel> tvChannels = new ArrayList<>();
-
     private RecyclerView rvTvChannelsList;
     private RecyclerView.LayoutManager rvLayoutManager;
-    private RecyclerViewAdapter tvChannelsAdapter;
+    private TvChannelsAdapter tvChannelsAdapter;
 
     private FirebaseDatabase database;
     private DatabaseReference myRef;
+
+     static final String CHANNEL_ID_EXTRA = "channel_id_extra";
+     static final String USERS_IN_CHAT_EXTRA = "users_in_chart_extra";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -56,20 +57,10 @@ public class MainActivity extends AppCompatActivity {
             public void onChildAdded(DataSnapshot dataSnapshot, String s) {
              //   UploadChannelsToFirebaseActivity.Channel channel = dataSnapshot.getValue(UploadChannelsToFirebaseActivity.Channel.class);
                 Channel channel = dataSnapshot.getValue(Channel.class);
-                // adapter.add(channel);
 
-                // наполняем ArrayList's твКаналами из Firebase
-                tvChannels.add(channel);
+                // передаю в адаптер список ТВ-Каналов из Firebase (по одному):
                 tvChannelsAdapter.setChannelAndUsersIntoList(channel);
 
-//                // наполняем ArrayList's значениями из Firebase
-//                assert channel != null;
-//                nameTvChannelsList.add(channel.name);
-//                usersIntoChatArrayList.add(channel.number);
-//                // urlTvChannelsList.add(channel.urlChannel);
-//
-//                // отправляем их в ТВ-адаптер
-//                tvChannelsAdapter.setChannelAndUsersIntoList(nameTvChannelsList,usersIntoChatArrayList);
             }
 
             @Override
@@ -99,19 +90,19 @@ public class MainActivity extends AppCompatActivity {
         rvTvChannelsList.setLayoutManager(rvLayoutManager);
 
 // при нажатии на элемент:
-        RecyclerViewAdapter.OnChannelClickListner onChannelClickListner = new RecyclerViewAdapter.OnChannelClickListner() {
+        TvChannelsAdapter.OnChannelClickListener onChannelClickListener = new TvChannelsAdapter.OnChannelClickListener() {
             @Override
-            public void onChannelClick(Integer channel, Integer usersIntoChat) {
+            public void onChannelClick(Channel channel, Integer usersIntoChat ) {
 
         // передаем в ChatActivity порядковый номер канала на который нажали и количество юзеров
                 Intent intent = new Intent(MainActivity.this, ChatActivity.class);
-                intent.putExtra(Intent.EXTRA_INDEX, channel);
-                intent.putExtra("count_users_into_this_chart", usersIntoChat);
+                intent.putExtra(CHANNEL_ID_EXTRA, channel.channel_id);
+                intent.putExtra(USERS_IN_CHAT_EXTRA, usersIntoChat);
                 startActivity(intent);
             }
         };
 // создаем адаптер с 2мя параметрами в конструкторе
-        tvChannelsAdapter = new RecyclerViewAdapter(MainActivity.this, onChannelClickListner);
+        tvChannelsAdapter = new TvChannelsAdapter(MainActivity.this, onChannelClickListener);
         rvTvChannelsList.setAdapter(tvChannelsAdapter);
     }
 
@@ -119,6 +110,7 @@ public class MainActivity extends AppCompatActivity {
     // Класс Channel - один элемент с тремя параметрами (для добавления в базу данных firebase)
     @IgnoreExtraProperties
     static class Channel implements Serializable {
+        public String channel_id;
         public String name;
         public int number;
         public String urlChannel;
@@ -126,7 +118,8 @@ public class MainActivity extends AppCompatActivity {
         public Channel() {
         }
 
-        Channel(String name, int number, String url) {
+        Channel(String channel_id, String name, int number, String url) {
+            this.channel_id = channel_id;
             this.name = name;
             this.number = number;
             this.urlChannel = url;

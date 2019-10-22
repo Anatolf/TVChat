@@ -83,6 +83,9 @@ public class ChatActivity extends AppCompatActivity {
 
     Set<String> blokIds = new HashSet<>();
 
+    private String channel_id = "";
+    int usersIntoChat = 0;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -99,22 +102,22 @@ public class ChatActivity extends AppCompatActivity {
 
         root_chat = findViewById(R.id.root_element_chat);
 
-////////////////////// получаем Интент из Майн /////////////////////
+// получаем Интент из Майн
         Intent intentFromMain = getIntent();
-        if (intentFromMain.hasExtra(Intent.EXTRA_INDEX) && intentFromMain.hasExtra("count_users_into_this_chart")) {
-            int indexChannel = intentFromMain.getIntExtra(Intent.EXTRA_INDEX, 0);
-            int usersIntoChat = intentFromMain.getIntExtra("count_users_into_this_chart", 0);
+        if (intentFromMain.hasExtra(MainActivity.CHANNEL_ID_EXTRA) && intentFromMain.hasExtra(MainActivity.USERS_IN_CHAT_EXTRA)) {
+            channel_id = intentFromMain.getStringExtra(MainActivity.CHANNEL_ID_EXTRA);
+            usersIntoChat = intentFromMain.getIntExtra(MainActivity.USERS_IN_CHAT_EXTRA, 0);
+
             Toast.makeText(ChatActivity.this,
-                    "мы в ChatActivity, Канал " + indexChannel + ", количество обсуждающих " + usersIntoChat,
+                    "Мы в чате канала: " + channel_id + ", количество обсуждающих: " + usersIntoChat,
                     Toast.LENGTH_SHORT).show();
         }
-//end//////////////////////////////////////////////////////////////
 
 
         // подключили базу для отправки сообщения на fireBase в методе sendMessage()
         database = FirebaseDatabase.getInstance();
         //        database.setPersistenceEnabled(true);  // добавление элементов во время оффлайн
-        myRef = database.getReference("Comments").child("1TV");
+        myRef = database.getReference("Comments").child(channel_id); // channel_id - это "1TV", "2TV", "3TV"...
         //   myRef.removeValue();  // удалить из базы весь раздел "1TV"  и всё что внутри (комментарии "Comments")
         //  myRef = database.getReference("items").child("users").child("newUser"); // многопользовательская ветка
 
@@ -445,7 +448,7 @@ public class ChatActivity extends AppCompatActivity {
     @IgnoreExtraProperties
     static class FireBaseChatMessage implements Serializable {
 
-        public String user_id; // = "pidor_na_androide";
+        public String user_id; // = "12103322";
         public String message; // = "кукуепта";
         public long timeStamp; // = System.currentTimeMillis();
 

@@ -156,7 +156,7 @@ class CircularTransformation implements Transformation {
     public CircularTransformation(final int radius) {
         this.mRadius = radius;
     }
-    
+
     @Override
     public Bitmap transform(final Bitmap source) {
 

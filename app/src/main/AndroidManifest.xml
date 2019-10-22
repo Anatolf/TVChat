@@ -22,7 +22,7 @@
             </intent-filter>
         </activity>
 
-        <activity android:name=".RecyclerViewAdapter" />
+        <activity android:name=".TvChannelsAdapter" />
 
         <activity android:name=".ChatActivity"
             android:windowSoftInputMode="stateHidden|adjustPan"
