@@ -13,6 +13,15 @@
         android:padding="10dp">
 
         <EditText
+            android:id="@+id/id_channel_et"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="@android:color/transparent"
+            android:layout_weight="1"
+            android:gravity="center"
+            android:hint="id_Tv" />
+
+        <EditText
             android:id="@+id/channel_et"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"

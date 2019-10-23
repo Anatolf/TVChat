@@ -40,6 +40,7 @@ public class UploadChannelsToFirebaseActivity extends AppCompatActivity {
         myRef = database.getReference("Channels");
         //  myRef = database.getReference("items").child("users").child("newUser"); // многопользовательская ветка
 
+        final EditText id_Channel = findViewById(R.id.id_channel_et);
         final EditText nameChannel = findViewById(R.id.channel_et);
         final EditText numberChannel = findViewById(R.id.number_et);
         final EditText urlChannel = findViewById(R.id.url_et);
@@ -54,7 +55,11 @@ public class UploadChannelsToFirebaseActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 //создаем экземпляр одного канала
-                Channel channel = new Channel(nameChannel.getText().toString(), Integer.valueOf(numberChannel.getText().toString()), urlChannel.getText().toString());
+//                Channel channel = new Channel(id_Channel.getText().toString(),
+//                        nameChannel.getText().toString(),
+//                        Integer.valueOf(numberChannel.getText().toString()),
+//                        urlChannel.getText().toString());
+                Channel channel = new Channel("9TV", "ch", 12345, "111");  // заглушка тест
                 //    adapter.add(item);
                 // оправляем его в базу данных firebase
                 myRef.push().setValue(channel);
@@ -117,6 +122,7 @@ public class UploadChannelsToFirebaseActivity extends AppCompatActivity {
     // Класс Channel - один элемент с тремя параметрами (для добавления в базу данных firebase)
     @IgnoreExtraProperties
     static class Channel implements Serializable {
+        public String channel_id;
         public String name;
         public int number;
         public String urlChannel;
@@ -124,7 +130,8 @@ public class UploadChannelsToFirebaseActivity extends AppCompatActivity {
         public Channel() {
         }
 
-        Channel(String name, int number, String url) {
+        Channel(String channel_id, String name, int number, String url) {
+            this.channel_id = channel_id;
             this.name = name;
             this.number = number;
             this.urlChannel = url;

@@ -17,7 +17,6 @@ import com.google.firebase.database.IgnoreExtraProperties;
 import com.google.firebase.database.Query;
 
 import java.io.Serializable;
-import java.util.ArrayList;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -59,7 +58,7 @@ public class MainActivity extends AppCompatActivity {
                 Channel channel = dataSnapshot.getValue(Channel.class);
 
                 // передаю в адаптер список ТВ-Каналов из Firebase (по одному):
-                tvChannelsAdapter.setChannelAndUsersIntoList(channel);
+                tvChannelsAdapter.setChannelsList(channel);
 
             }
 

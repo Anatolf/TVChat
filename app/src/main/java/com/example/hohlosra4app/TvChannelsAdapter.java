@@ -30,13 +30,13 @@ public class TvChannelsAdapter extends RecyclerView.Adapter<TvChannelsAdapter.Vi
     }
 
 //// принимаем список ТВ-Каналов из Main (из FireBase):
-    public void setChannelAndUsersIntoList(MainActivity.Channel channel){
+    public void setChannelsList(MainActivity.Channel channel){
         tvChannelsList.add(channel);
         notifyDataSetChanged();
     }
 
 //// Очищает список ТВ-Каналов:
-    public void clearChannelAndUsersIntoList(){
+    public void clearChannelsList(){
         tvChannelsList.clear();
         notifyDataSetChanged();
     }
