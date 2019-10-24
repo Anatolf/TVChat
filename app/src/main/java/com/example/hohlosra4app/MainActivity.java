@@ -8,15 +8,13 @@ import androidx.recyclerview.widget.RecyclerView;
 import android.content.Intent;
 import android.os.Bundle;
 
+import com.example.hohlosra4app.Model.Channel;
 import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.database.IgnoreExtraProperties;
 import com.google.firebase.database.Query;
-
-import java.io.Serializable;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -106,22 +104,4 @@ public class MainActivity extends AppCompatActivity {
     }
 
 
-    // Класс Channel - один элемент с тремя параметрами (для добавления в базу данных firebase)
-    @IgnoreExtraProperties
-    static class Channel implements Serializable {
-        public String channel_id;
-        public String name;
-        public int number;
-        public String urlChannel;
-
-        public Channel() {
-        }
-
-        Channel(String channel_id, String name, int number, String url) {
-            this.channel_id = channel_id;
-            this.name = name;
-            this.number = number;
-            this.urlChannel = url;
-        }
-    }
 }

@@ -13,15 +13,14 @@ import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.TextView;
 
+import com.example.hohlosra4app.Model.Channel;
 import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.database.IgnoreExtraProperties;
 import com.google.firebase.database.Query;
 
-import java.io.Serializable;
 
 public class UploadChannelsToFirebaseActivity extends AppCompatActivity {
 
@@ -36,7 +35,6 @@ public class UploadChannelsToFirebaseActivity extends AppCompatActivity {
         // подключили базу
         database = FirebaseDatabase.getInstance();
 //        database.setPersistenceEnabled(true);  // добавление элементов во время оффлайн
-
         myRef = database.getReference("Channels");
         //  myRef = database.getReference("items").child("users").child("newUser"); // многопользовательская ветка
 
@@ -60,7 +58,7 @@ public class UploadChannelsToFirebaseActivity extends AppCompatActivity {
 //                        Integer.valueOf(numberChannel.getText().toString()),
 //                        urlChannel.getText().toString());
                 Channel channel = new Channel("9TV", "ch", 12345, "111");  // заглушка тест
-                //    adapter.add(item);
+
                 // оправляем его в базу данных firebase
                 myRef.push().setValue(channel);
             }
@@ -116,25 +114,6 @@ public class UploadChannelsToFirebaseActivity extends AppCompatActivity {
             ((TextView) view.findViewById(R.id.url_et)).setText(String.valueOf(channel.urlChannel));
 
             return view;
-        }
-    }
-
-    // Класс Channel - один элемент с тремя параметрами (для добавления в базу данных firebase)
-    @IgnoreExtraProperties
-    static class Channel implements Serializable {
-        public String channel_id;
-        public String name;
-        public int number;
-        public String urlChannel;
-
-        public Channel() {
-        }
-
-        Channel(String channel_id, String name, int number, String url) {
-            this.channel_id = channel_id;
-            this.name = name;
-            this.number = number;
-            this.urlChannel = url;
         }
     }
 

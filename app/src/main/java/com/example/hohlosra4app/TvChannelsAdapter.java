@@ -10,6 +10,7 @@ import android.widget.TextView;
 
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.example.hohlosra4app.Model.Channel;
 import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
@@ -19,7 +20,7 @@ public class TvChannelsAdapter extends RecyclerView.Adapter<TvChannelsAdapter.Vi
     // Create two empty arrayList and one context variable;
     Context mainActivityContext;
 
-    ArrayList<MainActivity.Channel> tvChannelsList = new ArrayList<>();
+    ArrayList<Channel> tvChannelsList = new ArrayList<>();
 
     private OnChannelClickListener onChannelClickListener;  // для передачи данных в MainActivity
 
@@ -30,7 +31,7 @@ public class TvChannelsAdapter extends RecyclerView.Adapter<TvChannelsAdapter.Vi
     }
 
 //// принимаем список ТВ-Каналов из Main (из FireBase):
-    public void setChannelsList(MainActivity.Channel channel){
+    public void setChannelsList(Channel channel){
         tvChannelsList.add(channel);
         notifyDataSetChanged();
     }
@@ -78,7 +79,7 @@ public class TvChannelsAdapter extends RecyclerView.Adapter<TvChannelsAdapter.Vi
 
 
     public interface OnChannelClickListener {  // для передачи данных в майн создаем слушатель
-        void onChannelClick(MainActivity.Channel channel, Integer usersIntoChat);
+        void onChannelClick(Channel channel, Integer usersIntoChat);
     }
 
     public class ViewHolder extends RecyclerView.ViewHolder{
@@ -101,7 +102,7 @@ public class TvChannelsAdapter extends RecyclerView.Adapter<TvChannelsAdapter.Vi
                 @Override
                 public void onClick(View v) {
                     // передаём в MainActivity:
-                    MainActivity.Channel channel = tvChannelsList.get(getAdapterPosition()); // объект Channel по которому нажали
+                    Channel channel = tvChannelsList.get(getAdapterPosition()); // объект Channel по которому нажали
                     int usersIntoChat = tvChannelsList.get(getAdapterPosition()).number; // количество Юзеров в чате (пока что фейковое из firebase)
                     onChannelClickListener.onChannelClick(channel, usersIntoChat);
                 }

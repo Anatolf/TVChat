@@ -1,4 +1,4 @@
-package com.example.hohlosra4app;
+package com.example.hohlosra4app.Model;
 
 import java.io.Serializable;
 import java.util.Random;
