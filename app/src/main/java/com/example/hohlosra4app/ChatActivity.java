@@ -9,6 +9,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageButton;
 import android.widget.ListView;
 import android.widget.RelativeLayout;
 import android.widget.Toast;
@@ -386,9 +387,13 @@ public class ChatActivity extends AppCompatActivity {
             final AlertDialog adTrueDialog = dialog.show();  // adTrueDialog для выхода из диалога после нажатия кнопок
 
 // Кнопки в Алерт Дайлог для авторизации:
-            final Button btnRegVk = sign_in_window.findViewById(R.id.reg_from_vk_btn);
-            final Button btnRegOk = sign_in_window.findViewById(R.id.reg_from_ok_btn);
-            final Button btnRegMail = sign_in_window.findViewById(R.id.reg_from_email_btn);
+//            final Button btnRegVk = sign_in_window.findViewById(R.id.reg_from_vk_btn);
+//            final Button btnRegOk = sign_in_window.findViewById(R.id.reg_from_ok_btn);
+//            final Button btnRegMail = sign_in_window.findViewById(R.id.reg_from_email_btn);
+
+            final ImageButton btnRegVk = sign_in_window.findViewById(R.id.ib_vk_btn);
+            final ImageButton btnRegOk = sign_in_window.findViewById(R.id.ib_ok_btn);
+            final ImageButton btnRegMail = sign_in_window.findViewById(R.id.ib_fb_btn);
 
             // по кнопке "Через Вк"
             btnRegVk.setOnClickListener(new View.OnClickListener() {
