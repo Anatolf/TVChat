@@ -5,9 +5,9 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ListView;
@@ -37,6 +37,8 @@ import com.vk.sdk.api.VKParameters;
 import com.vk.sdk.api.VKRequest;
 import com.vk.sdk.api.VKResponse;
 
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -52,12 +54,21 @@ import java.util.TimeZone;
 import java.util.Timer;
 import java.util.TimerTask;
 
+import ru.ok.android.sdk.Odnoklassniki;
+import ru.ok.android.sdk.OkListener;
+import ru.ok.android.sdk.OkRequestMode;
+import ru.ok.android.sdk.util.OkAuthType;
+import ru.ok.android.sdk.util.OkScope;
+
 public class ChatActivity extends AppCompatActivity {
     private static final String TAG = "myLogs";
 
     private static final String USER_VK_ID = "user_shared_pref_id_key";
     private static final String USER_VK_EMAIL = "user_shared_pref_email_key";
     private static final String USER_VK_ACCESS_TOKEN = "user_shared_pref_access_token_key";
+
+    private static final String USER_Ok_ID = "user_shared_pref_id_key_odnoklassniki";
+
 
     private EditText editText;
     private MessageAdapter messageAdapter;
@@ -77,6 +88,8 @@ public class ChatActivity extends AppCompatActivity {
 
     // for VK api
     private String[] scope = new String[]{VKScope.EMAIL, VKScope.FRIENDS, VKScope.PHOTOS};
+    // for Ok api
+    private Odnoklassniki odnoklassniki;
 
     SharedPreferences sPref;
 
@@ -120,14 +133,16 @@ public class ChatActivity extends AppCompatActivity {
         //   myRef.removeValue();  // удалить из базы весь раздел "1TV"  и всё что внутри (комментарии "Comments")
         //  myRef = database.getReference("items").child("users").child("newUser"); // многопользовательская ветка
 
+        odnoklassniki = Odnoklassniki.createInstance(this, "512000154078", "CPNKFHJGDIHBABABA");  // id "512000154078"
+
     }
 
 
-//////////////////VK VK VK Response autorisation ///////////////////////
+
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        if (!VKSdk.onActivityResult(requestCode, resultCode, data, new VKCallback<VKAccessToken>() {
 
+        if (!VKSdk.onActivityResult(requestCode, resultCode, data, new VKCallback<VKAccessToken>() {
             @Override
             public void onResult(VKAccessToken res) {
                 // Пользователь успешно авторизовался через VK
@@ -142,8 +157,6 @@ public class ChatActivity extends AppCompatActivity {
                 Toast.makeText(ChatActivity.this,
                         "Теперь вы можете отправлять сообщения!",
                         Toast.LENGTH_SHORT).show();
-
-
             }
 
             @Override
@@ -153,8 +166,38 @@ public class ChatActivity extends AppCompatActivity {
         })) {
             super.onActivityResult(requestCode, resultCode, data);
         }
+
+
+
+        if (Odnoklassniki.Companion.of(this).isActivityRequestOAuth(requestCode)) {  // web Odnoklassniki.getInstance(this)
+            boolean isAuthCompleted = !TextUtils.isEmpty(data.getStringExtra("access_token"));
+            if (isAuthCompleted) {
+                Log.d(TAG, "isActivityRequestOAuth: Zaebis web");
+                // Пользователь успешно авторизовался через Odnoklassniki
+                // Сохраняем его Id, email, access_token в SharedPreferences тут???
+                getOkUserInfo();
+
+            } else {
+                Log.d(TAG, "isActivityRequestOAuth: Pizdets web");
+            }
+        } else if (Odnoklassniki.Companion.of(this).isActivityRequestViral(requestCode)) { // native
+            boolean isAuthCompleted = !TextUtils.isEmpty(data.getStringExtra("access_token"));
+            if (isAuthCompleted) {
+                Log.d(TAG, "isActivityRequestViral: Zaebis native");
+                // Пользователь успешно авторизовался через Odnoklassniki
+                // Сохраняем его Id, email, access_token в SharedPreferences тут???
+
+            } else {
+                Log.d(TAG, "isActivityRequestViral: Pizdets native");
+            }
+        } else {
+            super.onActivityResult(requestCode, resultCode, data);
+        }
+
     }
 
+
+//////////////////VK VK VK Response autorisation ///////////////////////
     private VKRequest createUserRequest() {
 
         String usersIdsStr = "";
@@ -169,7 +212,7 @@ public class ChatActivity extends AppCompatActivity {
                         VKApiConst.FIELDS, "sex,photo_50"));
     }
 
-    private void getUsersInfo() {
+    private void getVkUsersInfo() {
 
         createUserRequest().executeWithListener(new VKRequest.VKRequestListener() {
             @Override
@@ -196,7 +239,7 @@ public class ChatActivity extends AppCompatActivity {
                         jsonFirstNames.add(firstName);
                         //jsonLastNames.add(lastName);
                         jsonAvatars.add(avatarPhoto);
-                        //Log.d(TAG, "в Цикле getUsersInfo: jsonId = " + jsonId + ", Имя = " + firstName + ", АВА = " + avatarPhoto);
+                        //Log.d(TAG, "в Цикле getVkUsersInfo: jsonId = " + jsonId + ", Имя = " + firstName + ", АВА = " + avatarPhoto);
                     }
 
                 } catch (JSONException e) {
@@ -272,8 +315,55 @@ public class ChatActivity extends AppCompatActivity {
             }
         });
     }
-// VK END ////////////////////////////////////////////
+// VK Response END ////////////////////////////////////////////
 
+
+////////////////// Odnoklassniki Response autorisation ///////////////////////
+    private void getOkUserInfo(){
+
+        //Map<String, String> parameters = new HashMap<>();
+        //parameters.put("key1", "value1");
+
+//        Set<OkRequestMode> requestMode = new HashSet<>();
+//        requestMode.add(OkRequestMode.SDK_SESSION);
+
+        odnoklassniki.requestAsync(
+                "users.getCurrentUser",
+                null,
+                OkRequestMode.getDEFAULT(),  // OkRequestMode.getDEFAULT()  // requestMode // EnumSet.of(OkRequestMode.SDK_SESSION)
+                new OkListener() {
+                    @Override
+                    public void onSuccess(@NotNull JSONObject jsonObject) {
+                        Log.d(TAG, "requestAsync: onSuccess " + jsonObject.toString());
+
+
+                        //JSONArray jsonArray = jsonObject.getJSONArray("response");
+                        //JSONObject userInfo = jsonObject.getJSONObject(0);
+                        try {
+                            String jsonId = jsonObject.getString("uid");
+                            String firstName = jsonObject.getString("first_name");
+                            String lastName = jsonObject.getString("last_name");
+                            String avatarPhoto = jsonObject.getString("pic_1");
+
+                            sPref = getPreferences(MODE_PRIVATE);
+                            SharedPreferences.Editor editor = sPref.edit();
+                            editor.putString(USER_Ok_ID, jsonId);
+                            editor.apply();
+
+                        //Log.d(TAG, "requestAsync: onSuccess, jsonId=  " + jsonId + ", firstName = " + firstName + ", lastName = " + lastName + ", avatarPhoto = " + avatarPhoto);
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                        }
+                    }
+
+                    @Override
+                    public void onError(@Nullable String s) {
+                        Log.d(TAG, "requestAsync: onError " + s);
+                    }
+                });
+    }
+
+// Odnoklassniki Response END ////////////////////////////////////////////
 
     @Override
     protected void onResume() {
@@ -333,7 +423,8 @@ public class ChatActivity extends AppCompatActivity {
                         timerTask = new TimerTask() {
                             @Override
                             public void run() {
-                                getUsersInfo();
+                                getVkUsersInfo();
+
                             }
                         };
                         timer = new Timer();
@@ -365,7 +456,22 @@ public class ChatActivity extends AppCompatActivity {
     // По нажатию кнопки создаём в FireBase новое "сообщение" с введённым текстом из поля EditText
     public void sendMessage(View view) {
 
-        if (!VKSdk.isLoggedIn()) {  /// || !одноклассники.isLoggedIn итд !почта.isLoggedIn
+        // Authorization (проверка, получен ли токен от какой либо из соц сетей)
+        boolean userNotAuthorization = false;
+        if(!VKSdk.isLoggedIn() || TextUtils.isEmpty(odnoklassniki.getSdkToken())){  // нет токена (и от Вк, и от Ок)
+            userNotAuthorization = true; // показываем диалог
+        }
+        if(!VKSdk.isLoggedIn() && !TextUtils.isEmpty(odnoklassniki.getSdkToken())){ // есть токен только от Ок
+            userNotAuthorization = false;  // пропускаем диалог
+        }
+        if(VKSdk.isLoggedIn() && TextUtils.isEmpty(odnoklassniki.getSdkToken())){  // есть токен только от Вк
+            userNotAuthorization = false;  // пропускаем диалог
+        }
+
+
+       // if (!VKSdk.isLoggedIn() || TextUtils.isEmpty(odnoklassniki.getSdkToken())) {
+
+        if (userNotAuthorization) {
 
 // Алерт Дайлог авторизации:
             final AlertDialog.Builder dialog = new AlertDialog.Builder(this);
@@ -387,10 +493,6 @@ public class ChatActivity extends AppCompatActivity {
             final AlertDialog adTrueDialog = dialog.show();  // adTrueDialog для выхода из диалога после нажатия кнопок
 
 // Кнопки в Алерт Дайлог для авторизации:
-//            final Button btnRegVk = sign_in_window.findViewById(R.id.reg_from_vk_btn);
-//            final Button btnRegOk = sign_in_window.findViewById(R.id.reg_from_ok_btn);
-//            final Button btnRegMail = sign_in_window.findViewById(R.id.reg_from_email_btn);
-
             final ImageButton btnRegVk = sign_in_window.findViewById(R.id.ib_vk_btn);
             final ImageButton btnRegOk = sign_in_window.findViewById(R.id.ib_ok_btn);
             final ImageButton btnRegMail = sign_in_window.findViewById(R.id.ib_fb_btn);
@@ -408,14 +510,15 @@ public class ChatActivity extends AppCompatActivity {
             btnRegOk.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    Toast.makeText(ChatActivity.this,
-                            "функция пока не доступна",
-                            Toast.LENGTH_SHORT).show();
+                    odnoklassniki.requestAuthorization(ChatActivity.this,
+                            "okauth://ok512000154078",
+                            OkAuthType.ANY,
+                            (OkScope.VALUABLE_ACCESS + ";" + OkScope.LONG_ACCESS_TOKEN));
                     adTrueDialog.dismiss();
                 }
             });
 
-            // по кнопке "Через Майл"
+            // по кнопке "Через Facebook"
             btnRegMail.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
@@ -432,18 +535,35 @@ public class ChatActivity extends AppCompatActivity {
 
         sPref = getPreferences(MODE_PRIVATE);
         final String current_user_id_vk = sPref.getString(USER_VK_ID, "");  // достали из SharedPreferences id_vk  пользователя
-        String message = editText.getText().toString();  // получаем сообщение с поля ввода
 
-        //отправляет введённое сообщение в базу данных
-        if (message.length() > 0) {
+        sPref = getPreferences(MODE_PRIVATE);
+        final String current_user_id_ok = sPref.getString(USER_Ok_ID, "");  // достали из SharedPreferences id_Ok  пользователя
+
+        String message = editText.getText().toString();  // получаем сообщение с поля ввода
+        Log.d(TAG, "перед отправкой на firebase: current_user_id_vk = " + current_user_id_vk + ", current_user_id_Ok = " + current_user_id_ok);
+
+        //отправляет введённое сообщение в базу данных c тегом ВК
+        if (message.length() > 0 && !TextUtils.isEmpty(current_user_id_vk)) {
             long time_stamp = System.currentTimeMillis();   // получаем время отправки сообщения
             //создаем экземпляр одного Cообщения Юзера
-            FireBaseChatMessage fireBaseChatMessage = new FireBaseChatMessage(current_user_id_vk, message, time_stamp);
+            FireBaseChatMessage fireBaseChatMessage = new FireBaseChatMessage(current_user_id_vk, message, time_stamp, "VK");
             // оправляем его в базу данных firebase
             myRef.push().setValue(fireBaseChatMessage);
             messagesView.smoothScrollToPosition(messageAdapter.getCount() - 1);
             editText.getText().clear();  //очищаем поле ввода
         }
+        // или:
+        //отправляет введённое сообщение в базу данных c тегом ОК
+        if (message.length() > 0 && !TextUtils.isEmpty(current_user_id_ok)) {
+            long time_stamp = System.currentTimeMillis();   // получаем время отправки сообщения
+            //создаем экземпляр одного Cообщения Юзера
+            FireBaseChatMessage fireBaseChatMessage = new FireBaseChatMessage(current_user_id_ok, message, time_stamp, "OK");
+            // оправляем его в базу данных firebase
+            myRef.push().setValue(fireBaseChatMessage);
+            messagesView.smoothScrollToPosition(messageAdapter.getCount() - 1);
+            editText.getText().clear();  //очищаем поле ввода
+        }
+
     }
 
 
@@ -454,14 +574,16 @@ public class ChatActivity extends AppCompatActivity {
         public String user_id; // = "12103322";
         public String message; // = "кукуепта";
         public long timeStamp; // = System.currentTimeMillis();
+        public String social_tag; // = System.currentTimeMillis();
 
         public FireBaseChatMessage() {
         }
 
-        public FireBaseChatMessage(String user_id, String message, long timeStamp) {
+        public FireBaseChatMessage(String user_id, String message, long timeStamp, String social_tag) {
             this.user_id = user_id;
             this.message = message;
             this.timeStamp = timeStamp;
+            this.social_tag = social_tag;
         }
     }
 }

@@ -7,6 +7,9 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.text.TextUtils;
+import android.util.Log;
+import android.view.View;
 
 import com.example.hohlosra4app.Model.Channel;
 import com.google.firebase.database.ChildEventListener;
@@ -16,8 +19,19 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.Query;
 
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
+import org.json.JSONObject;
+
+import ru.ok.android.sdk.Odnoklassniki;
+import ru.ok.android.sdk.OkListener;
+import ru.ok.android.sdk.OkRequestMode;
+import ru.ok.android.sdk.util.OkAuthType;
+import ru.ok.android.sdk.util.OkScope;
+
 public class MainActivity extends AppCompatActivity {
 
+    public static final String TAG = "MainActivity";
     private RecyclerView rvTvChannelsList;
     private RecyclerView.LayoutManager rvLayoutManager;
     private TvChannelsAdapter tvChannelsAdapter;
@@ -27,6 +41,9 @@ public class MainActivity extends AppCompatActivity {
 
      static final String CHANNEL_ID_EXTRA = "channel_id_extra";
      static final String USERS_IN_CHAT_EXTRA = "users_in_chart_extra";
+
+
+    //Odnoklassniki odnoklassniki;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -40,7 +57,46 @@ public class MainActivity extends AppCompatActivity {
         initRecyclerView();
         downloadChannelsFromFireBase();
 
+        //testResponceOk();
+
     }
+
+//    private void testResponceOk() {
+//        odnoklassniki = Odnoklassniki.createInstance(this, "512000154078", "CPNKFHJGDIHBABABA");  // id "512000154078"
+//        //btnTestOk = findViewById(R.id.test_ok_reg);
+//        findViewById(R.id.test_ok_reg).setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(final View view) {
+//                odnoklassniki.requestAuthorization(MainActivity.this,
+//                        "okauth://ok512000154078",
+//                        OkAuthType.ANY,
+//                        (OkScope.VALUABLE_ACCESS + ";" + OkScope.LONG_ACCESS_TOKEN));
+//            }
+//        });
+//
+//        //Map<String, String> parameters = new HashMap<>();
+//        //parameters.put("key1", "value1");
+//
+////        Set<OkRequestMode> requestMode = new HashSet<>();
+////        requestMode.add(OkRequestMode.SDK_SESSION);
+//
+//        odnoklassniki.requestAsync(
+//                "users.getCurrentUser",
+//                null,
+//                OkRequestMode.getDEFAULT(),  // OkRequestMode.getDEFAULT()  // requestMode // EnumSet.of(OkRequestMode.SDK_SESSION)
+//                new OkListener() {
+//                    @Override
+//                    public void onSuccess(@NotNull JSONObject jsonObject) {
+//                        Log.d(TAG, "requestAsync: onSuccess " + jsonObject.toString());
+//                    }
+//
+//                    @Override
+//                    public void onError(@Nullable String s) {
+//                        Log.d(TAG, "requestAsync: onError " + s);
+//                    }
+//                });
+//
+//    }
 
     private void downloadChannelsFromFireBase() {
         // подключаемся к базе
@@ -74,6 +130,29 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
+
+//    @Override
+//    protected void onActivityResult(int requestCode, int resultCode, @androidx.annotation.Nullable Intent data) {
+//        super.onActivityResult(requestCode, resultCode, data);
+//        if (Odnoklassniki.Companion.of(this).isActivityRequestOAuth(requestCode)) { // web Odnoklassniki.getInstance(this)
+//            boolean isAuthCompleted = !TextUtils.isEmpty(data.getStringExtra("access_token"));
+//            if (isAuthCompleted) {
+//                Log.d(TAG, "isActivityRequestOAuth: Zaebis");
+//            } else {
+//                Log.d(TAG, "isActivityRequestOAuth: Pizdets");
+//            }
+//        } else if (Odnoklassniki.Companion.of(this).isActivityRequestViral(requestCode)) { // native
+//            boolean isAuthCompleted = !TextUtils.isEmpty(data.getStringExtra("access_token"));
+//            if (isAuthCompleted) {
+//                Log.d(TAG, "isActivityRequestViral: Zaebis");
+//            } else {
+//                Log.d(TAG, "isActivityRequestViral: Pizdets");
+//            }
+//        } else {
+//            super.onActivityResult(requestCode, resultCode, data);
+//        }
+//    }
+//
 
     private void initRecyclerView(){
 
