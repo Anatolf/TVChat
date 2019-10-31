@@ -47,7 +47,11 @@ dependencies {
     implementation 'com.google.android.material:material:1.0.0'
     implementation 'com.android.support:design:28.+'
     implementation 'com.vk:androidsdk:1.6.9'
+
     implementation 'ru.ok:odnoklassniki-android-sdk:2.1.8'
 
-    implementation 'com.squareup.picasso:picasso:2.5.2'
+    implementation 'com.squareup.picasso:picasso:2.71828'
+
+    implementation 'com.squareup.retrofit2:retrofit:2.6.2'
+    implementation 'com.squareup.retrofit2:converter-gson:2.6.2'
 }

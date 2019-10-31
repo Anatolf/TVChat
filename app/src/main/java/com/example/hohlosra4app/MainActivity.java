@@ -7,9 +7,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.text.TextUtils;
 import android.util.Log;
-import android.view.View;
 
 import com.example.hohlosra4app.Model.Channel;
 import com.google.firebase.database.ChildEventListener;
@@ -18,16 +16,16 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.Query;
+import com.vk.sdk.VKSdk;
+import com.vk.sdk.api.VKApi;
 
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
-import org.json.JSONObject;
+import java.io.IOException;
+import java.util.List;
 
-import ru.ok.android.sdk.Odnoklassniki;
-import ru.ok.android.sdk.OkListener;
-import ru.ok.android.sdk.OkRequestMode;
-import ru.ok.android.sdk.util.OkAuthType;
-import ru.ok.android.sdk.util.OkScope;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
+
 
 public class MainActivity extends AppCompatActivity {
 
@@ -43,8 +41,6 @@ public class MainActivity extends AppCompatActivity {
      static final String USERS_IN_CHAT_EXTRA = "users_in_chart_extra";
 
 
-    //Odnoklassniki odnoklassniki;
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -59,44 +55,28 @@ public class MainActivity extends AppCompatActivity {
 
         //testResponceOk();
 
-    }
-
-//    private void testResponceOk() {
-//        odnoklassniki = Odnoklassniki.createInstance(this, "512000154078", "CPNKFHJGDIHBABABA");  // id "512000154078"
-//        //btnTestOk = findViewById(R.id.test_ok_reg);
-//        findViewById(R.id.test_ok_reg).setOnClickListener(new View.OnClickListener() {
+//        Call call = App.getService().accsessToken(
+//                "7168396",
+//                "bb6792b4bb6792b4bb6792b478bb0af338bbb67bb6792b4e6df9e37d5c9e26cb14273da",
+//                "5.102",
+//                "client_credentials");
+//
+//        call.enqueue(new Callback<String>() {
+//
 //            @Override
-//            public void onClick(final View view) {
-//                odnoklassniki.requestAuthorization(MainActivity.this,
-//                        "okauth://ok512000154078",
-//                        OkAuthType.ANY,
-//                        (OkScope.VALUABLE_ACCESS + ";" + OkScope.LONG_ACCESS_TOKEN));
+//            public void onResponse(Call<String> call, Response<String> response) {
+//                Log.d(TAG, "onResponse: " + response.toString());
+//
+//            }
+//
+//            @Override
+//            public void onFailure(Call<String> call, Throwable t) {
+//                Log.d(TAG, "onFailure: " + t.getMessage());
+//
 //            }
 //        });
-//
-//        //Map<String, String> parameters = new HashMap<>();
-//        //parameters.put("key1", "value1");
-//
-////        Set<OkRequestMode> requestMode = new HashSet<>();
-////        requestMode.add(OkRequestMode.SDK_SESSION);
-//
-//        odnoklassniki.requestAsync(
-//                "users.getCurrentUser",
-//                null,
-//                OkRequestMode.getDEFAULT(),  // OkRequestMode.getDEFAULT()  // requestMode // EnumSet.of(OkRequestMode.SDK_SESSION)
-//                new OkListener() {
-//                    @Override
-//                    public void onSuccess(@NotNull JSONObject jsonObject) {
-//                        Log.d(TAG, "requestAsync: onSuccess " + jsonObject.toString());
-//                    }
-//
-//                    @Override
-//                    public void onError(@Nullable String s) {
-//                        Log.d(TAG, "requestAsync: onError " + s);
-//                    }
-//                });
-//
-//    }
+    }
+
 
     private void downloadChannelsFromFireBase() {
         // подключаемся к базе
@@ -130,29 +110,6 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
-
-//    @Override
-//    protected void onActivityResult(int requestCode, int resultCode, @androidx.annotation.Nullable Intent data) {
-//        super.onActivityResult(requestCode, resultCode, data);
-//        if (Odnoklassniki.Companion.of(this).isActivityRequestOAuth(requestCode)) { // web Odnoklassniki.getInstance(this)
-//            boolean isAuthCompleted = !TextUtils.isEmpty(data.getStringExtra("access_token"));
-//            if (isAuthCompleted) {
-//                Log.d(TAG, "isActivityRequestOAuth: Zaebis");
-//            } else {
-//                Log.d(TAG, "isActivityRequestOAuth: Pizdets");
-//            }
-//        } else if (Odnoklassniki.Companion.of(this).isActivityRequestViral(requestCode)) { // native
-//            boolean isAuthCompleted = !TextUtils.isEmpty(data.getStringExtra("access_token"));
-//            if (isAuthCompleted) {
-//                Log.d(TAG, "isActivityRequestViral: Zaebis");
-//            } else {
-//                Log.d(TAG, "isActivityRequestViral: Pizdets");
-//            }
-//        } else {
-//            super.onActivityResult(requestCode, resultCode, data);
-//        }
-//    }
-//
 
     private void initRecyclerView(){
 

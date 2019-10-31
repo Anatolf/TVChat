@@ -64,7 +64,7 @@ public class TvChannelsAdapter extends RecyclerView.Adapter<TvChannelsAdapter.Vi
         holder.tvChannelName.setText(nameTvChannel);
         holder.tvUsersIntoChat.setText(countUsers);
 
-        Picasso.with(mainActivityContext)
+        Picasso.get()
                 .load(urlTvChannelLogo)
                 .error(R.drawable.ic_launcher_foreground)
                 .into(holder.logoTvChannel);

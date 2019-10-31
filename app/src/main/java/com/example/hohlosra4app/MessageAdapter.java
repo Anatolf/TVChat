@@ -9,6 +9,8 @@ import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Shader;
 import android.graphics.drawable.GradientDrawable;
+import android.text.TextUtils;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -24,9 +26,13 @@ import com.vk.sdk.VKSdk;
 import java.util.ArrayList;
 import java.util.List;
 
+import ru.ok.android.sdk.Odnoklassniki;
+
 
 public class MessageAdapter extends BaseAdapter {
     private static final String TAG = "myLogs";
+
+    private Odnoklassniki odnoklassniki;
 
     List<Message> messages = new ArrayList<Message>();
     Context context;
@@ -37,6 +43,7 @@ public class MessageAdapter extends BaseAdapter {
 
 
     public void add(Message message) {
+        Log.d(TAG, "Мы в Адаптере, мессадж = " + message.getText());
             this.messages.add(message);
             notifyDataSetChanged();
     }
@@ -62,9 +69,10 @@ public class MessageAdapter extends BaseAdapter {
         LayoutInflater messageInflater = (LayoutInflater) context.getSystemService(Activity.LAYOUT_INFLATER_SERVICE);
         Message message = messages.get(i);
 
+        odnoklassniki = Odnoklassniki.createInstance(context, "512000154078", "CPNKFHJGDIHBABABA");  // id "512000154078"
 
         // Если пользователь зарегестрировался через Вк, то отображаем сообщения с аватарками:
-        if (VKSdk.isLoggedIn()) {
+        if (VKSdk.isLoggedIn() || !TextUtils.isEmpty(odnoklassniki.getMAccessToken())) {
 
             if (message.isBelongsToCurrentUser()) {
                 convertView = messageInflater.inflate(R.layout.my_message, null);
@@ -85,7 +93,7 @@ public class MessageAdapter extends BaseAdapter {
                 convertView.setTag(holder);
 
                 holder.avatar.setVisibility(View.INVISIBLE);
-                Picasso.with(context)
+                Picasso.get()
                         .load(message.getAvatar())
                         .transform(new CircularTransformation(0)) // 0 - радиус по умолчанию делает максимальный кроп углов от квадрата
                         .error(R.drawable.ic_launcher_foreground)
