@@ -7,7 +7,6 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.util.Log;
 
 import com.example.hohlosra4app.Model.Channel;
 import com.google.firebase.database.ChildEventListener;
@@ -16,20 +15,12 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.Query;
-import com.vk.sdk.VKSdk;
-import com.vk.sdk.api.VKApi;
 
-import java.io.IOException;
-import java.util.List;
-
-import retrofit2.Call;
-import retrofit2.Callback;
-import retrofit2.Response;
 
 
 public class MainActivity extends AppCompatActivity {
+    //public static final String TAG = "MainActivity";
 
-    public static final String TAG = "MainActivity";
     private RecyclerView rvTvChannelsList;
     private RecyclerView.LayoutManager rvLayoutManager;
     private TvChannelsAdapter tvChannelsAdapter;
@@ -37,8 +28,8 @@ public class MainActivity extends AppCompatActivity {
     private FirebaseDatabase database;
     private DatabaseReference myRef;
 
-     static final String CHANNEL_ID_EXTRA = "channel_id_extra";
-     static final String USERS_IN_CHAT_EXTRA = "users_in_chart_extra";
+    static final String CHANNEL_ID_EXTRA = "channel_id_extra";
+    static final String USERS_IN_CHAT_EXTRA = "users_in_chart_extra";
 
 
     @Override
@@ -52,29 +43,6 @@ public class MainActivity extends AppCompatActivity {
 
         initRecyclerView();
         downloadChannelsFromFireBase();
-
-        //testResponceOk();
-
-//        Call call = App.getService().accsessToken(
-//                "7168396",
-//                "bb6792b4bb6792b4bb6792b478bb0af338bbb67bb6792b4e6df9e37d5c9e26cb14273da",
-//                "5.102",
-//                "client_credentials");
-//
-//        call.enqueue(new Callback<String>() {
-//
-//            @Override
-//            public void onResponse(Call<String> call, Response<String> response) {
-//                Log.d(TAG, "onResponse: " + response.toString());
-//
-//            }
-//
-//            @Override
-//            public void onFailure(Call<String> call, Throwable t) {
-//                Log.d(TAG, "onFailure: " + t.getMessage());
-//
-//            }
-//        });
     }
 
 
@@ -88,7 +56,7 @@ public class MainActivity extends AppCompatActivity {
         myQuery.addChildEventListener(new ChildEventListener() {
             @Override
             public void onChildAdded(DataSnapshot dataSnapshot, String s) {
-             //   UploadChannelsToFirebaseActivity.Channel channel = dataSnapshot.getValue(UploadChannelsToFirebaseActivity.Channel.class);
+                //   UploadChannelsToFirebaseActivity.Channel channel = dataSnapshot.getValue(UploadChannelsToFirebaseActivity.Channel.class);
                 Channel channel = dataSnapshot.getValue(Channel.class);
 
                 // передаю в адаптер список ТВ-Каналов из Firebase (по одному):
@@ -97,21 +65,25 @@ public class MainActivity extends AppCompatActivity {
             }
 
             @Override
-            public void onChildChanged(DataSnapshot dataSnapshot, String s) { }
+            public void onChildChanged(DataSnapshot dataSnapshot, String s) {
+            }
 
             @Override
-            public void onChildRemoved(DataSnapshot dataSnapshot) { }
+            public void onChildRemoved(DataSnapshot dataSnapshot) {
+            }
 
             @Override
-            public void onChildMoved(DataSnapshot dataSnapshot, String s) { }
+            public void onChildMoved(DataSnapshot dataSnapshot, String s) {
+            }
 
             @Override
-            public void onCancelled(DatabaseError databaseError) { }
+            public void onCancelled(DatabaseError databaseError) {
+            }
         });
     }
 
 
-    private void initRecyclerView(){
+    private void initRecyclerView() {
 
         // Attach RecyclerView xml item layout
         rvTvChannelsList = findViewById(R.id.rv_tv_channels);
@@ -125,9 +97,9 @@ public class MainActivity extends AppCompatActivity {
 // при нажатии на элемент:
         TvChannelsAdapter.OnChannelClickListener onChannelClickListener = new TvChannelsAdapter.OnChannelClickListener() {
             @Override
-            public void onChannelClick(Channel channel, Integer usersIntoChat ) {
+            public void onChannelClick(Channel channel, Integer usersIntoChat) {
 
-        // передаем в ChatActivity порядковый номер канала на который нажали и количество юзеров
+                // передаем в ChatActivity порядковый номер канала на который нажали и количество юзеров
                 Intent intent = new Intent(MainActivity.this, ChatActivity.class);
                 intent.putExtra(CHANNEL_ID_EXTRA, channel.channel_id);
                 intent.putExtra(USERS_IN_CHAT_EXTRA, usersIntoChat);

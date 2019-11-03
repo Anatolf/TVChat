@@ -3,6 +3,8 @@ package com.example.hohlosra4app;
 import android.app.Application;
 import android.content.SharedPreferences;
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import com.vk.sdk.VKSdk;
 
 import retrofit2.Retrofit;
@@ -11,8 +13,10 @@ import ru.ok.android.sdk.Odnoklassniki;
 
 public class App extends Application {
 
-    private static Retrofit retrofit;
+    private static Retrofit retrofitVk;
+    private static Retrofit retrofitOk;
     private static VkService service;
+    private static OdnoklassnikiService odnoklassnikiService;
 
     private Odnoklassniki odnoklassniki;
     private SharedPreferences preferences;
@@ -37,22 +41,47 @@ public class App extends Application {
         return get().odnoklassniki;
     }
 
-    public static Retrofit getRetrofit() {
-        if (retrofit == null){
-            retrofit = new Retrofit.Builder()
+    /// for VK
+    public static Retrofit getRetrofitVk() {
+        if (retrofitVk == null){
+            retrofitVk = new Retrofit.Builder()
                     .baseUrl("https://oauth.vk.com/")
                     .addConverterFactory(GsonConverterFactory.create())
                     .build();
         }
-        return retrofit;
+        return retrofitVk;
     }
 
-    public static VkService getService() {
+    public static VkService getVkService() {
         if (service == null) {
-            service = getRetrofit().create(VkService.class);
+            service = getRetrofitVk().create(VkService.class);
         }
         return service;
     }
+
+    /// for OK
+    public static Retrofit getRetrofitOk() {
+        if (retrofitOk == null){
+            retrofitOk = new Retrofit.Builder()
+                    .baseUrl("https://api.ok.ru/")  // https://api.ok.ru/   https://connect.ok.ru/oauth/
+                    .addConverterFactory(GsonConverterFactory.create())
+                    .build();
+        }
+        return retrofitOk;
+    }
+
+    public static OdnoklassnikiService getOdnoklassnikiService() {
+        if (odnoklassnikiService == null) {
+            odnoklassnikiService = getRetrofitOk().create(OdnoklassnikiService.class);
+        }
+        return odnoklassnikiService;
+    }
+
+
+
+
+
+
 
     public SharedPreferences getPrefs() {
         if (preferences == null) {

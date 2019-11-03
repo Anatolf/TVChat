@@ -43,6 +43,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.Serializable;
+import java.security.MessageDigest;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -55,6 +56,9 @@ import java.util.TimeZone;
 import java.util.Timer;
 import java.util.TimerTask;
 
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 import ru.ok.android.sdk.Odnoklassniki;
 import ru.ok.android.sdk.OkListener;
 import ru.ok.android.sdk.OkRequestMode;
@@ -182,7 +186,7 @@ public class ChatActivity extends AppCompatActivity {
                     odnoklassniki.onAuthActivityResult(requestCode, resultCode, data, new OkListener() {
                         @Override
                         public void onSuccess(@NotNull JSONObject jsonObject) {
-                            Log.d(TAG, "!!!!!!!! requestAsync: onSuccess " + jsonObject.toString());
+                            Log.d(TAG, "requestAsync: onSuccess " + jsonObject.toString());
 
                             // очищаем временные списки (или происходит дублирование всех сообщений)
                             usersIds.clear();
@@ -245,7 +249,7 @@ public class ChatActivity extends AppCompatActivity {
                     odnoklassniki.onAuthActivityResult(requestCode, resultCode, data, new OkListener() {
                         @Override
                         public void onSuccess(@NotNull JSONObject jsonObject) {
-                            Log.d(TAG, "!!!!!!!! requestAsync: onSuccess " + jsonObject.toString());
+                            Log.d(TAG, "requestAsync: onSuccess " + jsonObject.toString());
 
                             // очищаем временные списки (или происходит дублирование всех сообщений)
                             usersIds.clear();
@@ -281,7 +285,7 @@ public class ChatActivity extends AppCompatActivity {
 
                                         @Override
                                         public void onError(@Nullable String s) {
-                                            Log.d(TAG, "Odnoklassniki !!! requestAsync: onError " + s);
+                                            Log.d(TAG, "Odnoklassniki, requestAsync: onError " + s);
                                         }
                                     });
 
@@ -289,11 +293,10 @@ public class ChatActivity extends AppCompatActivity {
 
                         @Override
                         public void onError(@Nullable String s) {
-                            Log.d(TAG, "(((((((((( requestAsync: Error " + s);
+                            Log.d(TAG, "requestAsync: Error " + s);
 
                         }
                     });
-
 
 
                 } else {
@@ -308,11 +311,11 @@ public class ChatActivity extends AppCompatActivity {
 
     private void createMessagesToShow() {
         // Делаем запрос, получаем ответ от ВК, заполняем временные Списки:
-        getVkMessages(new OnCompleteMessagesListner() {
+        getVkMessages(new OnCompleteMessagesListener() {
             @Override
             public void onComplete() {
                 // Делаем запрос, получаем ответ от Ок и заполняем временные Списки:
-                getOkMessages(new OnCompleteMessagesListner() {
+                getOkMessages(new OnCompleteMessagesListener() {
                     @Override
                     public void onComplete() {
                         mergeAllMessages();
@@ -323,7 +326,7 @@ public class ChatActivity extends AppCompatActivity {
     }
 
 
-    private void getOkMessages(final OnCompleteMessagesListner listener) {
+    private void getOkMessages(final OnCompleteMessagesListener listener) {
         final ArrayList<String> jsonIdsOk = new ArrayList<>();
         final ArrayList<String> jsonFirstNamesOk = new ArrayList<>();
         //final ArrayList<String> jsonLastNamesOk = new ArrayList<>();
@@ -336,101 +339,119 @@ public class ChatActivity extends AppCompatActivity {
             }
         }
 
+        if(TextUtils.isEmpty(okUsersIdsStr)){
+            if (listener != null) {
+            listener.onComplete();
+            }
+            return;
+        }
+
         Map<String, String> parameters = new HashMap<>();
         parameters.put("uids", okUsersIdsStr);
         parameters.put("fields", "FIRST_NAME,LAST_NAME,PIC_1");
 
-        //Log.d(TAG, "getOkMessages: usersSocialTags size = " + usersSocialTags.size() + ", ++Str Ids = " + okUsersIdsStr);
-        odnoklassniki.requestAsync(
+        Log.d(TAG, "getOkMessages: usersSocialTags size = " + usersSocialTags.size() + ", ++Str Ids = " + okUsersIdsStr);
+
+        Call call = App.getOdnoklassnikiService().fbDo(
+                "CPNKFHJGDIHBABABA",
+                "FIRST_NAME,LAST_NAME,PIC_1",
+                "json",
                 "users.getInfo",
-                parameters,
-                OkRequestMode.getDEFAULT(),  // OkRequestMode.getDEFAULT()  // requestMode // EnumSet.of(OkRequestMode.SDK_SESSION)
-                new OkListener() {
-                    @Override
-                    public void onSuccess(@NotNull JSONObject jsonObject) {
-                        try {
-                            Log.d(TAG, "OK onComplete: " + jsonObject.toString());
+                okUsersIdsStr,
+                getSig(
+                        "CPNKFHJGDIHBABABA",
+                        "FIRST_NAME,LAST_NAME,PIC_1",
+                        "json",
+                        "users.getInfo",
+                        okUsersIdsStr,
+                        ""),  // todo secretKey App
+                "");  // todo global AccessToken App
 
-                            JSONArray jsonArray = new JSONArray(jsonObject.getString("result"));
-                            for (int i = 0; i < jsonArray.length(); i++) {
-                                JSONObject userInfo = jsonArray.getJSONObject(i);
 
-                                String jsonId = userInfo.getString("uid");
-                                String firstName = userInfo.getString("first_name");
-                                String lastName = userInfo.getString("last_name");
-                                String avatarPhoto = userInfo.getString("pic_1");
+        call.enqueue(new Callback() {
+            @Override
+            public void onResponse(Call call, Response response) {
+                //Log.d(TAG, "Odnoklassniki - from my application, with Global Key, onResponse: " + response.toString());
 
-                                jsonIdsOk.add(jsonId);
-                                jsonFirstNamesOk.add(firstName);
-                                //jsonLastNamesOk.add(lastName);
-                                jsonAvatarsOk.add(avatarPhoto);
-                                Log.d(TAG, "Одноклассники requestAsync: onSuccess, jsonId=  " + jsonId + ", firstName = " + firstName + ", lastName = " + lastName + ", avatarPhoto = " + avatarPhoto);
-                            }
+                try {
 
-//                // достали из SharedPreferences id_ok  пользователя, для проверки Юзер (я/не я?)
-//                sPref = getPreferences(MODE_PRIVATE);
-//                final String current_user_id_vk = sPref.getString(USER_VK_ID, "");
+                    JSONArray jsonArray = new JSONArray((ArrayList)response.body());
+                    for (int i = 0; i < jsonArray.length(); i++) {
+                        JSONObject userInfo = jsonArray.getJSONObject(i);
 
-                            // первый цикл бежит по всем списку id сообщений полученых от FireBase
-                            // второй цикл сравнивает каждый проход с id полученными от ВК jsonId (списки jsonIds, jsonFirstNames, jsonAvatars - идентичны по размеру - для дальнейшего сопоставления)
-                            for (int i = 0; i < usersIds.size(); i++) {
-                                for (int j = 0; j < jsonIdsOk.size(); j++) {
-                                    if (usersIds.get(i).equals(jsonIdsOk.get(j))) {
+                        String jsonId = userInfo.getString("uid");
+                        String firstName = userInfo.getString("first_name");
+                        String lastName = userInfo.getString("last_name");
+                        String avatarPhoto = userInfo.getString("pic_1");
 
-                                        String id = usersIds.get(i);
-                                        String message = usersMessages.get(i);
+                        jsonIdsOk.add(jsonId);
+                        jsonFirstNamesOk.add(firstName);
+                        //jsonLastNamesOk.add(lastName);
+                        jsonAvatarsOk.add(avatarPhoto);
+                        //Log.d(TAG, "Одноклассники requestAsync: onSuccess, jsonId=  " + jsonId + ", firstName = " + firstName + ", lastName = " + lastName + ", avatarPhoto = " + avatarPhoto);
+                    }
+                    // первый цикл бежит по всем списку id сообщений полученых от FireBase
+                    // второй цикл сравнивает каждый проход с id полученными от ВК jsonId (списки jsonIds, jsonFirstNames, jsonAvatars - идентичны по размеру - для дальнейшего сопоставления)
+                    for (int i = 0; i < usersIds.size(); i++) {
+                        for (int j = 0; j < jsonIdsOk.size(); j++) {
+                            if (usersIds.get(i).equals(jsonIdsOk.get(j))) {
 
-                                        Date date = new Date(usersTimeStamps.get(i));
-                                        DateFormat formatter = new SimpleDateFormat("HH:mm:ss");
-                                        formatter.setTimeZone(TimeZone.getTimeZone("Europe/Moscow"));
-                                        String currentTime = formatter.format(date);
+                                String id = usersIds.get(i);
+                                String message = usersMessages.get(i);
 
-                                        String name = jsonFirstNamesOk.get(j);
-                                        String ava = jsonAvatarsOk.get(j);
+                                Date date = new Date(usersTimeStamps.get(i));
+                                DateFormat formatter = new SimpleDateFormat("HH:mm:ss");
+                                formatter.setTimeZone(TimeZone.getTimeZone("Europe/Moscow"));
+                                String currentTime = formatter.format(date);
 
-                                        boolean belongToCurrentUser = false; // флаг Юзер я, не я?
+                                String name = jsonFirstNamesOk.get(j);
+                                String ava = jsonAvatarsOk.get(j);
+
+                                boolean belongToCurrentUser = false; // флаг Юзер я, не я?
 //                            if (id.equals(current_user_id_vk)) {  // мой id вконтакте
 //                                belongToCurrentUser = true;
 //                            } else {
 //                                belongToCurrentUser = false;
 //                            }
 
-                                        //  конструктор № 2: создаёт сообщения с аватарками из ВК:
-                                        Message singleMessage = new Message(id, message, currentTime, belongToCurrentUser, name, ava);
-                                        //messageAdapter.add(singleMessage);  // посылаем на отображение
-                                        okMessages.add(singleMessage);
+                                //  для конструктора № 2: создаёт сообщения с аватарками из ОК и ВК:
+                                Message singleMessage = new Message(id, message, currentTime, belongToCurrentUser, name, ava);
+                                //messageAdapter.add(singleMessage);  // посылаем на отображение
+                                okMessages.add(singleMessage);
 
-                                        Log.d(TAG, "в Цикле For ОДНОКЛАССНИКИ ___________________: id = " + id + ", message = " + message
-                                                + ", currentTime = " + currentTime + ", name = "
-                                                + name + ", ava = " + ava + ", belongToCurrentUser = " + belongToCurrentUser);
+                                Log.d(TAG, "в Цикле For ОДНОКЛАССНИКИ ___________________: id = " + id + ", message = " + message
+                                        + ", currentTime = " + currentTime + ", name = "
+                                        + name + ", ava = " + ava + ", belongToCurrentUser = " + belongToCurrentUser);
 
-                                    }
-                                }
                             }
-                            // очищаем временные списки:
-                            jsonIdsOk.clear();
-                            jsonFirstNamesOk.clear();
-                            //jsonLastNamesOk.clear();
-                            jsonAvatarsOk.clear();
-
-                            // Odnoklassniki messages Ready !!!
-                            if (listener != null) {
-                                listener.onComplete();
-                            }
-
-                        } catch (JSONException e) {
-                            e.printStackTrace();
                         }
                     }
+                    // очищаем временные списки:
+                    jsonIdsOk.clear();
+                    jsonFirstNamesOk.clear();
+                    //jsonLastNamesOk.clear();
+                    jsonAvatarsOk.clear();
 
-                    @Override
-                    public void onError(@Nullable String s) {
-                        Log.d(TAG, "OK requestAsync: onError " + s);
+                    // Odnoklassniki messages Ready !!!
+                    if (listener != null) {
+                        listener.onComplete();
                     }
-                });
+
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+
+            }
+
+            @Override
+            public void onFailure(Call call, Throwable t) {
+                //Log.d(TAG, "Odnoklassniki - from my application, with Global Key, ERROR onFailure:  " + t.getMessage());
+            }
+        });
+
     }
 
-    private void getVkMessages(final OnCompleteMessagesListner listner) {
+    private void getVkMessages(final OnCompleteMessagesListener listener) {
 
         final ArrayList<String> jsonIdsVk = new ArrayList<>();
         final ArrayList<String> jsonFirstNamesVk = new ArrayList<>();
@@ -445,17 +466,24 @@ public class ChatActivity extends AppCompatActivity {
             }
         }
 
+        if(TextUtils.isEmpty(vkUsersIdsStr)){
+            if (listener != null) {
+                listener.onComplete();
+            }
+            return;
+        }
+
         VKRequest vkRequest = new VKRequest(
                 "users.get",
                 VKParameters.from(
-                        "access_token", "",  // TODO: 2019-10-31 PLACE THIS accsess token VK 
+                        "access_token", "",  // TODO: PLACE THIS accsess token VK
                         VKApiConst.USER_IDS, vkUsersIdsStr,
                         VKApiConst.FIELDS, "sex,photo_50"));
 
         vkRequest.executeWithListener(new VKRequest.VKRequestListener() {
             @Override
             public void onComplete(VKResponse response) {
-                Log.d(TAG, "VK onComplete: " + response.responseString);
+                //Log.d(TAG, "VK - from my application, with Global Key, onComplete: " + response.responseString);
                 // получаем ответ от ApiVk и парсим json каждого участника чата
                 try {
                     JSONObject jsonResponse = new JSONObject(response.responseString);
@@ -521,8 +549,8 @@ public class ChatActivity extends AppCompatActivity {
                     jsonAvatarsVk.clear();
 
                     // vk messages Ready !!!
-                    if (listner != null) {
-                        listner.onComplete();
+                    if (listener != null) {
+                        listener.onComplete();
                     }
 
                 } catch (JSONException e) {
@@ -532,7 +560,7 @@ public class ChatActivity extends AppCompatActivity {
         });
     }
 
-    public interface OnCompleteMessagesListner {
+    public interface OnCompleteMessagesListener {
         void onComplete();
     }
 
@@ -579,6 +607,41 @@ public class ChatActivity extends AppCompatActivity {
         usersSocialTags.clear();
         vkMessages.clear();
         okMessages.clear();
+
+    }
+
+
+    private String getSig(String applicationKey,
+                          String fields,
+                          String format,
+                          String method,
+                          String uids,
+                          String secretKey) {
+
+
+        return toMD5("application_key=" + applicationKey +
+                "fields=" + fields +
+                "format=" + format +
+                "method=" + method +
+                "uids=" + uids +
+                secretKey);
+
+    }
+
+
+    private String toMD5(String toEncrypt) {
+        try {
+            MessageDigest digest = MessageDigest.getInstance("md5");
+            digest.update(toEncrypt.getBytes());
+            byte[] bytes = digest.digest();
+            StringBuilder sb = new StringBuilder();
+            for (byte i : bytes) {
+                sb.append(String.format("%02X", i));
+            }
+            return sb.toString().toLowerCase();
+        } catch (Exception exc) {
+            throw new IllegalStateException(exc);
+        }
 
     }
 
