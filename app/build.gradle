@@ -1,6 +1,9 @@
 apply plugin: 'com.android.application'
 apply plugin: 'com.google.gms.google-services'
 
+def props = new Properties()
+file("secret_keys.properties").withInputStream { props.load(it) }
+
 android {
     compileSdkVersion 29
     buildToolsVersion "29.0.2"
@@ -14,8 +17,17 @@ android {
     }
     buildTypes {
         release {
+            buildConfigField "String", "FOO_STRING", "\"bar\""
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+        }
+
+        debug {
+            buildConfigField "String", "VK_GLOBAL_ACCESS_TOKEN", "\"${props.vk}\""
+            buildConfigField "String", "OK_GLOBAL_ACCESS_TOKEN", "\"${props.ok}\""
+            buildConfigField "String", "OK_APP_ID", "\"${props.okAppId}\""
+            buildConfigField "String", "OK_APP_KEY", "\"${props.okAppKey}\""
+            buildConfigField "String", "OK_SECRET_KEY", "\"${props.okSecretKey}\""
         }
     }
     lintOptions {

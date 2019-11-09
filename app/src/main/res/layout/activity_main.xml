@@ -5,6 +5,12 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     >
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical">
+
+    <include layout="@layout/custom_toolbar" />
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/rv_tv_channels"
@@ -13,5 +19,5 @@
         android:scrollbars="none"
         >
     </androidx.recyclerview.widget.RecyclerView>
-
+    </LinearLayout>
 </FrameLayout>

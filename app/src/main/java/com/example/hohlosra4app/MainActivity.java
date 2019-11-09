@@ -2,11 +2,14 @@ package com.example.hohlosra4app;
 
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.widget.ImageView;
+import android.widget.TextView;
 
 import com.example.hohlosra4app.Model.Channel;
 import com.google.firebase.database.ChildEventListener;
@@ -15,11 +18,15 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.Query;
-
+import com.squareup.picasso.Picasso;
 
 
 public class MainActivity extends AppCompatActivity {
     //public static final String TAG = "MainActivity";
+
+    Toolbar toolbar;
+    ImageView icon_toolbar;
+    TextView head_text_toolbar;
 
     private RecyclerView rvTvChannelsList;
     private RecyclerView.LayoutManager rvLayoutManager;
@@ -29,6 +36,8 @@ public class MainActivity extends AppCompatActivity {
     private DatabaseReference myRef;
 
     static final String CHANNEL_ID_EXTRA = "channel_id_extra";
+    static final String CHANNEL_NAME_EXTRA = "channel_name_extra";
+    static final String CHANNEL_IMAGE_EXTRA = "channel_image_extra";
     static final String USERS_IN_CHAT_EXTRA = "users_in_chart_extra";
 
 
@@ -36,6 +45,10 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        toolbar = findViewById(R.id.custom_tool_bar);
+        icon_toolbar = findViewById(R.id.image_tool_bar);
+        head_text_toolbar = findViewById(R.id.head_text_tool_bar);
 
 // активити для заполнения базы)
 //        Intent intent = new Intent(this,UploadChannelsToFirebaseActivity.class);
@@ -85,6 +98,17 @@ public class MainActivity extends AppCompatActivity {
 
     private void initRecyclerView() {
 
+        head_text_toolbar.setText("TvSrach");
+
+        Picasso.get()
+                .load(R.drawable.tvsrach5)
+                //.transform(new CircularTransformation(0)) // 0 - радиус по умолчанию делает максимальный кроп углов от квадрата
+                .error(R.drawable.ic_launcher_foreground)
+                .into(icon_toolbar);
+
+        setSupportActionBar(toolbar);
+        getSupportActionBar().setDisplayShowTitleEnabled(false);
+
         // Attach RecyclerView xml item layout
         rvTvChannelsList = findViewById(R.id.rv_tv_channels);
 
@@ -102,6 +126,8 @@ public class MainActivity extends AppCompatActivity {
                 // передаем в ChatActivity порядковый номер канала на который нажали и количество юзеров
                 Intent intent = new Intent(MainActivity.this, ChatActivity.class);
                 intent.putExtra(CHANNEL_ID_EXTRA, channel.channel_id);
+                intent.putExtra(CHANNEL_NAME_EXTRA, channel.name);
+                intent.putExtra(CHANNEL_IMAGE_EXTRA, channel.urlChannel);
                 intent.putExtra(USERS_IN_CHAT_EXTRA, usersIntoChat);
                 startActivity(intent);
             }

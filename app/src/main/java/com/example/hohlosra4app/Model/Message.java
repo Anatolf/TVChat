@@ -1,6 +1,7 @@
 package com.example.hohlosra4app.Model;
 
 import java.io.Serializable;
+import java.util.HashMap;
 import java.util.Random;
 
 public class Message implements Serializable {
@@ -11,6 +12,7 @@ public class Message implements Serializable {
     private String name;
     private String color;
     private String avatar;
+    private HashMap<String,Boolean> liked_users;
 
     public Message(String id, String text, String time, boolean belongsToCurrentUser) {
         this.id = id;
@@ -19,15 +21,17 @@ public class Message implements Serializable {
         this.belongsToCurrentUser = belongsToCurrentUser;
         this.name = getRandomName();
         this.color = getRandomColor();
+
     }
 
-    public Message(String id, String text, String time, boolean belongsToCurrentUser, String name, String avatar) {
+    public Message(String id, String text, String time, boolean belongsToCurrentUser, String name, String avatar, HashMap<String,Boolean> liked_users) {
         this.id = id;
         this.text = text;
         this.time = time;
         this.belongsToCurrentUser = belongsToCurrentUser;
         this.name = name;
         this.avatar = avatar;
+        this.liked_users = liked_users;
     }
 
     public String getId() {
@@ -56,6 +60,10 @@ public class Message implements Serializable {
 
     public String getAvatar() {
         return avatar;
+    }
+
+    public HashMap<String, Boolean> getLiked_users() {
+        return liked_users;
     }
 
     static String getRandomName() {

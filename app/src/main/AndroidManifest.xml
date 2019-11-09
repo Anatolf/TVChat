@@ -6,13 +6,13 @@
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
 
     <application
+        android:name=".App"
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
-        android:name=".App"
         android:supportsRtl="true"
-        android:windowSoftInputMode="stateHidden|adjustPan"
-        android:theme="@style/AppTheme">
+        android:theme="@style/AppTheme"
+        android:windowSoftInputMode="stateHidden|adjustPan">
         <activity android:name=".MainActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -20,25 +20,21 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-
         <activity android:name=".TvChannelsAdapter" />
-
-        <activity android:name=".ChatActivity"
-            android:windowSoftInputMode="stateHidden|adjustPan"
-            >
-        </activity>
-
-
-        <activity android:name=".UploadChannelsToFirebaseActivity"></activity>
-
+        <activity
+            android:name=".ChatActivity"
+            android:windowSoftInputMode="stateHidden|adjustPan"/>
+        <activity android:name=".UploadChannelsToFirebaseActivity" />
         <activity android:name=".RegistrationActivity" />
 
         <meta-data
             android:name="preloaded_fonts"
             android:resource="@array/preloaded_fonts" />
 
-        <activity android:name="com.vk.sdk.VKServiceActivity" android:label="ServiceActivity" android:theme="@style/VK.Transparent" />
-
+        <activity
+            android:name="com.vk.sdk.VKServiceActivity"
+            android:label="ServiceActivity"
+            android:theme="@style/VK.Transparent" />
         <activity
             android:name="ru.ok.android.sdk.OkAuthActivity"
             android:configChanges="orientation|screenSize"
@@ -54,10 +50,6 @@
                     android:scheme="okauth" />
             </intent-filter>
         </activity>
-
-
     </application>
-
-
 
 </manifest>

@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.appcompat.widget.Toolbar
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/custom_tool_bar"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="?actionBarSize"
+    android:background="@color/colorPrimaryDark"
+    android:animateLayoutChanges="true"
+    app:popupTheme="@style/TextAppearance.AppCompat.Widget.PopupMenu.Header">
+
+    <ImageView
+        android:id="@+id/image_tool_bar"
+        android:layout_width="50dp"
+        android:layout_height="50dp"
+        android:src="@drawable/fb_button"/>
+
+    <TextView
+        android:id="@+id/head_text_tool_bar"
+        android:layout_marginLeft="25dp"
+        android:layout_toRightOf="@+id/image_tool_bar"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textColor="@color/vk_white"
+        android:textSize="20sp"
+        app:popupTheme="@style/Widget.AppCompat.ActionBar.TabText"
+        android:gravity="center_vertical"
+        android:text="Rose"/>
+
+
+</androidx.appcompat.widget.Toolbar>

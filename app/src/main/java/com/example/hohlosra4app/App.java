@@ -26,7 +26,7 @@ public class App extends Application {
     public void onCreate() {
         super.onCreate();
         VKSdk.initialize(this);
-        Odnoklassniki.createInstance(this,"512000154078","CPNKFHJGDIHBABABA");
+        Odnoklassniki.createInstance(this, BuildConfig.OK_APP_ID, BuildConfig.OK_APP_KEY);
         app = this;
     }
 
@@ -63,7 +63,7 @@ public class App extends Application {
     public static Retrofit getRetrofitOk() {
         if (retrofitOk == null){
             retrofitOk = new Retrofit.Builder()
-                    .baseUrl("https://api.ok.ru/")  // https://api.ok.ru/   https://connect.ok.ru/oauth/
+                    .baseUrl("https://api.ok.ru/")
                     .addConverterFactory(GsonConverterFactory.create())
                     .build();
         }
