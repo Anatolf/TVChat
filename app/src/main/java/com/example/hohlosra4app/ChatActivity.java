@@ -96,11 +96,8 @@ public class ChatActivity extends AppCompatActivity {
     // for registration window
     private RelativeLayout root_chat;
 
-    private ArrayList<String> usersIds = new ArrayList<>();
-    private ArrayList<Long> usersTimeStamps = new ArrayList<>();
-    private ArrayList<String> usersMessages = new ArrayList<>();
-    private ArrayList<String> usersSocialTags = new ArrayList<>();
-    private ArrayList<HashMap<String, Boolean>> usersLikedIds = new ArrayList<>();
+    private ArrayList<FireBaseChatMessage> fireBaseMessages = new ArrayList<>();
+    private ArrayList<String> fireBaseIds = new ArrayList<>();
 
     // for merge messages before showing
     final ArrayList<Message> vkMessages = new ArrayList<>();
@@ -162,140 +159,44 @@ public class ChatActivity extends AppCompatActivity {
         MessageAdapter.OnLikeClickListener onLikeClickListener = new MessageAdapter.OnLikeClickListener() {
             @Override
             public void onLikeClick(final Message message) {
-                // делаем запрос в базу данных fireBase:
-                myCommentsRef = database.getReference("Comments").child(channel_id); // channel_id - это "1TV", "2TV", "3TV"...
+                DatabaseReference myLikeRef = database.getReference("Comments")
+                        .child(channel_id)
+                        .child(message.getFireBase_id())
+                        .child("liked_users");
+                sPref = getPreferences(MODE_PRIVATE);
+                final String current_user_id_vk = sPref.getString(USER_VK_ID, "");  // достали из SharedPreferences id_vk  пользователя
 
-                Query myQuery1 = myCommentsRef;
-                //  Query myQuery = myCommentsRef.orderByChild("numberChannel").equalTo(111);   // редактирование: сортирует ответ по "numberChannel" и 111
+                sPref = getPreferences(MODE_PRIVATE);
+                final String current_user_id_ok = sPref.getString(USER_Ok_ID, "");  // достали из SharedPreferences id_Ok  пользователя
 
-                //Log.d(TAG, "LIKE FIRE BASE, Channel = " + channel_id + ", message.getId = " + message.getTime() + ", message.getText = " + message.getText());
-                // myCommentsRef.child(message.getId()).child("count_likes").setValue(1);
-                myQuery1.addChildEventListener(new ChildEventListener() {
-                    @Override
-                    public void onChildAdded(@NonNull DataSnapshot dataSnapshot, @androidx.annotation.Nullable String s) {
-
-                        FireBaseChatMessage fireBaseChatMessage = dataSnapshot.getValue(FireBaseChatMessage.class);
-
-                        //String messageKey = dataSnapshot.getKey();
-
-                        Date date = new Date(fireBaseChatMessage.timeStamp);
-                        DateFormat formatter = new SimpleDateFormat("HH:mm:ss");
-                        formatter.setTimeZone(TimeZone.getTimeZone("Europe/Moscow"));
-                        String messageTime = formatter.format(date);
-                        //Log.d(TAG, "LIKE FIRE-BASE, fireBaseChatMessage = " + fireBaseChatMessage.message + " ___ "+ messageTime);
-
-                        // проверяем время и id юзера сообщения которому поставили лайк:
-                        if (message.getTime().equals(messageTime) && message.getId().equals(fireBaseChatMessage.user_id)) {
-                            //Log.d(TAG, "!!!!!!LIKE LIKE LIKE LIKE LIKE  МЫ ВНУТРИ !!!, сообщение = " + fireBaseChatMessage.message + " ___ "+ messageTime);
-
-                            sPref = getPreferences(MODE_PRIVATE);
-                            final String current_user_id_vk = sPref.getString(USER_VK_ID, "");  // достали из SharedPreferences id_vk  пользователя
-
-                            sPref = getPreferences(MODE_PRIVATE);
-                            final String current_user_id_ok = sPref.getString(USER_Ok_ID, "");  // достали из SharedPreferences id_Ok  пользователя
-
-                            //Log.d(TAG, "current_user ID ID ID ID ID____ vk = " + current_user_id_vk + " ____ok = " + current_user_id_ok);
-
-                            if (!TextUtils.isEmpty(current_user_id_vk)) {
-                                dataSnapshot.getRef().child("liked_users").child(current_user_id_vk).setValue(true);
-                            }
-                            if (!TextUtils.isEmpty(current_user_id_ok)) {
-                                dataSnapshot.getRef().child("liked_users").child(current_user_id_ok).setValue(true);
-                            }
-
-                        }
-
-                    }
-
-                    @Override
-                    public void onChildChanged(@NonNull DataSnapshot dataSnapshot, @androidx.annotation.Nullable String s) {
-
-                    }
-
-                    @Override
-                    public void onChildRemoved(@NonNull DataSnapshot dataSnapshot) {
-
-                    }
-
-                    @Override
-                    public void onChildMoved(@NonNull DataSnapshot dataSnapshot, @androidx.annotation.Nullable String s) {
-
-                    }
-
-                    @Override
-                    public void onCancelled(@NonNull DatabaseError databaseError) {
-
-                    }
-                });
+                if (!TextUtils.isEmpty(current_user_id_vk)) {
+                    myLikeRef.child(current_user_id_vk).setValue(true);
+                }
+                if (!TextUtils.isEmpty(current_user_id_ok)) {
+                    myLikeRef.child(current_user_id_ok).setValue(true);
+                }
             }
-
         };
 
         MessageAdapter.OnCancelLikeClickListener onCancelLikeClickListener = new MessageAdapter.OnCancelLikeClickListener() {
             @Override
             public void onCancelLikeClick(final Message message) {
-                // делаем запрос в базу данных firebase
-                Query myQuery = myCommentsRef;
+                DatabaseReference myLikeRef = database.getReference("Comments")
+                        .child(channel_id)
+                        .child(message.getFireBase_id())
+                        .child("liked_users");
+                sPref = getPreferences(MODE_PRIVATE);
+                final String current_user_id_vk = sPref.getString(USER_VK_ID, "");  // достали из SharedPreferences id_vk  пользователя
 
-                //Log.d(TAG, "DISS FIRE BASE, Channel = " + channel_id + ", message.getId = " + message.getTime() + ", message.getText = " + message.getText());
-                // myCommentsRef.child(message.getId()).child("count_likes").setValue(1);
-                myQuery.addChildEventListener(new ChildEventListener() {
-                    @Override
-                    public void onChildAdded(@NonNull DataSnapshot dataSnapshot, @androidx.annotation.Nullable String s) {
+                sPref = getPreferences(MODE_PRIVATE);
+                final String current_user_id_ok = sPref.getString(USER_Ok_ID, "");  // достали из SharedPreferences id_Ok  пользователя
 
-                        FireBaseChatMessage fireBaseChatMessage = dataSnapshot.getValue(FireBaseChatMessage.class);
-
-                        Date date = new Date(fireBaseChatMessage.timeStamp);
-                        DateFormat formatter = new SimpleDateFormat("HH:mm:ss");
-                        formatter.setTimeZone(TimeZone.getTimeZone("Europe/Moscow"));
-                        String messageTime = formatter.format(date);
-                        //Log.d(TAG, "LIKE FIRE BASE, fireBaseChatMessage = " + fireBaseChatMessage.message + " ___ "+ messageTime);
-
-                        // проверяем время и id юзера сообщения которому поставили лайк:
-                        if (message.getTime().equals(messageTime) && message.getId().equals(fireBaseChatMessage.user_id)) {
-                            //Log.d(TAG, "_____DISS DISS DISS DISS DISS  МЫ ВНУТРИ !!!, сообщение = " + fireBaseChatMessage.message + " ___ "+ messageTime);
-
-                            sPref = getPreferences(MODE_PRIVATE);
-                            final String current_user_id_vk = sPref.getString(USER_VK_ID, "");  // достали из SharedPreferences id_vk  пользователя
-
-                            sPref = getPreferences(MODE_PRIVATE);
-                            final String current_user_id_ok = sPref.getString(USER_Ok_ID, "");  // достали из SharedPreferences id_Ok  пользователя
-
-                            //Log.d(TAG, "current_user ID ID ID ID ID____ vk = " + current_user_id_vk + " ____ok = " + current_user_id_ok);
-
-                            if (!TextUtils.isEmpty(current_user_id_vk)) {
-                                dataSnapshot.getRef().child("liked_users").child(current_user_id_vk).setValue(false);
-                            }
-                            if (!TextUtils.isEmpty(current_user_id_ok)) {
-                                dataSnapshot.getRef().child("liked_users").child(current_user_id_ok).setValue(false);
-                            }
-
-
-                        }
-
-                    }
-
-                    @Override
-                    public void onChildChanged(@NonNull DataSnapshot dataSnapshot, @androidx.annotation.Nullable String s) {
-
-                    }
-
-                    @Override
-                    public void onChildRemoved(@NonNull DataSnapshot dataSnapshot) {
-
-                    }
-
-                    @Override
-                    public void onChildMoved(@NonNull DataSnapshot dataSnapshot, @androidx.annotation.Nullable String s) {
-
-                    }
-
-                    @Override
-                    public void onCancelled(@NonNull DatabaseError databaseError) {
-
-                    }
-                });
-
+                if (!TextUtils.isEmpty(current_user_id_vk)) {
+                    myLikeRef.child(current_user_id_vk).removeValue();
+                }
+                if (!TextUtils.isEmpty(current_user_id_ok)) {
+                    myLikeRef.child(current_user_id_ok).removeValue();
+                }
             }
         };
 
@@ -307,10 +208,10 @@ public class ChatActivity extends AppCompatActivity {
         sPref = getPreferences(MODE_PRIVATE);
         final String current_user_id_ok = sPref.getString(USER_Ok_ID, "");  // достали из SharedPreferences id_Ok  пользователя
 
-        if(!TextUtils.isEmpty(current_user_id_vk)){
+        if (!TextUtils.isEmpty(current_user_id_vk)) {
             current_user_id = current_user_id_vk;
         }
-        if(!TextUtils.isEmpty(current_user_id_ok)){
+        if (!TextUtils.isEmpty(current_user_id_ok)) {
             current_user_id = current_user_id_ok;
         }
 
@@ -330,8 +231,6 @@ public class ChatActivity extends AppCompatActivity {
         database = FirebaseDatabase.getInstance();
         //        database.setPersistenceEnabled(true);  // добавление элементов во время оффлайн
         myCommentsRef = database.getReference("Comments").child(channel_id); // channel_id - это "1TV", "2TV", "3TV"...
-        //   myCommentsRef.removeValue();  // удалить из базы весь раздел "1TV"  и всё что внутри (комментарии "Comments")
-        //  myCommentsRef = database.getReference("items").child("users").child("newUser"); // многопользовательская ветка
 
         odnoklassniki = App.getOdnoklassniki();
 
@@ -468,11 +367,8 @@ public class ChatActivity extends AppCompatActivity {
                             Log.d(TAG, "requestAsync: onSuccess " + jsonObject.toString());
 
                             // очищаем временные списки (или происходит дублирование всех сообщений)
-                            usersIds.clear();
-                            usersMessages.clear();
-                            usersTimeStamps.clear();
-                            usersSocialTags.clear();
-                            usersLikedIds.clear();
+                            fireBaseMessages.clear();
+                            fireBaseIds.clear();
                             vkMessages.clear();
                             okMessages.clear();
 
@@ -532,11 +428,8 @@ public class ChatActivity extends AppCompatActivity {
                             Log.d(TAG, "requestAsync: onSuccess " + jsonObject.toString());
 
                             // очищаем временные списки (или происходит дублирование всех сообщений)
-                            usersIds.clear();
-                            usersMessages.clear();
-                            usersTimeStamps.clear();
-                            usersSocialTags.clear();
-                            usersLikedIds.clear();
+                            fireBaseMessages.clear();
+                            fireBaseIds.clear();
                             vkMessages.clear();
                             okMessages.clear();
 
@@ -613,10 +506,11 @@ public class ChatActivity extends AppCompatActivity {
         //final ArrayList<String> jsonLastNamesOk = new ArrayList<>();
         final ArrayList<String> jsonAvatarsOk = new ArrayList<>();
 
+
         String okUsersIdsStr = "";
-        for (int j = 0; j < usersSocialTags.size(); j++) { // бежим по списку тегов, проверяем - если от Oк, то добавляем id к запросу
-            if (usersSocialTags.get(j).equals("OK")) {
-                okUsersIdsStr = okUsersIdsStr + usersIds.get(j) + ",";
+        for (int j = 0; j < fireBaseMessages.size(); j++) { // проверяем - если от Oк, то добавляем id к запросу
+            if (fireBaseMessages.get(j).social_tag.equals("OK")) {
+                okUsersIdsStr = okUsersIdsStr + fireBaseMessages.get(j).user_id + ",";
             }
         }
 
@@ -631,7 +525,7 @@ public class ChatActivity extends AppCompatActivity {
         parameters.put("uids", okUsersIdsStr);
         parameters.put("fields", "FIRST_NAME,LAST_NAME,PIC_1");
 
-        Log.d(TAG, "getOkMessages: usersSocialTags size = " + usersSocialTags.size() + ", ++Str Ids = " + okUsersIdsStr);
+        Log.d(TAG, "getOkMessages: fireBaseMessages.size() = " + fireBaseMessages.size() + ", ++Str Ids = " + okUsersIdsStr);
 
         Call call = App.getOdnoklassnikiService().fbDo(
                 BuildConfig.OK_APP_KEY,
@@ -645,8 +539,8 @@ public class ChatActivity extends AppCompatActivity {
                         "json",
                         "users.getInfo",
                         okUsersIdsStr,
-                        BuildConfig.OK_SECRET_KEY),  // todo secretKey App
-                BuildConfig.OK_GLOBAL_ACCESS_TOKEN);  // todo global AccessToken App
+                        BuildConfig.OK_SECRET_KEY),  // secretKey App
+                BuildConfig.OK_GLOBAL_ACCESS_TOKEN);  // global AccessToken App
 
 
         call.enqueue(new Callback() {
@@ -676,17 +570,17 @@ public class ChatActivity extends AppCompatActivity {
                     sPref = getPreferences(MODE_PRIVATE);
                     final String current_user_id_ok = sPref.getString(USER_Ok_ID, "");
 
-                    // первый цикл бежит по всем списку id сообщений полученых от FireBase
-                    // второй цикл сравнивает каждый проход с id полученными от ВК jsonId (списки jsonIds, jsonFirstNames, jsonAvatars - идентичны по размеру - для дальнейшего сопоставления)
-                    for (int i = 0; i < usersIds.size(); i++) {
+                    // второй цикл сравнивает каждый проход с id полученными от ВК jsonId
+                    for (int i = 0; i < fireBaseMessages.size(); i++) {
                         for (int j = 0; j < jsonIdsOk.size(); j++) {
-                            if (usersIds.get(i).equals(jsonIdsOk.get(j))) {
+                            if (fireBaseMessages.get(i).user_id.equals(jsonIdsOk.get(j))) {
 
-                                String id = usersIds.get(i);
-                                String message = usersMessages.get(i);
-                                HashMap<String, Boolean> liked_users = usersLikedIds.get(i);
+                                String id = fireBaseMessages.get(i).user_id;
+                                String message = fireBaseMessages.get(i).message;
+                                HashMap<String, Boolean> liked_users = fireBaseMessages.get(i).liked_users;
+                                String fire_base_Id = fireBaseIds.get(i);
 
-                                Date date = new Date(usersTimeStamps.get(i));
+                                Date date = new Date(fireBaseMessages.get(i).timeStamp);
                                 DateFormat formatter = new SimpleDateFormat("HH:mm:ss");
                                 formatter.setTimeZone(TimeZone.getTimeZone("Europe/Moscow"));
                                 String currentTime = formatter.format(date);
@@ -695,20 +589,20 @@ public class ChatActivity extends AppCompatActivity {
                                 String ava = jsonAvatarsOk.get(j);
 
                                 boolean belongToCurrentUser = false; // флаг Юзер я, не я?
-                                if (id.equals(current_user_id_ok)) {  // мой id одноклассники
+                                if (id.equals(current_user_id_ok)) {
                                     belongToCurrentUser = true;
                                 } else {
                                     belongToCurrentUser = false;
                                 }
 
                                 //  для конструктора № 2: создаёт сообщения с аватарками из ОК и ВК:
-                                Message singleMessage = new Message(id, message, currentTime, belongToCurrentUser, name, ava, liked_users);
+                                Message singleMessage = new Message(id, message, currentTime, belongToCurrentUser, name, ava, liked_users, fire_base_Id);
                                 //messageAdapter.add(singleMessage);  // посылаем на отображение
                                 okMessages.add(singleMessage);
 
-                                Log.d(TAG, "в Цикле For ОДНОКЛАССНИКИ ___________________: id = " + id + ", message = " + message
-                                        + ", currentTime = " + currentTime + ", name = "
-                                        + name + ", ava = " + ava + ", belongToCurrentUser = " + belongToCurrentUser);
+//                                Log.d(TAG, "в Цикле For ОДНОКЛАССНИКИ: id = " + id + ", message = " + message
+//                                        + ", currentTime = " + currentTime + ", name = "
+//                                        + name + ", ava = " + ava + ", belongToCurrentUser = " + belongToCurrentUser);
 
                             }
                         }
@@ -746,10 +640,9 @@ public class ChatActivity extends AppCompatActivity {
         final ArrayList<String> jsonAvatarsVk = new ArrayList<>();
 
         String vkUsersIdsStr = "";
-        for (int i = 0; i < usersSocialTags.size(); i++) { // бежим по списку тегов, проверяем - если от Вк, то добавляем id к запросу
-            if (usersSocialTags.get(i).equals("VK")) {
-                vkUsersIdsStr = vkUsersIdsStr + usersIds.get(i) + ",";
-                //countUsersVk++;
+        for (int i = 0; i < fireBaseMessages.size(); i++) { // проверяем - если от Вк, то добавляем id к запросу
+            if (fireBaseMessages.get(i).social_tag.equals("VK")) {
+                vkUsersIdsStr = vkUsersIdsStr + fireBaseMessages.get(i).user_id + ",";
             }
         }
 
@@ -763,7 +656,7 @@ public class ChatActivity extends AppCompatActivity {
         VKRequest vkRequest = new VKRequest(
                 "users.get",
                 VKParameters.from(
-                        "access_token", BuildConfig.VK_GLOBAL_ACCESS_TOKEN,  // TODO: PLACE THIS access token VK
+                        "access_token", BuildConfig.VK_GLOBAL_ACCESS_TOKEN,  // PLACE THIS access token VK
                         VKApiConst.USER_IDS, vkUsersIdsStr,
                         VKApiConst.FIELDS, "sex,photo_50"));
 
@@ -786,26 +679,25 @@ public class ChatActivity extends AppCompatActivity {
                         jsonFirstNamesVk.add(firstName);
                         //jsonLastNamesVk.add(lastName);
                         jsonAvatarsVk.add(avatarPhoto);
-                        Log.d(TAG, "в Цикле getVkUsersInfo: jsonId = " + jsonId + ", Имя = " + firstName + ", АВА = " + avatarPhoto);
+                        //Log.d(TAG, "в Цикле getVkUsersInfo: jsonId = " + jsonId + ", Имя = " + firstName + ", АВА = " + avatarPhoto);
                     }
-
 
 
                     // достали из SharedPreferences id_vk  пользователя, для проверки Юзер (я/не я?)
                     sPref = getPreferences(MODE_PRIVATE);
                     final String current_user_id_vk = sPref.getString(USER_VK_ID, "");
 
-                    // первый цикл бежит по всем списку id сообщений полученых от FireBase
-                    // второй цикл сравнивает каждый проход с id полученными от ВК jsonId (списки jsonIds, jsonFirstNames, jsonAvatars - идентичны по размеру - для дальнейшего сопоставления)
-                    for (int i = 0; i < usersIds.size(); i++) {
+                    // второй цикл сравнивает каждый проход с id полученными от ВК jsonId
+                    for (int i = 0; i < fireBaseMessages.size(); i++) {
                         for (int j = 0; j < jsonIdsVk.size(); j++) {
-                            if (usersIds.get(i).equals(jsonIdsVk.get(j))) {
+                            if (fireBaseMessages.get(i).user_id.equals(jsonIdsVk.get(j))) {
 
-                                String id = usersIds.get(i);
-                                String message = usersMessages.get(i);
-                                HashMap<String, Boolean> liked_users = usersLikedIds.get(i);
+                                String id = fireBaseMessages.get(i).user_id;
+                                String message = fireBaseMessages.get(i).message;
+                                HashMap<String, Boolean> liked_users = fireBaseMessages.get(i).liked_users;
+                                String fire_base_Id = fireBaseIds.get(i);
 
-                                Date date = new Date(usersTimeStamps.get(i));
+                                Date date = new Date(fireBaseMessages.get(i).timeStamp);
                                 DateFormat formatter = new SimpleDateFormat("HH:mm:ss");
                                 formatter.setTimeZone(TimeZone.getTimeZone("Europe/Moscow"));
                                 String currentTime = formatter.format(date);
@@ -814,19 +706,20 @@ public class ChatActivity extends AppCompatActivity {
                                 String ava = jsonAvatarsVk.get(j);
 
                                 boolean belongToCurrentUser; // флаг Юзер я, не я?
-                                if (id.equals(current_user_id_vk)) {  // мой id вконтакте
+                                if (id.equals(current_user_id_vk)) {
                                     belongToCurrentUser = true;
                                 } else {
                                     belongToCurrentUser = false;
                                 }
 
                                 //  конструктор № 2: создаёт сообщения с аватарками из ВК:
-                                Message singleMessage = new Message(id, message, currentTime, belongToCurrentUser, name, ava, liked_users);
+                                Message singleMessage = new Message(id, message, currentTime, belongToCurrentUser, name, ava, liked_users, fire_base_Id);
                                 //messageAdapter.add(singleMessage);  // посылаем на отображение
                                 vkMessages.add(singleMessage);
-                                Log.d(TAG, "в Цикле For ВКОНТАКТЕ ____________________: id = " + id + ", message = " + message
-                                        + ", currentTime = " + currentTime + ", name = "
-                                        + name + ", ava = " + ava + ", belongToCurrentUser = " + belongToCurrentUser);
+
+//                                Log.d(TAG, "в Цикле For ВКОНТАКТЕ: id = " + id + ", message = " + message
+//                                        + ", currentTime = " + currentTime + ", name = "
+//                                        + name + ", ava = " + ava + ", belongToCurrentUser = " + belongToCurrentUser);
 
                             }
                         }
@@ -856,33 +749,33 @@ public class ChatActivity extends AppCompatActivity {
     private void mergeAllMessages() {
         Log.d(TAG, "in mergeAllMessages()");
 
-        for (int i = 0; i < usersSocialTags.size(); i++) {
+        for (int i = 0; i < fireBaseMessages.size(); i++) {
 
-            if (usersSocialTags.get(i).equals("VK")) {
+            if (fireBaseMessages.get(i).social_tag.equals("VK")) {
                 for (int j = 0; j < vkMessages.size(); j++) {
 
-                    Date date = new Date(usersTimeStamps.get(i));
+                    Date date = new Date(fireBaseMessages.get(i).timeStamp);
                     DateFormat formatter = new SimpleDateFormat("HH:mm:ss");
                     formatter.setTimeZone(TimeZone.getTimeZone("Europe/Moscow"));
                     String timeToCompare = formatter.format(date);
 
                     // сравниваем по id и по времени отправки сообщения перед отображением
-                    if (usersIds.get(i).equals(vkMessages.get(j).getId()) && timeToCompare.equals(vkMessages.get(j).getTime())) {
+                    if (fireBaseMessages.get(i).user_id.equals(vkMessages.get(j).getId()) && timeToCompare.equals(vkMessages.get(j).getTime())) {
                         messageAdapter.add(vkMessages.get(j));  // посылаем на отображение
                     }
                 }
             }
 
-            if (usersSocialTags.get(i).equals("OK")) {
+            if (fireBaseMessages.get(i).social_tag.equals("OK")) {
                 for (int j = 0; j < okMessages.size(); j++) {
 
-                    Date date = new Date(usersTimeStamps.get(i));
+                    Date date = new Date(fireBaseMessages.get(i).timeStamp);
                     DateFormat formatter = new SimpleDateFormat("HH:mm:ss");
                     formatter.setTimeZone(TimeZone.getTimeZone("Europe/Moscow"));
                     String timeToCompare = formatter.format(date);
 
                     // сравниваем по id и по времени отправки сообщения перед отображением
-                    if (usersIds.get(i).equals(okMessages.get(j).getId()) && timeToCompare.equals(okMessages.get(j).getTime())) {
+                    if (fireBaseMessages.get(i).user_id.equals(okMessages.get(j).getId()) && timeToCompare.equals(okMessages.get(j).getTime())) {
                         messageAdapter.add(okMessages.get(j));  // посылаем на отображение
                     }
                 }
@@ -890,11 +783,8 @@ public class ChatActivity extends AppCompatActivity {
         }
 
         // очищаем временные списки:
-        usersIds.clear();
-        usersMessages.clear();
-        usersTimeStamps.clear();
-        usersSocialTags.clear();
-        usersLikedIds.clear();
+        fireBaseMessages.clear();
+        fireBaseIds.clear();
         vkMessages.clear();
         okMessages.clear();
 
@@ -977,13 +867,10 @@ public class ChatActivity extends AppCompatActivity {
                 if (!blockIds.contains(s)) { // не пропускает дубликат (s пример: "LqbDjO_PdRZ9EI_o-V1")
                     blockIds.add(s);
 
-                    // берём приходящее сообщение из базы и добавляем все его параметры в листы:
+                    // берём приходящее сообщение из базы и добавляем его в список и отдельный список с уникальными номерами:
                     if (!TextUtils.isEmpty(fireBaseChatMessage.user_id)) {
-                        usersIds.add(fireBaseChatMessage.user_id);
-                        usersTimeStamps.add(fireBaseChatMessage.timeStamp);
-                        usersMessages.add(fireBaseChatMessage.message);
-                        usersSocialTags.add(fireBaseChatMessage.social_tag);
-                        usersLikedIds.add(fireBaseChatMessage.liked_users);
+                        fireBaseMessages.add(fireBaseChatMessage);
+                        fireBaseIds.add(dataSnapshot.getKey());
                     }
 
                     // берём дату из fireBaseChatMessage и переводим её в "00:00:00" по Москве (для первого конструктора, ниже)
@@ -1020,6 +907,7 @@ public class ChatActivity extends AppCompatActivity {
 
             @Override
             public void onChildChanged(final DataSnapshot dataSnapshot, String s) {
+                updateData(dataSnapshot);
             }
 
             @Override
@@ -1034,6 +922,16 @@ public class ChatActivity extends AppCompatActivity {
             public void onCancelled(DatabaseError databaseError) {
             }
         });
+    }
+
+    private void updateData(@NonNull DataSnapshot dataSnapshot) {
+        for (Message msg : messageAdapter.messages) {
+            if (msg.getFireBase_id().equals(dataSnapshot.getKey())) {
+                FireBaseChatMessage fireBaseChatMessage = dataSnapshot.getValue(FireBaseChatMessage.class);
+                msg.setLikes(fireBaseChatMessage.liked_users);
+                messageAdapter.notifyDataSetChanged();
+            }
+        }
     }
 
 
@@ -1095,8 +993,6 @@ public class ChatActivity extends AppCompatActivity {
                     Toast.makeText(ChatActivity.this,
                             "функция пока не доступна",
                             Toast.LENGTH_SHORT).show();
-                    // сделать а возвращением результата // если через отдельную активити то ниже переход на заготовку
-                    // startActivity(new Intent(ChatActivity.this, RegistrationActivity.class));
                     adTrueDialog.dismiss();
                 }
             });
@@ -1110,16 +1006,13 @@ public class ChatActivity extends AppCompatActivity {
         final String current_user_id_ok = sPref.getString(USER_Ok_ID, "");  // достали из SharedPreferences id_Ok  пользователя
 
         String message = editText.getText().toString();  // получаем сообщение с поля ввода
-        Log.d(TAG, "перед отправкой на firebase: current_user_id_vk = " + current_user_id_vk + ", current_user_id_Ok = " + current_user_id_ok);
+        //Log.d(TAG, "перед отправкой на firebase: current_user_id_vk = " + current_user_id_vk + ", current_user_id_Ok = " + current_user_id_ok);
 
         //отправляет введённое сообщение в базу данных c тегом ВК
         if (message.length() > 0 && !TextUtils.isEmpty(current_user_id_vk)) {
             long time_stamp = System.currentTimeMillis();   // получаем время отправки сообщения
 
-            HashMap<String, Boolean> zeroLike = new HashMap<>();
-            zeroLike.put(current_user_id_vk, false);
-            //создаем экземпляр одного Cообщения Юзера
-            FireBaseChatMessage fireBaseChatMessage = new FireBaseChatMessage(current_user_id_vk, message, time_stamp, "VK", zeroLike);
+            FireBaseChatMessage fireBaseChatMessage = new FireBaseChatMessage(current_user_id_vk, message, time_stamp, "VK", new HashMap<String, Boolean>());
             // оправляем его в базу данных firebase
             myCommentsRef.push().setValue(fireBaseChatMessage);
             messagesView.smoothScrollToPosition(messageAdapter.getCount() - 1);
@@ -1130,10 +1023,7 @@ public class ChatActivity extends AppCompatActivity {
         if (message.length() > 0 && !TextUtils.isEmpty(current_user_id_ok)) {
             long time_stamp = System.currentTimeMillis();   // получаем время отправки сообщения
 
-             HashMap<String, Boolean> zeroLike = new HashMap<>();
-             zeroLike.put(current_user_id_ok, false);
-            //создаем экземпляр одного Cообщения Юзера
-            FireBaseChatMessage fireBaseChatMessage = new FireBaseChatMessage(current_user_id_ok, message, time_stamp, "OK", zeroLike);
+            FireBaseChatMessage fireBaseChatMessage = new FireBaseChatMessage(current_user_id_ok, message, time_stamp, "OK", new HashMap<String, Boolean>());
             // оправляем его в базу данных firebase
             myCommentsRef.push().setValue(fireBaseChatMessage);
             messagesView.smoothScrollToPosition(messageAdapter.getCount() - 1);
@@ -1149,8 +1039,8 @@ public class ChatActivity extends AppCompatActivity {
         public String user_id; // = "12103322";
         public String message; // = "кукуепта";
         public long timeStamp; // = System.currentTimeMillis();
-        public String social_tag; // = System.currentTimeMillis();
-        public HashMap<String, Boolean> liked_users;
+        public String social_tag; // = "VK", "OK"
+        public HashMap<String, Boolean> liked_users; // < "12103322", true >
 
         public FireBaseChatMessage() {
         }

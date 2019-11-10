@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.Random;
 
 public class Message implements Serializable {
+    private String fireBase_id;
     private String id;
     private String text;
     private String time;
@@ -24,7 +25,8 @@ public class Message implements Serializable {
 
     }
 
-    public Message(String id, String text, String time, boolean belongsToCurrentUser, String name, String avatar, HashMap<String,Boolean> liked_users) {
+    public Message(String id, String text, String time, boolean belongsToCurrentUser, String name,
+                   String avatar, HashMap<String,Boolean> liked_users, String fireBase_id) {
         this.id = id;
         this.text = text;
         this.time = time;
@@ -32,6 +34,7 @@ public class Message implements Serializable {
         this.name = name;
         this.avatar = avatar;
         this.liked_users = liked_users;
+        this.fireBase_id = fireBase_id;
     }
 
     public String getId() {
@@ -64,6 +67,14 @@ public class Message implements Serializable {
 
     public HashMap<String, Boolean> getLiked_users() {
         return liked_users;
+    }
+
+    public String getFireBase_id() {
+        return fireBase_id;
+    }
+
+    public void setLikes(HashMap<String,Boolean> liked_users) {
+        this.liked_users = liked_users;
     }
 
     static String getRandomName() {

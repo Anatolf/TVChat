@@ -107,10 +107,12 @@ public class MessageAdapter extends BaseAdapter {
                 holder.messageBody.setText(message.getText());
                 holder.time.setText(message.getTime());
                 int count_likes = 0;
-                HashMap<String, Boolean> liked_users = message.getLiked_users();
-                for (Map.Entry entry : liked_users.entrySet()) {
-                    if ((boolean) entry.getValue()) {
-                        count_likes++;
+                if(message.getLiked_users()!=null) {
+                    HashMap<String, Boolean> liked_users = message.getLiked_users();
+                    for (Map.Entry entry : liked_users.entrySet()) {
+                        if ((boolean) entry.getValue()) {
+                            count_likes++;
+                        }
                     }
                 }
                 holder.countHeart.setText(String.valueOf(count_likes));
@@ -139,10 +141,12 @@ public class MessageAdapter extends BaseAdapter {
                 holder.messageBody.setText(message.getText());
 
                 int count_likes = 0;
-                HashMap<String, Boolean> liked_users = message.getLiked_users();
-                for (Map.Entry entry : liked_users.entrySet()) {
-                    if ((boolean) entry.getValue()) {
-                        count_likes++;
+                if(message.getLiked_users()!=null) {
+                    HashMap<String, Boolean> liked_users = message.getLiked_users();
+                    for (Map.Entry entry : liked_users.entrySet()) {
+                        if ((boolean) entry.getValue()) {
+                            count_likes++;
+                        }
                     }
                 }
                 holder.countHeart.setText(String.valueOf(count_likes));
@@ -187,19 +191,19 @@ public class MessageAdapter extends BaseAdapter {
 
 
         if (VKSdk.isLoggedIn() || !TextUtils.isEmpty(odnoklassniki.getMAccessToken())) {
-            HashMap<String, Boolean> liked_users = message.getLiked_users();
-            for (Map.Entry entry : liked_users.entrySet()) {
 
-                if (entry.getKey().equals(current_user_id) && (boolean) entry.getValue()) {
+            if(message.getLiked_users()!=null) {
+                HashMap<String, Boolean> liked_users = message.getLiked_users();
 
+                if (liked_users.containsKey(current_user_id)) {
                     holder.whiteHeart.setVisibility(View.INVISIBLE);
                     holder.redHeart.setVisibility(View.VISIBLE);
-                    //iLikeThisMessage = true;
                 } else {
                     holder.redHeart.setVisibility(View.INVISIBLE);
                     holder.whiteHeart.setVisibility(View.VISIBLE);
                 }
             }
+
         }
 
 
@@ -215,9 +219,6 @@ public class MessageAdapter extends BaseAdapter {
                     holder.whiteHeart.setVisibility(View.INVISIBLE);
                     holder.redHeart.setVisibility(View.VISIBLE);
 
-
-                    //holder.countHeart.setText(String.valueOf(countLike + 1));
-
                 }
 
             });
@@ -232,8 +233,6 @@ public class MessageAdapter extends BaseAdapter {
                     }
                     holder.redHeart.setVisibility(View.INVISIBLE);
                     holder.whiteHeart.setVisibility(View.VISIBLE);
-
-                    //holder.countHeart.setText(String.valueOf(countLike - 1));
 
                 }
 
