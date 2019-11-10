@@ -17,6 +17,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.ImageView;
+import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -36,7 +37,7 @@ import static android.content.Context.MODE_PRIVATE;
 
 
 public class MessageAdapter extends BaseAdapter {
-    private static final String TAG = "myLogs";
+    private static final String TAG = "MessageAdapter";
 
     private OnLikeClickListener onLikeClickListener;  // для передачи сообщения которому поставили лайк в ChatActivity
     private OnCancelLikeClickListener onCancelLikeClickListener;  // для передачи сообщения которому отменили лайк в ChatActivity
@@ -106,6 +107,7 @@ public class MessageAdapter extends BaseAdapter {
                 holder.countHeart = (TextView) convertView.findViewById(R.id.count_heart);
                 holder.messageBody.setText(message.getText());
                 holder.time.setText(message.getTime());
+
                 int count_likes = 0;
                 if(message.getLiked_users()!=null) {
                     HashMap<String, Boolean> liked_users = message.getLiked_users();
@@ -151,38 +153,37 @@ public class MessageAdapter extends BaseAdapter {
                 }
                 holder.countHeart.setText(String.valueOf(count_likes));
                 convertView.setTag(holder);
-
-
-
             }
 
             // Если пользователь НЕ зарегестрировался через Вк или Ок, то отображаем сообщения цветными заглушками и рандомными именами:
         } else {
-            if (message.isBelongsToCurrentUser()) {
-                convertView = messageInflater.inflate(R.layout.my_message, null);
-                holder.messageBody = (TextView) convertView.findViewById(R.id.message_body);
-                holder.time = (TextView) convertView.findViewById(R.id.time_et);
-                convertView.setTag(holder);
-
-                holder.time.setText(message.getTime());
-                holder.messageBody.setText(message.getText());
-                //  Log.d(TAG, "inAdapter, Me: message= " + message.getText() + " , messages.size= " + messages.size());
-
-            } else {
                 convertView = messageInflater.inflate(R.layout.their_message, null);
                 holder.avatar = (View) convertView.findViewById(R.id.avatar);
                 holder.name = (TextView) convertView.findViewById(R.id.channel_et);
                 holder.time = (TextView) convertView.findViewById(R.id.time_et);
                 holder.messageBody = (TextView) convertView.findViewById(R.id.message_body);
-                convertView.setTag(holder);
+                holder.countHeart = (TextView) convertView.findViewById(R.id.count_heart);
 
                 holder.name.setText(message.getName());
                 holder.time.setText(message.getTime());
                 holder.messageBody.setText(message.getText());
                 GradientDrawable drawable = (GradientDrawable) holder.avatar.getBackground();
                 drawable.setColor(Color.parseColor(message.getColor()));
-                //  Log.d(TAG, "inAdapter, Their: message= " + message.getText() + " , messages.size= " + messages.size());
-            }
+
+                int count_likes = 0;
+                if(message.getLiked_users()!=null) {
+                    HashMap<String, Boolean> liked_users = message.getLiked_users();
+                    for (Map.Entry entry : liked_users.entrySet()) {
+                        if ((boolean) entry.getValue()) {
+                            count_likes++;
+                        }
+                    }
+                }
+                holder.countHeart.setText(String.valueOf(count_likes));
+
+                convertView.setTag(holder);
+                  //Log.d(TAG, "Without registration, Their: message= " + message.getText() + " , messages.size= " + messages.size());
+
         }
 
 
@@ -212,7 +213,7 @@ public class MessageAdapter extends BaseAdapter {
             holder.whiteHeart.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    Toast.makeText(context, "Лайк: " + message.getText(), Toast.LENGTH_SHORT).show();
+                    //Toast.makeText(context, "Лайк: " + message.getText(), Toast.LENGTH_SHORT).show();
                     if (onLikeClickListener != null) {
                         onLikeClickListener.onLikeClick(message);
                     }
@@ -226,7 +227,7 @@ public class MessageAdapter extends BaseAdapter {
             holder.redHeart.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    Toast.makeText(context, "Дизлайк: " + message.getText(), Toast.LENGTH_SHORT).show();
+                    //Toast.makeText(context, "Дизлайк: " + message.getText(), Toast.LENGTH_SHORT).show();
                     if (onCancelLikeClickListener != null) {
                         onCancelLikeClickListener.onCancelLikeClick(message);
 

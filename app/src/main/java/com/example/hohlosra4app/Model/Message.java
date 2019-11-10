@@ -15,13 +15,13 @@ public class Message implements Serializable {
     private String avatar;
     private HashMap<String,Boolean> liked_users;
 
-    public Message(String id, String text, String time, boolean belongsToCurrentUser) {
-        this.id = id;
+    public Message(String text, String time, HashMap<String,Boolean> liked_users, String fireBase_id) {
+        this.fireBase_id = fireBase_id;
         this.text = text;
         this.time = time;
-        this.belongsToCurrentUser = belongsToCurrentUser;
         this.name = getRandomName();
         this.color = getRandomColor();
+        this.liked_users = liked_users;
 
     }
 

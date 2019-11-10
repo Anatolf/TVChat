@@ -221,7 +221,7 @@ public class ChatActivity extends AppCompatActivity {
         messagesView = (ListView) findViewById(R.id.messages_view);
         // при добавлении нового сообщения сразу же его отображает (скроллит список вниз)
         // ("вниз" установлено в activity_chat - android:stackFromBottom="true")
-        messagesView.setTranscriptMode(ListView.TRANSCRIPT_MODE_ALWAYS_SCROLL);
+        //messagesView.setTranscriptMode(ListView.TRANSCRIPT_MODE_ALWAYS_SCROLL);
         messagesView.setAdapter(messageAdapter);
 
         root_chat = findViewById(R.id.root_element_chat);
@@ -762,6 +762,13 @@ public class ChatActivity extends AppCompatActivity {
                     // сравниваем по id и по времени отправки сообщения перед отображением
                     if (fireBaseMessages.get(i).user_id.equals(vkMessages.get(j).getId()) && timeToCompare.equals(vkMessages.get(j).getTime())) {
                         messageAdapter.add(vkMessages.get(j));  // посылаем на отображение
+
+                        sPref = getPreferences(MODE_PRIVATE);
+                        final String current_user_id_vk = sPref.getString(USER_VK_ID, "");  // достали из SharedPreferences id_vk  пользователя
+
+                        if (vkMessages.get(j).getId().equals(current_user_id_vk)) {  // для скролла вниз при добавлении юзером нового сообщения
+                            messagesView.smoothScrollToPosition(messageAdapter.getCount() - 1);
+                        }
                     }
                 }
             }
@@ -777,6 +784,13 @@ public class ChatActivity extends AppCompatActivity {
                     // сравниваем по id и по времени отправки сообщения перед отображением
                     if (fireBaseMessages.get(i).user_id.equals(okMessages.get(j).getId()) && timeToCompare.equals(okMessages.get(j).getTime())) {
                         messageAdapter.add(okMessages.get(j));  // посылаем на отображение
+
+                        sPref = getPreferences(MODE_PRIVATE);
+                        final String current_user_id_ok = sPref.getString(USER_Ok_ID, "");  // достали из SharedPreferences id_Ok  пользователя
+
+                        if (okMessages.get(j).getId().equals(current_user_id_ok)) {   // для скролла вниз при добавлении юзером нового сообщения
+                            messagesView.smoothScrollToPosition(messageAdapter.getCount() - 1);
+                        }
                     }
                 }
             }
@@ -873,18 +887,19 @@ public class ChatActivity extends AppCompatActivity {
                         fireBaseIds.add(dataSnapshot.getKey());
                     }
 
-                    // берём дату из fireBaseChatMessage и переводим её в "00:00:00" по Москве (для первого конструктора, ниже)
-                    Date date = new Date(fireBaseChatMessage.timeStamp);
-                    DateFormat formatter = new SimpleDateFormat("HH:mm:ss");
-                    formatter.setTimeZone(TimeZone.getTimeZone("Europe/Moscow"));
-                    String currentTime = formatter.format(date);
-
 
                     // если пользователь ещё не прошёл регистрацию Через ВК или ОК то:
                     if (!VKSdk.isLoggedIn() && TextUtils.isEmpty(odnoklassniki.getMAccessToken())) {
+                        // берём дату из fireBaseChatMessage и переводим её в "00:00:00" по Москве (для первого конструктора, ниже)
+                        Date date = new Date(fireBaseChatMessage.timeStamp);
+                        DateFormat formatter = new SimpleDateFormat("HH:mm:ss");
+                        formatter.setTimeZone(TimeZone.getTimeZone("Europe/Moscow"));
+                        String currentTime = formatter.format(date);
+
                         //  конструктор № 1: создаёт сообщения с рандомными Именами собеседников и рандомным Цветом сообщения:
-                        Message singleMessage = new Message(dataSnapshot.getKey(), fireBaseChatMessage.message, currentTime, false);
+                        Message singleMessage = new Message(fireBaseChatMessage.message, currentTime, fireBaseChatMessage.liked_users, dataSnapshot.getKey());
                         messageAdapter.add(singleMessage);  // посылаем на отображение
+                        messagesView.smoothScrollToPosition(messageAdapter.getCount() - 1);
                     } else {
 
                         // Таймер с задержкой 1 секунда, чтобы получить ответы из ApiVk (аватарки, имена)
@@ -1015,7 +1030,7 @@ public class ChatActivity extends AppCompatActivity {
             FireBaseChatMessage fireBaseChatMessage = new FireBaseChatMessage(current_user_id_vk, message, time_stamp, "VK", new HashMap<String, Boolean>());
             // оправляем его в базу данных firebase
             myCommentsRef.push().setValue(fireBaseChatMessage);
-            messagesView.smoothScrollToPosition(messageAdapter.getCount() - 1);
+            //messagesView.smoothScrollToPosition(messageAdapter.getCount() - 1);
             editText.getText().clear();  //очищаем поле ввода
         }
         // или:
@@ -1026,7 +1041,7 @@ public class ChatActivity extends AppCompatActivity {
             FireBaseChatMessage fireBaseChatMessage = new FireBaseChatMessage(current_user_id_ok, message, time_stamp, "OK", new HashMap<String, Boolean>());
             // оправляем его в базу данных firebase
             myCommentsRef.push().setValue(fireBaseChatMessage);
-            messagesView.smoothScrollToPosition(messageAdapter.getCount() - 1);
+            //messagesView.smoothScrollToPosition(messageAdapter.getCount() - 1);
             editText.getText().clear();  //очищаем поле ввода
         }
     }
