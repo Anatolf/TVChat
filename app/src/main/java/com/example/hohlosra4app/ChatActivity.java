@@ -91,7 +91,7 @@ public class ChatActivity extends AppCompatActivity {
 
     private FirebaseDatabase database;
     private DatabaseReference myCommentsRef;
-    private DatabaseReference myChannelsRef;
+    private DatabaseReference usersInChannelRef;
 
     // for registration window
     private RelativeLayout root_chat;
@@ -113,8 +113,7 @@ public class ChatActivity extends AppCompatActivity {
     private String channel_id = "";
     private String channel_name = "";
     private String channel_image_url = "";
-    private int usersIntoChat = 0;
-
+    private String firebase_channel_id = "";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -127,19 +126,13 @@ public class ChatActivity extends AppCompatActivity {
 
         // получаем Интент из Майн
         Intent intentFromMain = getIntent();
-        if (intentFromMain.hasExtra(MainActivity.CHANNEL_ID_EXTRA)
-                && intentFromMain.hasExtra(MainActivity.CHANNEL_NAME_EXTRA)
-                && intentFromMain.hasExtra(MainActivity.CHANNEL_IMAGE_EXTRA)
-                && intentFromMain.hasExtra(MainActivity.USERS_IN_CHAT_EXTRA)) {
 
-            channel_id = intentFromMain.getStringExtra(MainActivity.CHANNEL_ID_EXTRA);
-            channel_name = intentFromMain.getStringExtra(MainActivity.CHANNEL_NAME_EXTRA);
-            channel_image_url = intentFromMain.getStringExtra(MainActivity.CHANNEL_IMAGE_EXTRA);
-            usersIntoChat = intentFromMain.getIntExtra(MainActivity.USERS_IN_CHAT_EXTRA, 0);
-
-//            Toast.makeText(ChatActivity.this,
-//                    "Мы в чате канала: " + channel_id + ", количество обсуждающих: " + usersIntoChat,
-//                    Toast.LENGTH_SHORT).show();
+        if (intentFromMain.hasExtra(MainActivity.CHANNEL_OBJECT_EXTRA)){
+            Channel channel = (Channel) intentFromMain.getSerializableExtra(MainActivity.CHANNEL_OBJECT_EXTRA);
+            channel_id = channel.channel_id;
+            channel_name = channel.name;
+            channel_image_url = channel.urlChannel;
+            firebase_channel_id = channel.firebase_channel_id;
         }
 
         toolbar = findViewById(R.id.custom_tool_bar);
@@ -238,91 +231,45 @@ public class ChatActivity extends AppCompatActivity {
     }
 
     private void incrementOnlineUsersCountInChat() {
-        // делаем запрос в базу данных firebase:
-        myChannelsRef = database.getReference("Channels");
-        Query myQuery = myChannelsRef;
-        //  Query myQuery = myCommentsRef.orderByChild("numberChannel").equalTo(111);   // редактирование: сортирует ответ по "numberChannel" и 111
 
-        // myCommentsRef.child(message.getId()).child("count_likes").setValue(1);
-        myQuery.addChildEventListener(new ChildEventListener() {
-            @Override
-            public void onChildAdded(@NonNull DataSnapshot dataSnapshot, @androidx.annotation.Nullable String s) {
+        if (!TextUtils.isEmpty(channel_id)) {
+            usersInChannelRef = database.getReference("Channels").child(firebase_channel_id).child("count_users");
 
-                Channel channel = dataSnapshot.getValue(Channel.class);
+            sPref = getPreferences(MODE_PRIVATE);
+            final String current_user_id_vk = sPref.getString(USER_VK_ID, "");  // достали из SharedPreferences id_vk  пользователя
 
-                if (channel_id.equals(channel.channel_id)) {
-                    Log.d(TAG, "FEFRESH USERS !!!, сообщение = " + channel.channel_id + " ___ " + channel.number);
-                    dataSnapshot.getRef().child("number").setValue(channel.number + 1); // child(channel.channel_id).
+            sPref = getPreferences(MODE_PRIVATE);
+            final String current_user_id_ok = sPref.getString(USER_Ok_ID, "");  // достали из SharedPreferences id_Ok  пользователя
 
-
-                }
+            if (!TextUtils.isEmpty(current_user_id_vk)) {
+                usersInChannelRef.child(current_user_id_vk).setValue(true);
             }
-
-            @Override
-            public void onChildChanged(@NonNull DataSnapshot dataSnapshot, @androidx.annotation.Nullable String s) {
-
+            if (!TextUtils.isEmpty(current_user_id_ok)) {
+                usersInChannelRef.child(current_user_id_ok).setValue(true);
             }
-
-            @Override
-            public void onChildRemoved(@NonNull DataSnapshot dataSnapshot) {
-
-            }
-
-            @Override
-            public void onChildMoved(@NonNull DataSnapshot dataSnapshot, @androidx.annotation.Nullable String s) {
-
-            }
-
-            @Override
-            public void onCancelled(@NonNull DatabaseError databaseError) {
-
-            }
-        });
+        }
 
     }
 
     public void decrementOnlineUsersCountInChat() {
         // Decrement Count Users in This Chat:
 
-        // делаем запрос в базу данных firebase:
-        myChannelsRef = database.getReference("Channels");
-        Query myQuery = myChannelsRef;
-        //  Query myQuery = myCommentsRef.orderByChild("numberChannel").equalTo(111);   // редактирование: сортирует ответ по "numberChannel" и 111
+        if (!TextUtils.isEmpty(channel_id)) {
+            usersInChannelRef = database.getReference("Channels").child(firebase_channel_id).child("count_users");
 
-        // myCommentsRef.child(message.getId()).child("count_likes").setValue(1);
-        myQuery.addChildEventListener(new ChildEventListener() {
-            @Override
-            public void onChildAdded(@NonNull DataSnapshot dataSnapshot, @androidx.annotation.Nullable String s) {
-                Channel channel = dataSnapshot.getValue(Channel.class);
+            sPref = getPreferences(MODE_PRIVATE);
+            final String current_user_id_vk = sPref.getString(USER_VK_ID, "");  // достали из SharedPreferences id_vk  пользователя
 
-                if (channel_id.equals(channel.channel_id)) {
-                    Log.d(TAG, "DECREMENT USERS COUNT !!!, сообщение = " + channel.channel_id + " ___ " + channel.number);
-                    if (channel.number > 0) {
-                        dataSnapshot.getRef().child("number").setValue(channel.number - 1);
-                    }
-                }
+            sPref = getPreferences(MODE_PRIVATE);
+            final String current_user_id_ok = sPref.getString(USER_Ok_ID, "");  // достали из SharedPreferences id_Ok  пользователя
+
+            if (!TextUtils.isEmpty(current_user_id_vk)) {
+                usersInChannelRef.child(current_user_id_vk).removeValue();
             }
-
-            @Override
-            public void onChildChanged(@NonNull DataSnapshot dataSnapshot, @androidx.annotation.Nullable String s) {
-
+            if (!TextUtils.isEmpty(current_user_id_ok)) {
+                usersInChannelRef.child(current_user_id_ok).removeValue();
             }
-
-            @Override
-            public void onChildRemoved(@NonNull DataSnapshot dataSnapshot) {
-
-            }
-
-            @Override
-            public void onChildMoved(@NonNull DataSnapshot dataSnapshot, @androidx.annotation.Nullable String s) {
-
-            }
-
-            @Override
-            public void onCancelled(@NonNull DatabaseError databaseError) {
-
-            }
-        });
+        }
 
     }
 

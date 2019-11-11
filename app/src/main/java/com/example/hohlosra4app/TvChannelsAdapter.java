@@ -17,6 +17,8 @@ import com.example.hohlosra4app.Model.Channel;
 import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 
 
 public class TvChannelsAdapter extends RecyclerView.Adapter<TvChannelsAdapter.ViewHolder> {
@@ -75,20 +77,25 @@ public class TvChannelsAdapter extends RecyclerView.Adapter<TvChannelsAdapter.Vi
         //Used to set data in each row of recycler view // обновляет при прокрутке
 
         String nameTvChannel = tvChannelsList.get(position).name;
-        String countUsersInChat = String.valueOf(tvChannelsList.get(position).number);
-        String urlTvChannelLogo = tvChannelsList.get(position).urlChannel;
-
         holder.tvChannelName.setText(nameTvChannel);
 
-        if(tvChannelsList.get(position).number<=0){
-            holder.tvUsersIntoChat.setVisibility(View.INVISIBLE);
-            holder.onLine.setVisibility(View.INVISIBLE);
-        } else {
-            holder.tvUsersIntoChat.setText(countUsersInChat);
+        int countUsersInChat = 0;
+        if(tvChannelsList.get(position).getCountUsersInChat() != null) {
+            HashMap<String, Boolean> count_users = tvChannelsList.get(position).getCountUsersInChat();
+            for (Map.Entry entry : count_users.entrySet()) {
+                if ((boolean) entry.getValue()) {
+                    countUsersInChat++;
+                }
+            }
+            holder.tvUsersIntoChat.setText(String.valueOf(countUsersInChat));
             holder.tvUsersIntoChat.setVisibility(View.VISIBLE);
             holder.onLine.setVisibility(View.VISIBLE);
+        } else {
+            holder.tvUsersIntoChat.setVisibility(View.INVISIBLE);
+            holder.onLine.setVisibility(View.INVISIBLE);
         }
 
+        String urlTvChannelLogo = tvChannelsList.get(position).urlChannel;
         Picasso.get()
                 .load(urlTvChannelLogo)
                 .error(R.drawable.ic_launcher_foreground)
@@ -114,7 +121,7 @@ public class TvChannelsAdapter extends RecyclerView.Adapter<TvChannelsAdapter.Vi
 
 
     public interface OnChannelClickListener {  // для передачи данных в майн создаем слушатель
-        void onChannelClick(Channel channel, Integer usersIntoChat);
+        void onChannelClick(Channel channel);
     }
 
     public class ViewHolder extends RecyclerView.ViewHolder {
@@ -144,8 +151,7 @@ public class TvChannelsAdapter extends RecyclerView.Adapter<TvChannelsAdapter.Vi
                 public void onClick(View v) {
                     // передаём в MainActivity:
                     Channel channel = tvChannelsList.get(getAdapterPosition()); // объект Channel по которому нажали
-                    int usersIntoChat = tvChannelsList.get(getAdapterPosition()).number; // количество Юзеров в чате (пока что фейковое из firebase)
-                    onChannelClickListener.onChannelClick(channel, usersIntoChat);
+                    onChannelClickListener.onChannelClick(channel);
                 }
             });
 
@@ -160,8 +166,6 @@ public class TvChannelsAdapter extends RecyclerView.Adapter<TvChannelsAdapter.Vi
                     editor = preferences.edit();
                     editor.putString(channel.channel_id, channel.channel_id);
                     editor.apply();
-                    //tvChannelsList.remove(channel);
-                    //tvChannelsList.add(0,channel);
 
                     notifyDataSetChanged();
                 }

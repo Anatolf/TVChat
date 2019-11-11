@@ -57,7 +57,7 @@ public class UploadChannelsToFirebaseActivity extends AppCompatActivity {
 //                        nameChannel.getText().toString(),
 //                        Integer.valueOf(numberChannel.getText().toString()),
 //                        urlChannel.getText().toString());
-                Channel channel = new Channel("9TV", "ch", 12345, "111");  // заглушка тест
+                Channel channel = new Channel("9TV", "ch", "111");  // заглушка тест
 
                 // оправляем его в базу данных firebase
                 myRef.push().setValue(channel);
@@ -110,7 +110,7 @@ public class UploadChannelsToFirebaseActivity extends AppCompatActivity {
 
             // показывает в upload_to_firebase_item из базы данных
             ((TextView) view.findViewById(R.id.channel_et)).setText(channel.name);
-            ((TextView) view.findViewById(R.id.number_et)).setText(String.valueOf(channel.number));
+            //((TextView) view.findViewById(R.id.number_et)).setText(String.valueOf(channel.number));
             ((TextView) view.findViewById(R.id.url_et)).setText(String.valueOf(channel.urlChannel));
 
             return view;

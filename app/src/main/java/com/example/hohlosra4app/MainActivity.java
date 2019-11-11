@@ -35,10 +35,7 @@ public class MainActivity extends AppCompatActivity {
     private FirebaseDatabase database;
     private DatabaseReference myRef;
 
-    static final String CHANNEL_ID_EXTRA = "channel_id_extra";
-    static final String CHANNEL_NAME_EXTRA = "channel_name_extra";
-    static final String CHANNEL_IMAGE_EXTRA = "channel_image_extra";
-    static final String USERS_IN_CHAT_EXTRA = "users_in_chart_extra";
+    static final String CHANNEL_OBJECT_EXTRA = "channel_object_extra";
 
 
     @Override
@@ -69,8 +66,9 @@ public class MainActivity extends AppCompatActivity {
         myQuery.addChildEventListener(new ChildEventListener() {
             @Override
             public void onChildAdded(DataSnapshot dataSnapshot, String s) {
-                //   UploadChannelsToFirebaseActivity.Channel channel = dataSnapshot.getValue(UploadChannelsToFirebaseActivity.Channel.class);
+
                 Channel channel = dataSnapshot.getValue(Channel.class);
+                channel.setFirebaseChannelId(dataSnapshot.getKey());
 
                 // передаю в адаптер список ТВ-Каналов из Firebase (по одному):
                 tvChannelsAdapter.setChannelsList(channel);
@@ -79,6 +77,15 @@ public class MainActivity extends AppCompatActivity {
 
             @Override
             public void onChildChanged(DataSnapshot dataSnapshot, String s) {
+                // обновляет количество пользователей в каналах:
+                for (Channel ch : tvChannelsAdapter.tvChannelsList) {
+                    if(ch.firebase_channel_id.equals(dataSnapshot.getKey())){
+                        Channel channel = dataSnapshot.getValue(Channel.class);
+                        ch.setCount_users(channel.count_users);
+                        tvChannelsAdapter.notifyDataSetChanged();
+                    }
+                }
+
             }
 
             @Override
@@ -121,14 +128,11 @@ public class MainActivity extends AppCompatActivity {
 // при нажатии на элемент:
         TvChannelsAdapter.OnChannelClickListener onChannelClickListener = new TvChannelsAdapter.OnChannelClickListener() {
             @Override
-            public void onChannelClick(Channel channel, Integer usersIntoChat) {
+            public void onChannelClick(Channel channel) {
 
-                // передаем в ChatActivity порядковый номер канала на который нажали и количество юзеров
+                // передаем в ChatActivity channel
                 Intent intent = new Intent(MainActivity.this, ChatActivity.class);
-                intent.putExtra(CHANNEL_ID_EXTRA, channel.channel_id);
-                intent.putExtra(CHANNEL_NAME_EXTRA, channel.name);
-                intent.putExtra(CHANNEL_IMAGE_EXTRA, channel.urlChannel);
-                intent.putExtra(USERS_IN_CHAT_EXTRA, usersIntoChat);
+                intent.putExtra(CHANNEL_OBJECT_EXTRA, channel);
                 startActivity(intent);
             }
         };
