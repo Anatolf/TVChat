@@ -21,6 +21,9 @@ import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
+import androidx.recyclerview.widget.RecyclerView;
+
 import com.example.hohlosra4app.Model.Message;
 import com.squareup.picasso.Picasso;
 import com.squareup.picasso.Transformation;
@@ -36,17 +39,18 @@ import ru.ok.android.sdk.Odnoklassniki;
 import static android.content.Context.MODE_PRIVATE;
 
 
-public class MessageAdapter extends BaseAdapter {
+public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.BaseViewHolder> {
     private static final String TAG = "MessageAdapter";
+    private static final int ITEM_MY_MESSAGE = 0;
+    private static final int ITEM_THEIR_MESSAGE = 1;
+    private static final int ITEM_UNKNOW_MESSAGE = 2;
 
     private OnLikeClickListener onLikeClickListener;  // для передачи сообщения которому поставили лайк в ChatActivity
     private OnCancelLikeClickListener onCancelLikeClickListener;  // для передачи сообщения которому отменили лайк в ChatActivity
 
-    private Odnoklassniki odnoklassniki;
-
     List<Message> messages = new ArrayList<Message>();
-    Context context;
-    String current_user_id;
+    private Context context;
+    private String current_user_id;
 
     public MessageAdapter(Context context,
                           OnLikeClickListener onLikeClickListener,
@@ -61,24 +65,59 @@ public class MessageAdapter extends BaseAdapter {
 
 
     public void add(Message message) {
-        Log.d(TAG, "Мы в Адаптере, мессадж = " + message.getText());
+        // Log.d(TAG, "Мы в Адаптере, мессадж = " + message.getText());
         this.messages.add(message);
         notifyDataSetChanged();
     }
 
+    // todo clear()
+
+    @NonNull
     @Override
-    public int getCount() {
+    public BaseViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+        //Used to connect our custom UI to our recycler view // формирует представление одного элемента
+        View v;
+
+        switch (viewType) {
+            case ITEM_MY_MESSAGE: {
+                v = LayoutInflater.from(parent.getContext()).inflate(R.layout.my_message, parent, false);
+                return new MyMessageViewHolder(v);
+            }
+            case ITEM_THEIR_MESSAGE: {
+                v = LayoutInflater.from(parent.getContext()).inflate(R.layout.their_message, parent, false);
+                return new TheirMessageViewHolder(v);
+            }
+            default: {
+                v = LayoutInflater.from(parent.getContext()).inflate(R.layout.their_message, parent, false);
+                return new UnknownMessageViewHolder(v);
+            }
+        }
+    }
+
+    @Override
+    public void onBindViewHolder(@NonNull BaseViewHolder holder, int position) {
+        //Used to set data in each row of recycler view // обновляет при прокрутке
+        holder.bind(messages.get(position));
+
+    }
+
+    @Override
+    public int getItemCount() {
         return messages.size();
     }
 
     @Override
-    public Object getItem(int i) {
-        return messages.get(i);
-    }
+    public int getItemViewType(int position) {
 
-    @Override
-    public long getItemId(int i) {
-        return i;
+        if (!VKSdk.isLoggedIn() && TextUtils.isEmpty(App.getOdnoklassniki().getMAccessToken())) {
+            return ITEM_UNKNOW_MESSAGE;
+        }
+
+        if (messages.get(position).isBelongsToCurrentUser()) {
+            return ITEM_MY_MESSAGE;
+        } else {
+            return ITEM_THEIR_MESSAGE;
+        }
     }
 
     public interface OnLikeClickListener {  // для передачи нажатого лайка в ChatActivity создаем слушатель
@@ -89,170 +128,170 @@ public class MessageAdapter extends BaseAdapter {
         void onCancelLikeClick(Message message);
     }
 
-    @Override
-    public View getView(int i, View convertView, ViewGroup viewGroup) {
-        final MessageViewHolder holder = new MessageViewHolder();
-        LayoutInflater messageInflater = (LayoutInflater) context.getSystemService(Activity.LAYOUT_INFLATER_SERVICE);
-        final Message message = messages.get(i);
 
-        odnoklassniki = Odnoklassniki.createInstance(context, BuildConfig.OK_APP_ID, BuildConfig.OK_APP_KEY);
+    public class MyMessageViewHolder extends BaseViewHolder {
 
-        // Если пользователь зарегестрировался через Вк или Ок, то отображаем сообщения с аватарками:
-        if (VKSdk.isLoggedIn() || !TextUtils.isEmpty(odnoklassniki.getMAccessToken())) {
-
-            if (message.isBelongsToCurrentUser()) {
-                convertView = messageInflater.inflate(R.layout.my_message, null);
-                holder.messageBody = (TextView) convertView.findViewById(R.id.message_body);
-                holder.time = (TextView) convertView.findViewById(R.id.time_et);
-                holder.countHeart = (TextView) convertView.findViewById(R.id.count_heart);
-                holder.messageBody.setText(message.getText());
-                holder.time.setText(message.getTime());
-
-                int count_likes = 0;
-                if(message.getLiked_users()!=null) {
-                    HashMap<String, Boolean> liked_users = message.getLiked_users();
-                    for (Map.Entry entry : liked_users.entrySet()) {
-                        if ((boolean) entry.getValue()) {
-                            count_likes++;
-                        }
-                    }
-                }
-                holder.countHeart.setText(String.valueOf(count_likes));
-                convertView.setTag(holder);
-
-
-            } else {
-                convertView = messageInflater.inflate(R.layout.their_message, null);
-                holder.avatar = (View) convertView.findViewById(R.id.avatar);
-                holder.avatarPhoto = (ImageView) convertView.findViewById(R.id.avatarPhoto);
-                holder.name = (TextView) convertView.findViewById(R.id.channel_et);
-                holder.messageBody = (TextView) convertView.findViewById(R.id.message_body);
-                holder.time = (TextView) convertView.findViewById(R.id.time_et);
-                holder.countHeart = (TextView) convertView.findViewById(R.id.count_heart);
-
-
-                holder.avatar.setVisibility(View.INVISIBLE);
-                Picasso.get()
-                        .load(message.getAvatar())
-                        .transform(new CircularTransformation(0)) // 0 - радиус по умолчанию делает максимальный кроп углов от квадрата
-                        .error(R.drawable.ic_launcher_foreground)
-                        .into(holder.avatarPhoto);
-
-                holder.name.setText(message.getName());
-                holder.time.setText(message.getTime());
-                holder.messageBody.setText(message.getText());
-
-                int count_likes = 0;
-                if(message.getLiked_users()!=null) {
-                    HashMap<String, Boolean> liked_users = message.getLiked_users();
-                    for (Map.Entry entry : liked_users.entrySet()) {
-                        if ((boolean) entry.getValue()) {
-                            count_likes++;
-                        }
-                    }
-                }
-                holder.countHeart.setText(String.valueOf(count_likes));
-                convertView.setTag(holder);
-            }
-
-            // Если пользователь НЕ зарегестрировался через Вк или Ок, то отображаем сообщения цветными заглушками и рандомными именами:
-        } else {
-                convertView = messageInflater.inflate(R.layout.their_message, null);
-                holder.avatar = (View) convertView.findViewById(R.id.avatar);
-                holder.name = (TextView) convertView.findViewById(R.id.channel_et);
-                holder.time = (TextView) convertView.findViewById(R.id.time_et);
-                holder.messageBody = (TextView) convertView.findViewById(R.id.message_body);
-                holder.countHeart = (TextView) convertView.findViewById(R.id.count_heart);
-
-                holder.name.setText(message.getName());
-                holder.time.setText(message.getTime());
-                holder.messageBody.setText(message.getText());
-                GradientDrawable drawable = (GradientDrawable) holder.avatar.getBackground();
-                drawable.setColor(Color.parseColor(message.getColor()));
-
-                int count_likes = 0;
-                if(message.getLiked_users()!=null) {
-                    HashMap<String, Boolean> liked_users = message.getLiked_users();
-                    for (Map.Entry entry : liked_users.entrySet()) {
-                        if ((boolean) entry.getValue()) {
-                            count_likes++;
-                        }
-                    }
-                }
-                holder.countHeart.setText(String.valueOf(count_likes));
-
-                convertView.setTag(holder);
-                  //Log.d(TAG, "Without registration, Their: message= " + message.getText() + " , messages.size= " + messages.size());
+        public MyMessageViewHolder(View itemView) {
+            super(itemView);
 
         }
 
+        @Override
+        void bind(final Message message) {
+            messageBody.setText(message.getText());
+            time.setText(message.getTime());
 
-        holder.whiteHeart = convertView.findViewById(R.id.image_heart_white);
-        holder.redHeart = convertView.findViewById(R.id.image_heart_red);
+            setMyLike(message);
+            setOnLikeClick(message);
+            setLikeCount(message);
+        }
+    }
+
+    public class TheirMessageViewHolder extends BaseViewHolder {
+
+        public TheirMessageViewHolder(View itemView) {
+            super(itemView);
+        }
+
+        @Override
+        void bind(final Message message) {
+
+            // Если пользователь зарегестрировался через Вк или Ок, то отображаем сообщения с аватарками:
+            avatar.setVisibility(View.INVISIBLE);
+            Picasso.get()
+                    .load(message.getAvatar())
+                    .transform(new CircularTransformation(0)) // 0 - радиус по умолчанию делает максимальный кроп углов от квадрата
+                    .error(R.drawable.ic_launcher_foreground)
+                    .into(avatarPhoto);
+
+            name.setText(message.getName());
+            time.setText(message.getTime());
+            messageBody.setText(message.getText());
+
+            setMyLike(message);
+            setOnLikeClick(message);
+            setLikeCount(message);
+        }
+    }
+
+    public class UnknownMessageViewHolder extends BaseViewHolder {
+
+        public UnknownMessageViewHolder(View itemView) {
+            super(itemView);
+        }
+
+        @Override
+        void bind(final Message message) {
+            // Если пользователь НЕ зарегестрировался через Вк или Ок, то отображаем сообщения цветными заглушками и рандомными именами:
+            name.setText(message.getName());
+            time.setText(message.getTime());
+            messageBody.setText(message.getText());
+            GradientDrawable drawable = (GradientDrawable) avatar.getBackground();
+            drawable.setColor(Color.parseColor(message.getColor()));
+
+            whiteHeart.setVisibility(View.VISIBLE);
+            setOnLikeClick(message);
+            setLikeCount(message);
+        }
+    }
+
+    abstract class BaseViewHolder extends RecyclerView.ViewHolder {
+
+        public View avatar;
+        public ImageView avatarPhoto;
+
+        public TextView name;
+        public TextView messageBody;
+        public TextView time;
+        public ImageView whiteHeart;
+        public ImageView redHeart;
+        public TextView countHeart;
+
+        public BaseViewHolder(View itemView) {
+            super(itemView);
+
+            avatar = itemView.findViewById(R.id.avatar);
+            avatarPhoto = itemView.findViewById(R.id.avatarPhoto);
+
+            name = itemView.findViewById(R.id.channel_et);
+            messageBody = itemView.findViewById(R.id.message_body);
+            time = itemView.findViewById(R.id.time_et);
+            whiteHeart = itemView.findViewById(R.id.image_heart_white);
+            redHeart = itemView.findViewById(R.id.image_heart_red);
+            countHeart = itemView.findViewById(R.id.count_heart);
+
+        }
+
+        abstract void bind(final Message message);
 
 
-        if (VKSdk.isLoggedIn() || !TextUtils.isEmpty(odnoklassniki.getMAccessToken())) {
+        protected void setMyLike(final Message message) {
 
-            if(message.getLiked_users()!=null) {
+            whiteHeart.setVisibility(View.VISIBLE);
+
+            if (message.getLiked_users() != null) {
                 HashMap<String, Boolean> liked_users = message.getLiked_users();
 
                 if (liked_users.containsKey(current_user_id)) {
-                    holder.whiteHeart.setVisibility(View.INVISIBLE);
-                    holder.redHeart.setVisibility(View.VISIBLE);
+                    whiteHeart.setVisibility(View.INVISIBLE);
+                    redHeart.setVisibility(View.VISIBLE);
                 } else {
-                    holder.redHeart.setVisibility(View.INVISIBLE);
-                    holder.whiteHeart.setVisibility(View.VISIBLE);
+                    redHeart.setVisibility(View.INVISIBLE);
+                    whiteHeart.setVisibility(View.VISIBLE);
                 }
             }
-
         }
 
 
-        if (!TextUtils.isEmpty(current_user_id)) {
-
-            holder.whiteHeart.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    //Toast.makeText(context, "Лайк: " + message.getText(), Toast.LENGTH_SHORT).show();
-                    if (onLikeClickListener != null) {
-                        onLikeClickListener.onLikeClick(message);
+        protected void setLikeCount(final Message message) {
+            int count_likes = 0;
+            if (message.getLiked_users() != null) {
+                HashMap<String, Boolean> liked_users = message.getLiked_users();
+                for (Map.Entry entry : liked_users.entrySet()) {
+                    if ((boolean) entry.getValue()) {
+                        count_likes++;
                     }
-                    holder.whiteHeart.setVisibility(View.INVISIBLE);
-                    holder.redHeart.setVisibility(View.VISIBLE);
-
                 }
-
-            });
-
-            holder.redHeart.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    //Toast.makeText(context, "Дизлайк: " + message.getText(), Toast.LENGTH_SHORT).show();
-                    if (onCancelLikeClickListener != null) {
-                        onCancelLikeClickListener.onCancelLikeClick(message);
-
-                    }
-                    holder.redHeart.setVisibility(View.INVISIBLE);
-                    holder.whiteHeart.setVisibility(View.VISIBLE);
-
-                }
-
-            });
+            }
+            countHeart.setText(String.valueOf(count_likes));
         }
 
-        return convertView;
+
+        protected void setOnLikeClick(final Message message) {
+
+            if (!TextUtils.isEmpty(current_user_id)) {
+
+                whiteHeart.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        //Toast.makeText(context, "Лайк: " + message.getText(), Toast.LENGTH_SHORT).show();
+                        if (onLikeClickListener != null) {
+                            onLikeClickListener.onLikeClick(message);
+                        }
+                        whiteHeart.setVisibility(View.INVISIBLE);
+                        redHeart.setVisibility(View.VISIBLE);
+
+                    }
+
+                });
+
+                redHeart.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        if (onCancelLikeClickListener != null) {
+                            onCancelLikeClickListener.onCancelLikeClick(message);
+
+                        }
+                        redHeart.setVisibility(View.INVISIBLE);
+                        whiteHeart.setVisibility(View.VISIBLE);
+
+                    }
+
+                });
+            }
+        }
+
     }
-}
-
-class MessageViewHolder {
-    public View avatar;
-    public ImageView avatarPhoto;
-    public TextView name;
-    public TextView messageBody;
-    public TextView time;
-    public ImageView whiteHeart;
-    public ImageView redHeart;
-    public TextView countHeart;
 
 }
 

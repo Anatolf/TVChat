@@ -51,8 +51,22 @@ public class MainActivity extends AppCompatActivity {
 //        Intent intent = new Intent(this,UploadChannelsToFirebaseActivity.class);
 //        startActivity(intent);
 
+        initTitleBar();
         initRecyclerView();
         downloadChannelsFromFireBase();
+    }
+
+    private void initTitleBar() {
+        head_text_toolbar.setText("TvSrach");
+
+        Picasso.get()
+                .load(R.drawable.tvsrach5)
+                //.transform(new CircularTransformation(0)) // 0 - радиус по умолчанию делает максимальный кроп углов от квадрата
+                .error(R.drawable.ic_launcher_foreground)
+                .into(icon_toolbar);
+
+        setSupportActionBar(toolbar);
+        getSupportActionBar().setDisplayShowTitleEnabled(false);
     }
 
 
@@ -104,17 +118,6 @@ public class MainActivity extends AppCompatActivity {
 
 
     private void initRecyclerView() {
-
-        head_text_toolbar.setText("TvSrach");
-
-        Picasso.get()
-                .load(R.drawable.tvsrach5)
-                //.transform(new CircularTransformation(0)) // 0 - радиус по умолчанию делает максимальный кроп углов от квадрата
-                .error(R.drawable.ic_launcher_foreground)
-                .into(icon_toolbar);
-
-        setSupportActionBar(toolbar);
-        getSupportActionBar().setDisplayShowTitleEnabled(false);
 
         // Attach RecyclerView xml item layout
         rvTvChannelsList = findViewById(R.id.rv_tv_channels);

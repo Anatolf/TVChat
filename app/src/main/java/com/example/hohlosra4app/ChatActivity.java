@@ -20,9 +20,13 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
+import androidx.coordinatorlayout.widget.CoordinatorLayout;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.hohlosra4app.Model.Channel;
 import com.example.hohlosra4app.Model.Message;
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.snackbar.Snackbar;
 import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
@@ -87,13 +91,18 @@ public class ChatActivity extends AppCompatActivity {
 
     private EditText editText;
     private MessageAdapter messageAdapter;
-    private ListView messagesView;
+    private RecyclerView messagesRecyclerView;
+    private RecyclerView.LayoutManager rvLayoutManager;
+    private FloatingActionButton mFloatingActionButton;
+    private TextView floatingButtonText;
+    private ImageView floatingButtonImage;
+
 
     private FirebaseDatabase database;
     private DatabaseReference myCommentsRef;
     private DatabaseReference usersInChannelRef;
 
-    // for registration window
+    // for registration snackbar dialog:
     private RelativeLayout root_chat;
 
     private ArrayList<FireBaseChatMessage> fireBaseMessages = new ArrayList<>();
@@ -115,6 +124,9 @@ public class ChatActivity extends AppCompatActivity {
     private String channel_image_url = "";
     private String firebase_channel_id = "";
 
+    private int countNewMessages = 0;
+    private boolean startActivity = false;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         //Log.d(TAG, "in onCreate ChatActivity");
@@ -123,11 +135,11 @@ public class ChatActivity extends AppCompatActivity {
         setContentView(R.layout.activity_chat);
 
         editText = (EditText) findViewById(R.id.editText);
-
+        root_chat = findViewById(R.id.root_element_chat);
         // получаем Интент из Майн
         Intent intentFromMain = getIntent();
 
-        if (intentFromMain.hasExtra(MainActivity.CHANNEL_OBJECT_EXTRA)){
+        if (intentFromMain.hasExtra(MainActivity.CHANNEL_OBJECT_EXTRA)) {
             Channel channel = (Channel) intentFromMain.getSerializableExtra(MainActivity.CHANNEL_OBJECT_EXTRA);
             channel_id = channel.channel_id;
             channel_name = channel.name;
@@ -146,8 +158,68 @@ public class ChatActivity extends AppCompatActivity {
                 .into(icon_toolbar);
 
         setSupportActionBar(toolbar);
-        getSupportActionBar().setDisplayShowTitleEnabled(false);
+        // getSupportActionBar().setDisplayShowTitleEnabled(false);
 
+
+        String current_user_id = "";
+
+        sPref = getPreferences(MODE_PRIVATE);
+        final String current_user_id_vk = sPref.getString(USER_VK_ID, "");  // достали из SharedPreferences id_vk  пользователя
+        final String current_user_id_ok = sPref.getString(USER_Ok_ID, "");  // достали из SharedPreferences id_Ok  пользователя
+
+        if (!TextUtils.isEmpty(current_user_id_vk)) {
+            current_user_id = current_user_id_vk;
+        }
+        if (!TextUtils.isEmpty(current_user_id_ok)) {
+            current_user_id = current_user_id_ok;
+        }
+
+        initMessageRecyclerView(current_user_id);
+
+        // подключили базу для отправки сообщения на fireBase в методе sendMessage()
+        database = FirebaseDatabase.getInstance();
+        //        database.setPersistenceEnabled(true);  // добавление элементов во время оффлайн
+        myCommentsRef = database.getReference("Comments").child(channel_id); // channel_id - это "1TV", "2TV", "3TV"...
+
+        odnoklassniki = App.getOdnoklassniki();
+
+
+    }
+
+    private void initMessageRecyclerView(String current_user_id) {
+
+        final String current_user_id_vk = sPref.getString(USER_VK_ID, "");  // достали из SharedPreferences id_vk  пользователя
+        final String current_user_id_ok = sPref.getString(USER_Ok_ID, "");  // достали из SharedPreferences id_Ok  пользователя
+
+        messagesRecyclerView = findViewById(R.id.messages_view);
+        rvLayoutManager = new LinearLayoutManager(this);
+        ((LinearLayoutManager) rvLayoutManager).setStackFromEnd(true);  // auto scroll bottom
+        messagesRecyclerView.setLayoutManager(rvLayoutManager);
+        mFloatingActionButton = findViewById(R.id.floating_action_button);
+        floatingButtonText = findViewById(R.id.floating_button_text);
+        floatingButtonImage = findViewById(R.id.floating_button_image);
+
+        messagesRecyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
+
+            @Override
+            public void onScrollStateChanged(RecyclerView recyclerView, int newState) {
+                super.onScrollStateChanged(recyclerView, newState);
+
+                if (!recyclerView.canScrollVertically(1)) {
+                    //Toast.makeText(ChatActivity.this, "Я в самом низу списка recyclerView" , Toast.LENGTH_SHORT).show();
+                    mFloatingActionButton.hide();
+                    floatingButtonText.setVisibility(View.INVISIBLE);
+                    floatingButtonImage.setVisibility(View.INVISIBLE);
+                    countNewMessages = 0;
+
+                    if (mFloatingActionButton.getVisibility() != View.VISIBLE) {
+                        floatingButtonImage.setVisibility(View.INVISIBLE);
+                        floatingButtonText.setVisibility(View.INVISIBLE);
+                        countNewMessages = 0;
+                    }
+                }
+            }
+        });
 
         MessageAdapter.OnLikeClickListener onLikeClickListener = new MessageAdapter.OnLikeClickListener() {
             @Override
@@ -156,11 +228,6 @@ public class ChatActivity extends AppCompatActivity {
                         .child(channel_id)
                         .child(message.getFireBase_id())
                         .child("liked_users");
-                sPref = getPreferences(MODE_PRIVATE);
-                final String current_user_id_vk = sPref.getString(USER_VK_ID, "");  // достали из SharedPreferences id_vk  пользователя
-
-                sPref = getPreferences(MODE_PRIVATE);
-                final String current_user_id_ok = sPref.getString(USER_Ok_ID, "");  // достали из SharedPreferences id_Ok  пользователя
 
                 if (!TextUtils.isEmpty(current_user_id_vk)) {
                     myLikeRef.child(current_user_id_vk).setValue(true);
@@ -178,11 +245,6 @@ public class ChatActivity extends AppCompatActivity {
                         .child(channel_id)
                         .child(message.getFireBase_id())
                         .child("liked_users");
-                sPref = getPreferences(MODE_PRIVATE);
-                final String current_user_id_vk = sPref.getString(USER_VK_ID, "");  // достали из SharedPreferences id_vk  пользователя
-
-                sPref = getPreferences(MODE_PRIVATE);
-                final String current_user_id_ok = sPref.getString(USER_Ok_ID, "");  // достали из SharedPreferences id_Ok  пользователя
 
                 if (!TextUtils.isEmpty(current_user_id_vk)) {
                     myLikeRef.child(current_user_id_vk).removeValue();
@@ -193,41 +255,8 @@ public class ChatActivity extends AppCompatActivity {
             }
         };
 
-        String current_user_id = "";
-
-        sPref = getPreferences(MODE_PRIVATE);
-        final String current_user_id_vk = sPref.getString(USER_VK_ID, "");  // достали из SharedPreferences id_vk  пользователя
-
-        sPref = getPreferences(MODE_PRIVATE);
-        final String current_user_id_ok = sPref.getString(USER_Ok_ID, "");  // достали из SharedPreferences id_Ok  пользователя
-
-        if (!TextUtils.isEmpty(current_user_id_vk)) {
-            current_user_id = current_user_id_vk;
-        }
-        if (!TextUtils.isEmpty(current_user_id_ok)) {
-            current_user_id = current_user_id_ok;
-        }
-
         messageAdapter = new MessageAdapter(this, onLikeClickListener, onCancelLikeClickListener, current_user_id);
-
-
-        messagesView = (ListView) findViewById(R.id.messages_view);
-        // при добавлении нового сообщения сразу же его отображает (скроллит список вниз)
-        // ("вниз" установлено в activity_chat - android:stackFromBottom="true")
-        //messagesView.setTranscriptMode(ListView.TRANSCRIPT_MODE_ALWAYS_SCROLL);
-        messagesView.setAdapter(messageAdapter);
-
-        root_chat = findViewById(R.id.root_element_chat);
-
-
-        // подключили базу для отправки сообщения на fireBase в методе sendMessage()
-        database = FirebaseDatabase.getInstance();
-        //        database.setPersistenceEnabled(true);  // добавление элементов во время оффлайн
-        myCommentsRef = database.getReference("Comments").child(channel_id); // channel_id - это "1TV", "2TV", "3TV"...
-
-        odnoklassniki = App.getOdnoklassniki();
-
-
+        messagesRecyclerView.setAdapter(messageAdapter);
     }
 
     private void incrementOnlineUsersCountInChat() {
@@ -714,7 +743,7 @@ public class ChatActivity extends AppCompatActivity {
                         final String current_user_id_vk = sPref.getString(USER_VK_ID, "");  // достали из SharedPreferences id_vk  пользователя
 
                         if (vkMessages.get(j).getId().equals(current_user_id_vk)) {  // для скролла вниз при добавлении юзером нового сообщения
-                            messagesView.smoothScrollToPosition(messageAdapter.getCount() - 1);
+                            messagesRecyclerView.smoothScrollToPosition(messageAdapter.getItemCount() - 1);
                         }
                     }
                 }
@@ -736,7 +765,7 @@ public class ChatActivity extends AppCompatActivity {
                         final String current_user_id_ok = sPref.getString(USER_Ok_ID, "");  // достали из SharedPreferences id_Ok  пользователя
 
                         if (okMessages.get(j).getId().equals(current_user_id_ok)) {   // для скролла вниз при добавлении юзером нового сообщения
-                            messagesView.smoothScrollToPosition(messageAdapter.getCount() - 1);
+                            messagesRecyclerView.smoothScrollToPosition(messageAdapter.getItemCount() - 1);
                         }
                     }
                 }
@@ -790,6 +819,7 @@ public class ChatActivity extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
+        startActivity = true;
 
         // прибавление текущего юзера к присутствующим в Чате (обновление количества в FireBase)
         incrementOnlineUsersCountInChat();
@@ -811,6 +841,9 @@ public class ChatActivity extends AppCompatActivity {
     Timer timer;
     TimerTask timerTask;
 
+    Timer timer2;
+    TimerTask timerTask2;
+
     private void showAllMessages() {
 
         // делаем запрос в базу данных firebase
@@ -821,7 +854,7 @@ public class ChatActivity extends AppCompatActivity {
             public void onChildAdded(DataSnapshot dataSnapshot, String s) {
                 /////// Получаем из FireBase из раздела "1TV", подраздела "Comments" по одному объекту FireBaseChatMessage
                 /////// и отправляем его в messageAdapter для отображения
-                FireBaseChatMessage fireBaseChatMessage = dataSnapshot.getValue(FireBaseChatMessage.class);
+                final FireBaseChatMessage fireBaseChatMessage = dataSnapshot.getValue(FireBaseChatMessage.class);
 
                 // общая проверка приходящих сообщений на дубликат (String s - это уникальный код предыдущего сообщения, но при дублировании можно ловить по нему)
                 //Log.d(TAG, "fireBaseChatMessage, S-code = " + s);
@@ -846,7 +879,7 @@ public class ChatActivity extends AppCompatActivity {
                         //  конструктор № 1: создаёт сообщения с рандомными Именами собеседников и рандомным Цветом сообщения:
                         Message singleMessage = new Message(fireBaseChatMessage.message, currentTime, fireBaseChatMessage.liked_users, dataSnapshot.getKey());
                         messageAdapter.add(singleMessage);  // посылаем на отображение
-                        messagesView.smoothScrollToPosition(messageAdapter.getCount() - 1);
+                        //messagesRecyclerView.smoothScrollToPosition(messageAdapter.getCount() - 1);
                     } else {
 
                         // Таймер с задержкой 1 секунда, чтобы получить ответы из ApiVk (аватарки, имена)
@@ -861,9 +894,24 @@ public class ChatActivity extends AppCompatActivity {
                             }
                         };
                         timer = new Timer();
-                        timer.schedule(timerTask, 1000);
+                        timer.schedule(timerTask, 500);
                     }
                 }
+
+
+                if (timer2 != null && timerTask2 != null) {
+                    timer2.cancel();
+                    timerTask2.cancel();
+                }
+                timerTask2 = new TimerTask() {
+                    @Override
+                    public void run() {
+                        showNewMessages();
+                        countNewMessages++;
+                    }
+                };
+                timer2 = new Timer();
+                timer2.schedule(timerTask2, 2000);
 
             }
 
@@ -884,6 +932,62 @@ public class ChatActivity extends AppCompatActivity {
             public void onCancelled(DatabaseError databaseError) {
             }
         });
+    }
+
+
+    private void showNewMessages() {
+
+        ChatActivity.this.runOnUiThread(new Runnable() {
+            public void run() {
+
+                int visibleItemCount = rvLayoutManager.getChildCount(); // 5
+                int totalItemCount = rvLayoutManager.getItemCount();
+                int pastVisibleItems = ((LinearLayoutManager) rvLayoutManager).findFirstCompletelyVisibleItemPosition();
+
+
+                if ((totalItemCount - pastVisibleItems) > visibleItemCount) {  // если прокрутили вверх от самого низа больше чем на "5" items
+                    //Log.d(TAG, "if showNewMessages()");
+                    if (mFloatingActionButton.getVisibility() != View.VISIBLE) {
+                        mFloatingActionButton.show();
+                        floatingButtonText.setVisibility(View.VISIBLE);
+
+                        mFloatingActionButton.setOnClickListener(new View.OnClickListener() {
+                            @Override
+                            public void onClick(View v) { // скролл вниз + скрытие флоатинг баттон
+                                messagesRecyclerView.smoothScrollToPosition(messageAdapter.getItemCount() - 1);
+                                mFloatingActionButton.hide();
+                                floatingButtonText.setVisibility(View.INVISIBLE);
+                                floatingButtonImage.setVisibility(View.INVISIBLE);
+                                countNewMessages = 0;
+                                startActivity = false;
+                                // за скрытие флоатинг баттон и всех её атрибутов
+                                // при прокрутке пальцем вниз отвечает метод из initMessageRecyclerView onScrollStateChanged
+                            }
+                        });
+                    }
+                    if(startActivity) {
+                        floatingButtonText.setVisibility(View.INVISIBLE);
+                        floatingButtonImage.setVisibility(View.VISIBLE);
+                        startActivity = false;
+                    } else {
+                        floatingButtonImage.setVisibility(View.INVISIBLE);
+                        floatingButtonText.setText(String.valueOf(countNewMessages));
+                    }
+
+                } else {
+                    if (mFloatingActionButton.getVisibility() == View.VISIBLE) {
+                        floatingButtonText.setVisibility(View.INVISIBLE);
+                        floatingButtonImage.setVisibility(View.INVISIBLE);
+                        mFloatingActionButton.hide();
+                    }
+                    messagesRecyclerView.smoothScrollToPosition(messageAdapter.getItemCount() - 1);
+                    startActivity = false;
+
+                }
+            }
+        });
+
+
     }
 
     private void updateData(@NonNull DataSnapshot dataSnapshot) {
@@ -977,7 +1081,7 @@ public class ChatActivity extends AppCompatActivity {
             FireBaseChatMessage fireBaseChatMessage = new FireBaseChatMessage(current_user_id_vk, message, time_stamp, "VK", new HashMap<String, Boolean>());
             // оправляем его в базу данных firebase
             myCommentsRef.push().setValue(fireBaseChatMessage);
-            //messagesView.smoothScrollToPosition(messageAdapter.getCount() - 1);
+            //messagesRecyclerView.smoothScrollToPosition(messageAdapter.getCount() - 1);
             editText.getText().clear();  //очищаем поле ввода
         }
         // или:
@@ -988,7 +1092,7 @@ public class ChatActivity extends AppCompatActivity {
             FireBaseChatMessage fireBaseChatMessage = new FireBaseChatMessage(current_user_id_ok, message, time_stamp, "OK", new HashMap<String, Boolean>());
             // оправляем его в базу данных firebase
             myCommentsRef.push().setValue(fireBaseChatMessage);
-            //messagesView.smoothScrollToPosition(messageAdapter.getCount() - 1);
+            //messagesRecyclerView.smoothScrollToPosition(messageAdapter.getCount() - 1);
             editText.getText().clear();  //очищаем поле ввода
         }
     }

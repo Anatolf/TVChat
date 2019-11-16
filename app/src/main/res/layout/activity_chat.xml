@@ -1,58 +1,99 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:clipToPadding="false"
+    android:focusableInTouchMode="true"
+    android:orientation="vertical"
     tools:context=".ChatActivity"
     android:id="@+id/root_element_chat">
 
-    <LinearLayout
+    <include
+        android:id="@+id/action_bar"
+        layout="@layout/custom_toolbar" />
+
+
+    <androidx.coordinatorlayout.widget.CoordinatorLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:clipToPadding="false"
-        android:focusableInTouchMode="true"
-        android:orientation="vertical">
+        android:layout_above="@+id/message_send_panel"
+        android:layout_below="@+id/action_bar">
 
-        <include layout="@layout/custom_toolbar" />
-
-        <ListView
+        <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/messages_view"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_weight="2"
+            android:layout_height="match_parent"
+            android:layout_above="@+id/message_send_panel"
+            android:layout_below="@+id/action_bar"
             android:divider="#fff"
             android:stackFromBottom="true" />
 
-        <LinearLayout
+        <com.google.android.material.floatingactionbutton.FloatingActionButton
+            android:id="@+id/floating_action_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="bottom|end"
+            android:layout_margin="20dp"
+            app:borderWidth="0dp"
+            app:elevation="10dp"
+            app:fabSize="normal"
+            android:visibility="invisible"/>
+
+        <TextView
+            android:id="@+id/floating_button_text"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:elevation="12dp"
+            android:text="OK"
+            android:textColor="#fff"
+            android:textSize="18dp"
+            app:layout_anchor="@id/floating_action_button"
+            app:layout_anchorGravity="center"
+            android:visibility="invisible"/>
+
+        <ImageView
+            android:id="@+id/floating_button_image"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:elevation="12dp"
+            android:src="@drawable/cursor_classic_down_24dp"
+            app:layout_anchor="@id/floating_action_button"
+            app:layout_anchorGravity="center"
+            android:visibility="invisible"/>
+
+    </androidx.coordinatorlayout.widget.CoordinatorLayout>
+
+    <LinearLayout
+        android:id="@+id/message_send_panel"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:background="#fff"
+        android:orientation="horizontal">
+
+        <EditText
+            android:id="@+id/editText"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:background="#fff"
-            android:orientation="horizontal">
-
-            <EditText
-                android:id="@+id/editText"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_weight="2"
-                android:ems="10"
-                android:hint="Сообщение"
-                android:inputType="text"
-                android:paddingHorizontal="10dp"
-                android:text="" />
+            android:layout_weight="2"
+            android:ems="10"
+            android:hint="Сообщение"
+            android:inputType="text"
+            android:paddingHorizontal="10dp"
+            android:text="" />
 
 
-            <ImageButton
-                android:id="@+id/send_msg_btn"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center"
-                android:layout_marginHorizontal="10dp"
-                android:background="@drawable/ic_send_black_24dp"
-                android:onClick="sendMessage"
-                android:padding="20dp"
-                android:scaleType="fitCenter" />
-        </LinearLayout>
+        <ImageButton
+            android:id="@+id/send_msg_btn"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:layout_marginHorizontal="10dp"
+            android:background="@drawable/ic_send_black_24dp"
+            android:onClick="sendMessage"
+            android:padding="20dp"
+            android:scaleType="fitCenter" />
     </LinearLayout>
-
-
 </RelativeLayout>
