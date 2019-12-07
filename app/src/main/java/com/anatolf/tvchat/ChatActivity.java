@@ -1,4 +1,4 @@
-package com.example.hohlosra4app;
+package com.anatolf.tvchat;
 
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -22,8 +22,10 @@ import androidx.appcompat.widget.Toolbar;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.example.hohlosra4app.Model.Channel;
-import com.example.hohlosra4app.Model.Message;
+import com.example.hohlosra4app.BuildConfig;
+import com.anatolf.tvchat.Model.Channel;
+import com.anatolf.tvchat.Model.Message;
+import com.example.hohlosra4app.R;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.snackbar.Snackbar;
 import com.google.firebase.database.ChildEventListener;

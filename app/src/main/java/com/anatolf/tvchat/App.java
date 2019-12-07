@@ -1,10 +1,9 @@
-package com.example.hohlosra4app;
+package com.anatolf.tvchat;
 
 import android.app.Application;
 import android.content.SharedPreferences;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
+import com.example.hohlosra4app.BuildConfig;
 import com.vk.sdk.VKSdk;
 
 import retrofit2.Retrofit;

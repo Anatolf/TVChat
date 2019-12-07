@@ -1,4 +1,4 @@
-package com.example.hohlosra4app;
+package com.anatolf.tvchat;
 
 import retrofit2.Call;
 import retrofit2.http.GET;

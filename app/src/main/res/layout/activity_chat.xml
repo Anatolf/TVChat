@@ -7,7 +7,7 @@
     android:clipToPadding="false"
     android:focusableInTouchMode="true"
     android:orientation="vertical"
-    tools:context=".ChatActivity"
+    tools:context="com.anatolf.tvchat.ChatActivity"
     android:id="@+id/root_element_chat">
 
     <include

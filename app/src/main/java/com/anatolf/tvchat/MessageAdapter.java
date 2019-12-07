@@ -1,4 +1,4 @@
-package com.example.hohlosra4app;
+package com.anatolf.tvchat;
 
 import android.content.Context;
 import android.graphics.Bitmap;
@@ -18,7 +18,8 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.example.hohlosra4app.Model.Message;
+import com.anatolf.tvchat.Model.Message;
+import com.example.hohlosra4app.R;
 import com.squareup.picasso.Picasso;
 import com.squareup.picasso.Transformation;
 import com.vk.sdk.VKSdk;

@@ -1,4 +1,4 @@
-package com.example.hohlosra4app.Model;
+package com.anatolf.tvchat.Model;
 
 import java.io.Serializable;
 import java.util.HashMap;

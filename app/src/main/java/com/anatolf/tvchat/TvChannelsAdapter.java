@@ -1,4 +1,4 @@
-package com.example.hohlosra4app;
+package com.anatolf.tvchat;
 
 import android.content.Context;
 import android.content.SharedPreferences;
@@ -13,7 +13,8 @@ import android.widget.TextView;
 
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.example.hohlosra4app.Model.Channel;
+import com.anatolf.tvchat.Model.Channel;
+import com.example.hohlosra4app.R;
 import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
