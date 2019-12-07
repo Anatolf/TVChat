@@ -14,6 +14,7 @@ android {
         versionCode 1
         versionName "1.0"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+        vectorDrawables.useSupportLibrary = true
     }
     buildTypes {
         release {
@@ -54,7 +55,6 @@ dependencies {
     implementation 'androidx.cardview:cardview:1.0.0'
 
     // for Registration
-    implementation 'com.rengwuxian.materialedittext:library:2.1.4'
     implementation 'uk.co.chrisjenx:calligraphy:2.3.0'
     implementation 'com.google.android.material:material:1.0.0'
     implementation 'com.android.support:design:28.+'

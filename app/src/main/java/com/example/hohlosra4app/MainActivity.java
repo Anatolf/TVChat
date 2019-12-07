@@ -24,9 +24,9 @@ import com.squareup.picasso.Picasso;
 public class MainActivity extends AppCompatActivity {
     //public static final String TAG = "MainActivity";
 
-    Toolbar toolbar;
-    ImageView icon_toolbar;
-    TextView head_text_toolbar;
+    private Toolbar toolbar;
+    private ImageView icon_toolbar;
+    private TextView head_text_toolbar;
 
     private RecyclerView rvTvChannelsList;
     private RecyclerView.LayoutManager rvLayoutManager;
@@ -57,10 +57,10 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void initTitleBar() {
-        head_text_toolbar.setText("TvSrach");
+        head_text_toolbar.setText(R.string.app_name);
 
         Picasso.get()
-                .load(R.drawable.tvsrach5)
+                .load(R.mipmap.ic_launcher)
                 //.transform(new CircularTransformation(0)) // 0 - радиус по умолчанию делает максимальный кроп углов от квадрата
                 .error(R.drawable.ic_launcher_foreground)
                 .into(icon_toolbar);

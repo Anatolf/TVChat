@@ -11,7 +11,6 @@ import android.view.View;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ImageView;
-import android.widget.ListView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -20,7 +19,6 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
-import androidx.coordinatorlayout.widget.CoordinatorLayout;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -1013,7 +1011,7 @@ public class ChatActivity extends AppCompatActivity {
             dialog.setMessage("Чтобы отправлять сообщения, зарегестрируйтесь:");
 
             LayoutInflater inflater = LayoutInflater.from(this);
-            View sign_in_window = inflater.inflate(R.layout.sing_in_window2, null);
+            View sign_in_window = inflater.inflate(R.layout.dialog_registration, null);
             dialog.setView(sign_in_window);
 
             dialog.setNegativeButton("Отменить", new DialogInterface.OnClickListener() {

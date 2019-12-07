@@ -66,7 +66,7 @@ public class TvChannelsAdapter extends RecyclerView.Adapter<TvChannelsAdapter.Vi
         //Used to connect our custom UI to our recycler view // формирует представление одного элемента
         View v = LayoutInflater
                 .from(parent.getContext())
-                .inflate(R.layout.channel_recyclerview_item, parent, false);
+                .inflate(R.layout.item_channel_recyclerview, parent, false);
 
         return new ViewHolder(v);
     }

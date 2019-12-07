@@ -64,6 +64,6 @@
         android:divider="@android:color/transparent"
         android:dividerHeight="10dp"
         android:padding="10dp"
-        tools:listitem="@layout/upload_to_firebase_item" />
+        tools:listitem="@layout/item_upload_to_firebase" />
 
 </LinearLayout>

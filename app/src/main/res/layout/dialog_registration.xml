@@ -16,8 +16,8 @@
 
         <ImageButton
             android:id="@+id/ib_vk_btn"
-            android:layout_width="80dp"
-            android:layout_height="80dp"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
             android:layout_marginStart="20dp"
             android:layout_marginLeft="20dp"
             android:layout_alignParentStart="true"
@@ -25,20 +25,20 @@
             android:adjustViewBounds="true"
             android:background="@drawable/circle_button"
             android:cropToPadding="false"
-            android:padding="20dp"
+            android:padding="8dp"
             android:scaleType="fitCenter"
             app:layout_constraintStart_toStartOf="parent"
             app:srcCompat="@drawable/vk_button" />
 
         <ImageButton
             android:id="@+id/ib_ok_btn"
-            android:layout_width="80dp"
-            android:layout_height="80dp"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
             android:layout_centerInParent="true"
             android:adjustViewBounds="true"
             android:background="@drawable/circle_button"
             android:cropToPadding="false"
-            android:padding="20dp"
+            android:padding="8dp"
             android:scaleType="fitCenter"
             app:layout_constraintEnd_toStartOf="@+id/ib_fb_btn"
             app:layout_constraintStart_toEndOf="@+id/ib_vk_btn"
@@ -46,8 +46,8 @@
 
         <ImageButton
             android:id="@+id/ib_fb_btn"
-            android:layout_width="80dp"
-            android:layout_height="80dp"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
             android:layout_marginEnd="20dp"
             android:layout_marginRight="20dp"
             android:layout_alignParentEnd="true"
@@ -55,7 +55,7 @@
             android:adjustViewBounds="true"
             android:background="@drawable/circle_button"
             android:cropToPadding="false"
-            android:padding="20dp"
+            android:padding="8dp"
             android:scaleType="fitCenter"
             app:layout_constraintEnd_toEndOf="parent"
             app:srcCompat="@drawable/fb_button" />

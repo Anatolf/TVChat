@@ -25,11 +25,7 @@
             android:name=".ChatActivity"
             android:windowSoftInputMode="stateHidden|adjustPan"/>
         <activity android:name=".UploadChannelsToFirebaseActivity" />
-        <activity android:name=".RegistrationActivity" />
 
-        <meta-data
-            android:name="preloaded_fonts"
-            android:resource="@array/preloaded_fonts" />
 
         <activity
             android:name="com.vk.sdk.VKServiceActivity"

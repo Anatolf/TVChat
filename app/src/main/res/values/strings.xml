@@ -1,9 +1,3 @@
 <resources>
-    <string name="app_name">TvSrach</string>
-    <string name="apNameAnatolf">Anatolf</string>
-    <string name="app_name_after">Register App</string>
-    <string name="textBottom">Войдите в свою учётную запись</string>
-    <string name="btnRegistration">Регистрация</string>
-    <string name="btnSingIn">Войти</string>
-    <integer name="com_vk_sdk_AppId">7168396</integer>
+    <string name="app_name">TvChat</string>
 </resources>

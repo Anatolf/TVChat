@@ -12,7 +12,7 @@
 
     <include
         android:id="@+id/action_bar"
-        layout="@layout/custom_toolbar" />
+        layout="@layout/view_custom_toolbar" />
 
 
     <androidx.coordinatorlayout.widget.CoordinatorLayout

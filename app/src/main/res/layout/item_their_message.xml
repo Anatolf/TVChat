@@ -2,65 +2,73 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
+    android:clipToPadding="false"
     android:paddingVertical="10dp"
     android:paddingLeft="15dp"
-    android:paddingRight="60dp"
-    android:clipToPadding="false">
+    android:paddingRight="60dp">
 
     <View
         android:id="@+id/avatar"
-        android:layout_alignParentLeft="true"
-        android:scaleType="centerInside"
-        android:background="@drawable/circle"
         android:layout_width="34dp"
         android:layout_height="34dp"
-        android:visibility="visible"/>
+        android:layout_alignParentLeft="true"
+        android:background="@drawable/circle"
+        android:scaleType="centerInside"
+        android:visibility="visible" />
 
     <ImageView
         android:id="@+id/avatarPhoto"
         android:layout_width="34dp"
         android:layout_height="34dp" />
 
-    <TextView
-        android:id="@+id/channel_et"
+    <LinearLayout
+        android:id="@+id/nameAndTimeLayout"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
         android:layout_marginLeft="15dp"
         android:layout_toRightOf="@+id/avatar"
-        android:layout_alignTop="@+id/avatar"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:paddingBottom="4dp"
-        android:text="Rose"/>
+        android:paddingBottom="4dp">
 
-    <TextView
-        android:id="@+id/time_et"
-        android:layout_marginLeft="15dp"
-        android:layout_toRightOf="@+id/channel_et"
-        android:layout_alignTop="@+id/channel_et"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:paddingBottom="4dp"
-        android:text="21:06"/>
+        <TextView
+            android:id="@+id/channel_et"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:gravity="bottom"
+            android:textSize="12sp"
+            android:text="Rose" />
+
+        <TextView
+            android:id="@+id/time_et"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="5dp"
+            android:layout_toRightOf="@+id/channel_et"
+            android:gravity="bottom"
+            android:textSize="12sp"
+            android:text="21:06" />
+
+    </LinearLayout>
 
     <TextView
         android:id="@+id/message_body"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_below="@+id/channel_et"
-        android:layout_alignLeft="@+id/channel_et"
+        android:layout_below="@+id/nameAndTimeLayout"
+        android:layout_marginLeft="15dp"
+        android:layout_toRightOf="@+id/avatar"
         android:background="@drawable/their_message"
-        android:paddingVertical="12dp"
-        android:paddingHorizontal="16dp"
         android:elevation="2dp"
-        android:textSize="18dp"
+        android:paddingHorizontal="16dp"
+        android:paddingVertical="12dp"
         android:text="How are you doing? This is a long fireBaseChatMessage that should probably wrap."
-        />
+        android:textSize="18sp" />
 
     <RelativeLayout
         android:id="@+id/heartLayout"
-        android:layout_alignLeft="@+id/channel_et"
-        android:layout_below="@+id/message_body"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_below="@+id/message_body"
+        android:layout_alignLeft="@+id/nameAndTimeLayout"
         android:layout_marginTop="5dp">
 
         <ImageView
@@ -93,6 +101,7 @@
             android:layout_marginLeft="5dp"
             android:layout_marginTop="0dp"
             android:layout_toRightOf="@+id/image_heart_white"
+            android:textSize="12sp"
             android:text="0" />
 
     </RelativeLayout>

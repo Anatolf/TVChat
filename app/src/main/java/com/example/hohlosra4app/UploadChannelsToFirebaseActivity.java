@@ -99,16 +99,16 @@ public class UploadChannelsToFirebaseActivity extends AppCompatActivity {
 
     private class ItemsAdapter extends ArrayAdapter<Channel> {
         ItemsAdapter() {
-            super(UploadChannelsToFirebaseActivity.this, R.layout.upload_to_firebase_item);
+            super(UploadChannelsToFirebaseActivity.this, R.layout.item_upload_to_firebase);
         }
 
         @NonNull
         @Override
         public View getView(int position, @Nullable View convertView, @NonNull ViewGroup parent) {
-            final View view = getLayoutInflater().inflate(R.layout.upload_to_firebase_item, null);
+            final View view = getLayoutInflater().inflate(R.layout.item_upload_to_firebase, null);
             final Channel channel = getItem(position);
 
-            // показывает в upload_to_firebase_item из базы данных
+            // показывает в item_upload_to_firebase из базы данных
             ((TextView) view.findViewById(R.id.channel_et)).setText(channel.name);
             //((TextView) view.findViewById(R.id.number_et)).setText(String.valueOf(channel.number));
             ((TextView) view.findViewById(R.id.url_et)).setText(String.valueOf(channel.urlChannel));

@@ -1,8 +1,6 @@
 package com.example.hohlosra4app;
 
-import android.app.Activity;
 import android.content.Context;
-import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.BitmapShader;
 import android.graphics.Canvas;
@@ -11,15 +9,11 @@ import android.graphics.Paint;
 import android.graphics.Shader;
 import android.graphics.drawable.GradientDrawable;
 import android.text.TextUtils;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.BaseAdapter;
 import android.widget.ImageView;
-import android.widget.ListView;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
@@ -33,10 +27,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
-import ru.ok.android.sdk.Odnoklassniki;
-
-import static android.content.Context.MODE_PRIVATE;
 
 
 public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.BaseViewHolder> {
@@ -80,15 +70,15 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.BaseView
 
         switch (viewType) {
             case ITEM_MY_MESSAGE: {
-                v = LayoutInflater.from(parent.getContext()).inflate(R.layout.my_message, parent, false);
+                v = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_my_message, parent, false);
                 return new MyMessageViewHolder(v);
             }
             case ITEM_THEIR_MESSAGE: {
-                v = LayoutInflater.from(parent.getContext()).inflate(R.layout.their_message, parent, false);
+                v = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_their_message, parent, false);
                 return new TheirMessageViewHolder(v);
             }
             default: {
-                v = LayoutInflater.from(parent.getContext()).inflate(R.layout.their_message, parent, false);
+                v = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_their_message, parent, false);
                 return new UnknownMessageViewHolder(v);
             }
         }
