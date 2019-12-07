@@ -3,7 +3,7 @@ package com.anatolf.tvchat;
 import android.app.Application;
 import android.content.SharedPreferences;
 
-import com.example.hohlosra4app.BuildConfig;
+import com.anatolf.tvchat.BuildConfig;
 import com.vk.sdk.VKSdk;
 
 import retrofit2.Retrofit;

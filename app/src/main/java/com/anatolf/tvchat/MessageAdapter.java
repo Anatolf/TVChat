@@ -19,7 +19,7 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.anatolf.tvchat.Model.Message;
-import com.example.hohlosra4app.R;
+import com.anatolf.tvchat.R;
 import com.squareup.picasso.Picasso;
 import com.squareup.picasso.Transformation;
 import com.vk.sdk.VKSdk;

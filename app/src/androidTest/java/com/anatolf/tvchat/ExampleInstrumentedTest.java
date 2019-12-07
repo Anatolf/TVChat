@@ -1,4 +1,4 @@
-package com.example.hohlosra4app;
+package com.anatolf.tvchat;
 
 import android.content.Context;
 
@@ -22,6 +22,6 @@ public class ExampleInstrumentedTest {
         // Context of the app under test.
         Context appContext = InstrumentationRegistry.getInstrumentation().getTargetContext();
 
-        assertEquals("com.example.hohlosra4app", appContext.getPackageName());
+        assertEquals("com.anatolf.tvchat", appContext.getPackageName());
     }
 }

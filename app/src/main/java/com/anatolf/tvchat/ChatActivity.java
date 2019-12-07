@@ -22,10 +22,10 @@ import androidx.appcompat.widget.Toolbar;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.example.hohlosra4app.BuildConfig;
+import com.anatolf.tvchat.BuildConfig;
 import com.anatolf.tvchat.Model.Channel;
 import com.anatolf.tvchat.Model.Message;
-import com.example.hohlosra4app.R;
+import com.anatolf.tvchat.R;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.snackbar.Snackbar;
 import com.google.firebase.database.ChildEventListener;

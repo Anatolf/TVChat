@@ -14,7 +14,7 @@ import android.widget.TextView;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.anatolf.tvchat.Model.Channel;
-import com.example.hohlosra4app.R;
+import com.anatolf.tvchat.R;
 import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;

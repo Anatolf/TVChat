@@ -1,4 +1,4 @@
-package com.example.hohlosra4app;
+package com.anatolf.tvchat;
 
 import org.junit.Test;
 

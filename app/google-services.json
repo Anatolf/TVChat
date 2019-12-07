@@ -1,42 +1,34 @@
 {
   "project_info": {
-    "project_number": "1039203651912",
-    "firebase_url": "https://tvsrach-fb609.firebaseio.com",
-    "project_id": "tvsrach-fb609",
-    "storage_bucket": "tvsrach-fb609.appspot.com"
+    "project_number": "611152471827",
+    "firebase_url": "https://tvchat-5506b.firebaseio.com",
+    "project_id": "tvchat-5506b",
+    "storage_bucket": "tvchat-5506b.appspot.com"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:1039203651912:android:1502e9362961b47f60e37d",
+        "mobilesdk_app_id": "1:611152471827:android:974538867140e7a8285ce6",
         "android_client_info": {
-          "package_name": "com.example.hohlosra4app"
+          "package_name": "com.anatolf.tvchat"
         }
       },
       "oauth_client": [
         {
-          "client_id": "1039203651912-2n0e9g67gu0obcr1ku3drdf4n0vk4pnu.apps.googleusercontent.com",
-          "client_type": 1,
-          "android_info": {
-            "package_name": "com.example.hohlosra4app",
-            "certificate_hash": "cd0a61eef13b58f0adf6a4a72ef7422e3dcb69dd"
-          }
-        },
-        {
-          "client_id": "1039203651912-afvpvhdm9lralpki123gfbqdcj3i6fbc.apps.googleusercontent.com",
+          "client_id": "611152471827-t1anddio49v19gp2s0vvtcbef73iicg7.apps.googleusercontent.com",
           "client_type": 3
         }
       ],
       "api_key": [
         {
-          "current_key": "AIzaSyDWA0yqhgTQYMs2ZLPuh3qRusk5DF2yJdg"
+          "current_key": "AIzaSyDhiTtsUouKNwvrY9fr56oVnU3kwsQDT3E"
         }
       ],
       "services": {
         "appinvite_service": {
           "other_platform_oauth_client": [
             {
-              "client_id": "1039203651912-afvpvhdm9lralpki123gfbqdcj3i6fbc.apps.googleusercontent.com",
+              "client_id": "611152471827-t1anddio49v19gp2s0vvtcbef73iicg7.apps.googleusercontent.com",
               "client_type": 3
             }
           ]

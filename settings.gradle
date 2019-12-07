@@ -1,2 +1,2 @@
 include ':vksdk_library',':app'
-rootProject.name='Hohlosra4App'
+rootProject.name='TvChatApp'
