@@ -1,18 +1,18 @@
 package com.anatolf.tvchat;
 
 
+import android.content.Intent;
+import android.os.Bundle;
+import android.util.Log;
+import android.widget.ImageView;
+import android.widget.TextView;
+
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import android.content.Intent;
-import android.os.Bundle;
-import android.widget.ImageView;
-import android.widget.TextView;
-
 import com.anatolf.tvchat.Model.Channel;
-import com.anatolf.tvchat.R;
 import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -61,7 +61,7 @@ public class MainActivity extends AppCompatActivity {
         head_text_toolbar.setText(R.string.app_name);
 
         Picasso.get()
-                .load(R.mipmap.ic_launcher)
+                .load(R.drawable.ic_tvchat_255)
                 //.transform(new CircularTransformation(0)) // 0 - радиус по умолчанию делает максимальный кроп углов от квадрата
                 .error(R.drawable.ic_launcher_foreground)
                 .into(icon_toolbar);
@@ -113,6 +113,7 @@ public class MainActivity extends AppCompatActivity {
 
             @Override
             public void onCancelled(DatabaseError databaseError) {
+                Log.d("", "onCancelled: ");
             }
         });
     }
