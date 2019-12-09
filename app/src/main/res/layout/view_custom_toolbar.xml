@@ -14,7 +14,8 @@
         android:id="@+id/image_tool_bar"
         android:layout_width="48dp"
         android:layout_height="48dp"
-        android:src="@mipmap/ic_launcher" />
+        android:layout_marginBottom="12dp"
+        android:src="@drawable/ic_tvchat_255" />
 
     <TextView
         android:id="@+id/head_text_tool_bar"

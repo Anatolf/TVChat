@@ -34,7 +34,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:gravity="bottom"
-            android:textSize="12sp"
+            android:textSize="10sp"
             android:text="Rose" />
 
         <TextView
@@ -44,7 +44,7 @@
             android:layout_marginLeft="5dp"
             android:layout_toRightOf="@+id/channel_et"
             android:gravity="bottom"
-            android:textSize="12sp"
+            android:textSize="10sp"
             android:text="21:06" />
 
     </LinearLayout>
@@ -62,7 +62,7 @@
         android:paddingHorizontal="16dp"
         android:paddingVertical="12dp"
         android:text="How are you doing? This is a long fireBaseChatMessage that should probably wrap."
-        android:textSize="18sp" />
+        android:textSize="14sp" />
 
     <RelativeLayout
         android:id="@+id/heartLayout"
@@ -74,8 +74,8 @@
 
         <ImageView
             android:id="@+id/image_heart_red"
-            android:layout_width="25dp"
-            android:layout_height="25dp"
+            android:layout_width="20dp"
+            android:layout_height="20dp"
             android:layout_alignParentStart="true"
             android:layout_alignParentLeft="true"
             android:layout_alignParentTop="true"
@@ -85,8 +85,8 @@
 
         <ImageView
             android:id="@+id/image_heart_white"
-            android:layout_width="25dp"
-            android:layout_height="25dp"
+            android:layout_width="20dp"
+            android:layout_height="20dp"
             android:layout_alignParentStart="true"
             android:layout_alignParentLeft="true"
             android:layout_alignParentTop="true"
@@ -102,7 +102,7 @@
             android:layout_marginLeft="5dp"
             android:layout_marginTop="0dp"
             android:layout_toRightOf="@+id/image_heart_white"
-            android:textSize="12sp"
+            android:textSize="10sp"
             android:text="0" />
 
     </RelativeLayout>
