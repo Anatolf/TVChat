@@ -27,7 +27,7 @@
         android:textSize="20sp"
         app:popupTheme="@style/Widget.AppCompat.ActionBar.TabText"
         android:gravity="center_vertical"
-        android:text="Rose"/>
+        android:text="header_name"/>
 
 
 </androidx.appcompat.widget.Toolbar>

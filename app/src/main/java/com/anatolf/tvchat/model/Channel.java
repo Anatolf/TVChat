@@ -1,4 +1,4 @@
-package com.anatolf.tvchat.Model;
+package com.anatolf.tvchat.model;
 
 import com.google.firebase.database.IgnoreExtraProperties;
 

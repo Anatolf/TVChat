@@ -3,6 +3,8 @@ package com.anatolf.tvchat;
 import android.app.Application;
 import android.content.SharedPreferences;
 
+import com.anatolf.tvchat.net.OdnoklassnikiService;
+import com.anatolf.tvchat.net.VkService;
 import com.vk.sdk.VKSdk;
 
 import retrofit2.Retrofit;

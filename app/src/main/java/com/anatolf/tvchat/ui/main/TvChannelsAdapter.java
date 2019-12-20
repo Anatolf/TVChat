@@ -1,4 +1,4 @@
-package com.anatolf.tvchat;
+package com.anatolf.tvchat.ui.main;
 
 import android.content.Context;
 import android.content.SharedPreferences;
@@ -13,8 +13,8 @@ import android.widget.TextView;
 
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.anatolf.tvchat.Model.Channel;
 import com.anatolf.tvchat.R;
+import com.anatolf.tvchat.model.Channel;
 import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;

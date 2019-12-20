@@ -1,4 +1,4 @@
-package com.anatolf.tvchat;
+package com.anatolf.tvchat.net;
 
 
 import retrofit2.Call;
