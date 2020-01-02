@@ -31,7 +31,7 @@ class MainModel {
 
             @Override
             public void onChildChanged(DataSnapshot dataSnapshot, String s) {
-                listener.onGetUsersOnline(dataSnapshot);   // оповещение презентера о завершении загрузки через листенер
+                listener.onGetUsersCountOnline(dataSnapshot);   // оповещение презентера о завершении загрузки через листенер
             }
 
             @Override
@@ -51,6 +51,6 @@ class MainModel {
 
     public interface FireBaseListener {
         void onGetChannel(Channel channel);
-        void onGetUsersOnline(DataSnapshot dataSnapshot);
+        void onGetUsersCountOnline(DataSnapshot dataSnapshot);
     }
 }

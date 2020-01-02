@@ -13,8 +13,8 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.anatolf.tvchat.R;
 import com.anatolf.tvchat.model.Channel;
-import com.anatolf.tvchat.ui.chat.ChatActivity;
 import com.anatolf.tvchat.ui.UploadChannelsToFirebaseActivity;
+import com.anatolf.tvchat.ui.chat.ChatActivity;
 import com.google.firebase.database.DataSnapshot;
 import com.squareup.picasso.Picasso;
 
@@ -35,6 +35,13 @@ public class MainActivity extends AppCompatActivity implements MainContractView 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        initView();
+        presenter = new MainPresenter();
+        presenter.attachView(this); // связывает вью и презентер
+        presenter.autoDownloadChannels(); // передаёт действие пользователя в презентер
+    }
+
+    private void initView() {
         setContentView(R.layout.activity_main);
 
         toolbar = findViewById(R.id.custom_tool_bar);
@@ -46,11 +53,6 @@ public class MainActivity extends AppCompatActivity implements MainContractView 
 
         initTitleBar();
         initChannelsRecyclerView();
-
-
-        presenter = new MainPresenter();
-        presenter.attachView(this); // связывает вью и презентер
-        presenter.autoDownloadChannels(); // передаёт действие пользователя в презентер
     }
 
     @Override
@@ -93,12 +95,12 @@ public class MainActivity extends AppCompatActivity implements MainContractView 
 
 
     @Override
-    public void onGetChannel(Channel channel) { // оповещает вью об изменениях из презентера
+    public void showAddedChannel(Channel channel) { // оповещает вью об изменениях из презентера
         tvChannelsAdapter.setChannelsList(channel);
     }
 
     @Override
-    public void onGetUsersOnline(DataSnapshot dataSnapshot) { // оповещает вью об изменениях из презентера
+    public void showUsersCountOnline(DataSnapshot dataSnapshot) { // оповещает вью об изменениях из презентера
         updateUsersCountOnline(dataSnapshot);
     }
 

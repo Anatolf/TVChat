@@ -4,6 +4,6 @@ import com.anatolf.tvchat.model.Channel;
 import com.google.firebase.database.DataSnapshot;
 
 public interface MainContractView {
-    void onGetChannel(Channel channel);
-    void onGetUsersOnline(DataSnapshot dataSnapshot);
+    void showAddedChannel(Channel channel);
+    void showUsersCountOnline(DataSnapshot dataSnapshot);
 }

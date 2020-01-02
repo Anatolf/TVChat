@@ -1,12 +1,8 @@
-package com.anatolf.tvchat;
+package com.anatolf.tvchat.ui.chat;
 
 import android.content.Context;
-import android.graphics.Bitmap;
-import android.graphics.BitmapShader;
-import android.graphics.Canvas;
+import android.content.SharedPreferences;
 import android.graphics.Color;
-import android.graphics.Paint;
-import android.graphics.Shader;
 import android.graphics.drawable.GradientDrawable;
 import android.text.TextUtils;
 import android.view.LayoutInflater;
@@ -18,10 +14,11 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.anatolf.tvchat.Model.Message;
+import com.anatolf.tvchat.App;
 import com.anatolf.tvchat.R;
+import com.anatolf.tvchat.model.Message;
+import com.anatolf.tvchat.utils.CircularTransformation;
 import com.squareup.picasso.Picasso;
-import com.squareup.picasso.Transformation;
 import com.vk.sdk.VKSdk;
 
 import java.util.ArrayList;
@@ -45,13 +42,12 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.BaseView
 
     public MessageAdapter(Context context,
                           OnLikeClickListener onLikeClickListener,
-                          OnCancelLikeClickListener onCancelLikeClickListener,
-                          String current_user_id) {
+                          OnCancelLikeClickListener onCancelLikeClickListener) {
 
         this.context = context;
         this.onLikeClickListener = onLikeClickListener;
         this.onCancelLikeClickListener = onCancelLikeClickListener;
-        this.current_user_id = current_user_id;
+        this.current_user_id = getCurrentUserId();
     }
 
 
@@ -59,6 +55,20 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.BaseView
         // Log.d(TAG, "Мы в Адаптере, мессадж = " + message.getText());
         this.messages.add(message);
         notifyDataSetChanged();
+    }
+
+    private String getCurrentUserId() {
+        SharedPreferences sPref = App.get().getPrefs();
+        final String current_user_id_vk = sPref.getString(ChatActivity.USER_VK_ID, "");
+        final String current_user_id_ok = sPref.getString(ChatActivity.USER_Ok_ID, "");
+
+        if (!TextUtils.isEmpty(current_user_id_vk)) {
+            return current_user_id_vk;
+        }
+        if (!TextUtils.isEmpty(current_user_id_ok)) {
+            return current_user_id_ok;
+        }
+        return "";
     }
 
     // todo clear()
@@ -287,42 +297,3 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.BaseView
 }
 
 
-// for Picasso:
-class CircularTransformation implements Transformation {
-    private int mRadius = 10;
-
-    public CircularTransformation() {
-    }
-
-    public CircularTransformation(final int radius) {
-        this.mRadius = radius;
-    }
-
-    @Override
-    public Bitmap transform(final Bitmap source) {
-
-
-        final Paint paint = new Paint();
-        paint.setAntiAlias(true);
-        paint.setShader(new BitmapShader(source, Shader.TileMode.CLAMP, Shader.TileMode.CLAMP));
-
-        final Bitmap output = Bitmap.createBitmap(source.getWidth(), source.getHeight(), Bitmap.Config.ARGB_8888);
-        final Canvas canvas = new Canvas(output);
-
-        if (mRadius == 0) {
-            canvas.drawCircle(source.getWidth() / 2, source.getHeight() / 2, source.getWidth() / 2, paint);
-        } else {
-            canvas.drawCircle(source.getWidth() / 2, source.getHeight() / 2, mRadius, paint);
-        }
-
-        if (source != output)
-            source.recycle();
-
-        return output;
-    }
-
-    @Override
-    public String key() {
-        return "circle";
-    }
-}

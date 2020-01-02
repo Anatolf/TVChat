@@ -29,12 +29,16 @@ public class MainPresenter {
 
             @Override
             public void onGetChannel(Channel channel) {
-                view.onGetChannel(channel);  // презентер оповещает вью о новых данных после завершения загрузки данных моделью
+                if (view != null) {
+                    view.showAddedChannel(channel);  // презентер оповещает вью о новых данных после завершения загрузки данных моделью
+                }
             }
 
             @Override
-            public void onGetUsersOnline(DataSnapshot dataSnapshot) {
-                view.onGetUsersOnline(dataSnapshot);  // презентер оповещает вью о новых данных после завершения загрузки данных моделью
+            public void onGetUsersCountOnline(DataSnapshot dataSnapshot) {
+                if (view != null) {
+                    view.showUsersCountOnline(dataSnapshot);  // презентер оповещает вью о новых данных после завершения загрузки данных моделью
+                }
             }
         });
     }
