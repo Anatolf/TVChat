@@ -29,17 +29,7 @@ import com.google.android.material.snackbar.Snackbar;
 import com.google.firebase.database.DataSnapshot;
 import com.squareup.picasso.Picasso;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.Set;
-
 public class ChatActivity extends AppCompatActivity implements ChatContractView {
-    private static final String TAG = "myLogs";
-
-    public static final String USER_VK_ID = "user_shared_pref_id_key";
-    private static final String USER_VK_EMAIL = "user_shared_pref_email_key";
-    private static final String USER_VK_ACCESS_TOKEN = "user_shared_pref_access_token_key";
-    public static final String USER_Ok_ID = "user_shared_pref_id_key_odnoklassniki";
 
     private Toolbar toolbar;
     private ImageView icon_toolbar;
@@ -53,29 +43,15 @@ public class ChatActivity extends AppCompatActivity implements ChatContractView 
     private ImageView floatingButtonImage;
     private RelativeLayout root_chat;
 
-    private ArrayList<FireBaseChatMessage> fireBaseMessages = new ArrayList<>();
-    private ArrayList<String> fireBaseIds = new ArrayList<>();
-
-
-    private Set<String> blockIds = new HashSet<>();
-
-    private String channel_id = "";
-    private String channel_name = "";
-    private String channel_image_url = "";
-    private String firebase_channel_id = "";
-
     private boolean startActivity = false;
-
     private ChatPresenter presenter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_chat);
+
         initView();
-        presenter = new ChatPresenter();
-        presenter.attachView(this); // связывает вью и презентер
     }
 
     private void initView() {
@@ -87,19 +63,20 @@ public class ChatActivity extends AppCompatActivity implements ChatContractView 
             Channel channel = (Channel) intentFromMain
                     .getSerializableExtra(MainActivity.CHANNEL_OBJECT_EXTRA);
 
-            channel_id = channel.channel_id;
-            channel_name = channel.name;
-            channel_image_url = channel.urlChannel;
-            firebase_channel_id = channel.firebase_channel_id;
+            presenter = new ChatPresenter(channel.channel_id, channel.firebase_channel_id); // todo check channel & fb ids
+            presenter.attachView(this); // связывает вью и презентер
+
+            presenter.channel_name = channel.name;
+            presenter.channel_image_url = channel.urlChannel;
         }
 
         toolbar = findViewById(R.id.custom_tool_bar);
         icon_toolbar = findViewById(R.id.image_tool_bar);
         head_text_toolbar = findViewById(R.id.head_text_tool_bar);
-        head_text_toolbar.setText(channel_name);
+        head_text_toolbar.setText(presenter.channel_name);
 
         Picasso.get()
-                .load(channel_image_url)
+                .load(presenter.channel_image_url)
                 .error(R.drawable.ic_launcher_foreground)
                 .into(icon_toolbar);
 
@@ -114,7 +91,6 @@ public class ChatActivity extends AppCompatActivity implements ChatContractView 
         startActivity = true;
         messageAdapter.messages.clear();
         // очищаем специальный список id, для дублирующих сообщений из FireBase
-        blockIds.clear();
 
         presenter.getAllMessages();
         presenter.incrementOnlineUsersCountInChat();
@@ -181,7 +157,9 @@ public class ChatActivity extends AppCompatActivity implements ChatContractView 
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        presenter.onAuthResult(requestCode, resultCode, data);
+        if (!presenter.onAuthResult(this, requestCode, resultCode, data)) {
+            super.onActivityResult(requestCode, resultCode, data);
+        }
     }
 
 

@@ -18,6 +18,7 @@ import com.anatolf.tvchat.App;
 import com.anatolf.tvchat.R;
 import com.anatolf.tvchat.model.Message;
 import com.anatolf.tvchat.utils.CircularTransformation;
+import com.anatolf.tvchat.utils.PrefsConstants;
 import com.squareup.picasso.Picasso;
 import com.vk.sdk.VKSdk;
 
@@ -59,8 +60,8 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.BaseView
 
     private String getCurrentUserId() {
         SharedPreferences sPref = App.get().getPrefs();
-        final String current_user_id_vk = sPref.getString(ChatActivity.USER_VK_ID, "");
-        final String current_user_id_ok = sPref.getString(ChatActivity.USER_Ok_ID, "");
+        final String current_user_id_vk = sPref.getString(PrefsConstants.USER_VK_ID, "");
+        final String current_user_id_ok = sPref.getString(PrefsConstants.USER_Ok_ID, "");
 
         if (!TextUtils.isEmpty(current_user_id_vk)) {
             return current_user_id_vk;

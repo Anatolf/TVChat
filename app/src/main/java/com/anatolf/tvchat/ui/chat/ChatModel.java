@@ -1,19 +1,18 @@
 package com.anatolf.tvchat.ui.chat;
 
 import android.text.TextUtils;
-import android.widget.RelativeLayout;
 
 import com.anatolf.tvchat.App;
 import com.anatolf.tvchat.BuildConfig;
 import com.anatolf.tvchat.model.FireBaseChatMessage;
 import com.anatolf.tvchat.model.Message;
 import com.anatolf.tvchat.utils.FirebaseConstants;
+import com.anatolf.tvchat.utils.PrefsConstants;
 import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
-import com.vk.sdk.VKScope;
 import com.vk.sdk.VKSdk;
 import com.vk.sdk.api.VKApiConst;
 import com.vk.sdk.api.VKParameters;
@@ -43,51 +42,37 @@ import ru.ok.android.sdk.Odnoklassniki;
 
 public class ChatModel {
 
-    private static final String USER_VK_ID = "user_shared_pref_id_key";
-    private static final String USER_VK_EMAIL = "user_shared_pref_email_key";
-    private static final String USER_VK_ACCESS_TOKEN = "user_shared_pref_access_token_key";
-
-    private static final String USER_Ok_ID = "user_shared_pref_id_key_odnoklassniki";
-
-
     private FirebaseDatabase database;
     private DatabaseReference commentsRef;
     private DatabaseReference usersInChannelRef;
 
-    // for registration snackbar dialog:
-    private RelativeLayout root_chat;
-
     private ArrayList<FireBaseChatMessage> fireBaseMessages = new ArrayList<>();
     private ArrayList<String> fireBaseIds = new ArrayList<>();
 
-    // for merge messages before showing
-    final ArrayList<Message> vkMessages = new ArrayList<>();
-    final ArrayList<Message> okMessages = new ArrayList<>();
+    private final ArrayList<Message> vkMessages = new ArrayList<>();
+    private final ArrayList<Message> okMessages = new ArrayList<>();
 
-    private String[] vkScope = new String[]{VKScope.EMAIL, VKScope.FRIENDS, VKScope.PHOTOS};
     private Odnoklassniki odnoklassniki;
 
-    //private SharedPreferences sPref;
 
     private Set<String> blockIds = new HashSet<>();
 
     private String channel_id = "";
-    private String channel_name = "";
-    private String channel_image_url = "";
     private String firebase_channel_id = "";
-
-    private boolean startActivity = false;
 
     private Timer timer;
     private TimerTask timerTask;
-
     private Timer timer2;
     private TimerTask timerTask2;
 
     private GetMessageListener listener;
 
-    ChatModel() {
+    ChatModel(String channel_id, String firebase_channel_id) {
         // подключили базу для отправки сообщения на fireBase в методе sendMessage()
+
+        this.channel_id = channel_id;
+        this.firebase_channel_id = firebase_channel_id;
+
         database = FirebaseDatabase.getInstance();
         commentsRef = database.getReference(FirebaseConstants.COMMENTS).child(channel_id); // channel_id - это "1TV", "2TV", "3TV"...
         odnoklassniki = App.getOdnoklassniki();
@@ -96,8 +81,8 @@ public class ChatModel {
     void setLike(Message message, boolean enabled) {
 
 
-        final String current_user_id_vk = App.get().getPrefs().getString(USER_VK_ID, "");
-        final String current_user_id_ok = App.get().getPrefs().getString(USER_Ok_ID, "");
+        final String current_user_id_vk = App.get().getPrefs().getString(PrefsConstants.USER_VK_ID, "");
+        final String current_user_id_ok = App.get().getPrefs().getString(PrefsConstants.USER_Ok_ID, "");
 
         DatabaseReference likeRef = database.getReference(FirebaseConstants.COMMENTS)
                 .child(channel_id)
@@ -127,8 +112,8 @@ public class ChatModel {
                     .child(firebase_channel_id)
                     .child(FirebaseConstants.COUNT_USERS);
 
-            final String current_user_id_vk = App.get().getPrefs().getString(USER_VK_ID, "");
-            final String current_user_id_ok = App.get().getPrefs().getString(USER_Ok_ID, "");
+            final String current_user_id_vk = App.get().getPrefs().getString(PrefsConstants.USER_VK_ID, "");
+            final String current_user_id_ok = App.get().getPrefs().getString(PrefsConstants.USER_Ok_ID, "");
 
             if (!TextUtils.isEmpty(current_user_id_vk)) {
                 usersInChannelRef.child(current_user_id_vk).setValue(true);
@@ -145,8 +130,8 @@ public class ChatModel {
                     .child(firebase_channel_id)
                     .child(FirebaseConstants.COUNT_USERS);
 
-            final String current_user_id_vk = App.get().getPrefs().getString(USER_VK_ID, "");
-            final String current_user_id_ok = App.get().getPrefs().getString(USER_Ok_ID, "");
+            final String current_user_id_vk = App.get().getPrefs().getString(PrefsConstants.USER_VK_ID, "");
+            final String current_user_id_ok = App.get().getPrefs().getString(PrefsConstants.USER_Ok_ID, "");
 
             if (!TextUtils.isEmpty(current_user_id_vk)) {
                 usersInChannelRef.child(current_user_id_vk).removeValue();
@@ -158,6 +143,8 @@ public class ChatModel {
     }
 
     void getAllMessages(final GetMessageListener listener) {
+        clearMessages();
+
         this.listener = listener;
 
         commentsRef.addChildEventListener(new ChildEventListener() {
@@ -245,6 +232,13 @@ public class ChatModel {
         });
     }
 
+    void clearMessages() {
+        fireBaseMessages.clear();
+        fireBaseIds.clear();
+        vkMessages.clear();
+        okMessages.clear();
+    }
+
 
     private void createMessagesToShow() {
         // Делаем запрос, получаем ответ от ВК, заполняем временные Списки:
@@ -285,7 +279,7 @@ public class ChatModel {
                             listener.onUpdateSingleMessage(vkMessages.get(j));
                         }
 
-                        final String current_user_id_vk = App.get().getPrefs().getString(USER_VK_ID, "");  // достали из SharedPreferences id_vk  пользователя
+                        final String current_user_id_vk = App.get().getPrefs().getString(PrefsConstants.USER_VK_ID, "");  // достали из SharedPreferences id_vk  пользователя
 
                         if (vkMessages.get(j).getId().equals(current_user_id_vk)) {  // для скролла вниз при добавлении юзером нового сообщения
                             if (listener != null) {
@@ -313,7 +307,7 @@ public class ChatModel {
                             listener.onUpdateSingleMessage(okMessages.get(j));
                         }
 
-                        final String current_user_id_ok = App.get().getPrefs().getString(USER_Ok_ID, "");  // достали из SharedPreferences id_Ok  пользователя
+                        final String current_user_id_ok = App.get().getPrefs().getString(PrefsConstants.USER_Ok_ID, "");  // достали из SharedPreferences id_Ok  пользователя
 
                         if (okMessages.get(j).getId().equals(current_user_id_ok)) {   // для скролла вниз при добавлении юзером нового сообщения
                             if (listener != null) {
@@ -395,7 +389,7 @@ public class ChatModel {
 
                     // достали из SharedPreferences id_vk  пользователя, для проверки Юзер (я/не я?)
 
-                    final String current_user_id_ok = App.get().getPrefs().getString(USER_Ok_ID, "");
+                    final String current_user_id_ok = App.get().getPrefs().getString(PrefsConstants.USER_Ok_ID, "");
 
                     // второй цикл сравнивает каждый проход с id полученными от OК jsonId
                     for (int i = 0; i < fireBaseMessages.size(); i++) {
@@ -507,7 +501,7 @@ public class ChatModel {
 
 
                     // достали из SharedPreferences id_vk  пользователя, для проверки Юзер (я/не я?)
-                    final String current_user_id_vk = App.get().getPrefs().getString(USER_VK_ID, "");
+                    final String current_user_id_vk = App.get().getPrefs().getString(PrefsConstants.USER_VK_ID, "");
 
                     // второй цикл сравнивает каждый проход с id полученными от ВК jsonId
                     for (int i = 0; i < fireBaseMessages.size(); i++) {
@@ -600,8 +594,8 @@ public class ChatModel {
     }
 
     public void sendMessage(String message) {
-        final String current_user_id_vk = App.get().getPrefs().getString(USER_VK_ID, "");
-        final String current_user_id_ok = App.get().getPrefs().getString(USER_Ok_ID, "");
+        final String current_user_id_vk = App.get().getPrefs().getString(PrefsConstants.USER_VK_ID, "");
+        final String current_user_id_ok = App.get().getPrefs().getString(PrefsConstants.USER_Ok_ID, "");
 
         //отправляет введённое сообщение в Firebase c тегом ВК
         if (message.length() > 0 && !TextUtils.isEmpty(current_user_id_vk)) {

@@ -9,6 +9,7 @@ import android.util.Log;
 import com.anatolf.tvchat.App;
 import com.anatolf.tvchat.BuildConfig;
 import com.anatolf.tvchat.model.Message;
+import com.anatolf.tvchat.utils.PrefsConstants;
 import com.google.firebase.database.DataSnapshot;
 import com.vk.sdk.VKAccessToken;
 import com.vk.sdk.VKCallback;
@@ -29,14 +30,21 @@ import ru.ok.android.sdk.util.OkScope;
 
 public class ChatPresenter {
 
+    private static final String TAG = "ChatPresenterLogs";
+
     private ChatContractView view;
     private final ChatModel model;
 
     int countUnreadMessages = 0;
 
+    String channel_id = "";
+    String channel_name = "";
+    String channel_image_url = "";
+    String firebase_channel_id = "";
 
-    public ChatPresenter() {
-        this.model = new ChatModel(); // создаём модель (получает данные из FB)
+
+    public ChatPresenter(String channel_id, String firebase_channel_id) {
+        this.model = new ChatModel(channel_id, firebase_channel_id); // создаём модель (получает данные из FB)
     }
 
     public void attachView(ChatContractView view) {
@@ -116,7 +124,7 @@ public class ChatPresenter {
                 (OkScope.VALUABLE_ACCESS + ";" + OkScope.LONG_ACCESS_TOKEN));
     }
 
-    public void onAuthResult(int requestCode, int resultCode, Intent data) {
+    public boolean onAuthResult(Activity activity, int requestCode, int resultCode, Intent data) {
         // проверяем зарегестрировался ли пользователь через ВК:
         if (!VKSdk.onActivityResult(requestCode, resultCode, data, new VKCallback<VKAccessToken>() {
             @Override
@@ -124,9 +132,9 @@ public class ChatPresenter {
                 // Пользователь успешно авторизовался через VK
                 // Сохраняем его Id, email, access_token в SharedPreferences
                 SharedPreferences.Editor editor = App.get().getPrefs().edit();
-                editor.putString(USER_VK_ID, res.userId);
-                editor.putString(USER_VK_EMAIL, res.email);
-                editor.putString(USER_VK_ACCESS_TOKEN, res.accessToken);
+                editor.putString(PrefsConstants.USER_VK_ID, res.userId);
+                editor.putString(PrefsConstants.USER_VK_EMAIL, res.email);
+                editor.putString(PrefsConstants.USER_VK_ACCESS_TOKEN, res.accessToken);
                 editor.apply();
 
                 if (view != null) {
@@ -138,11 +146,10 @@ public class ChatPresenter {
             public void onError(VKError error) {
                 // Произошла ошибка авторизации (например, пользователь запретил авторизацию)
             }
-        }))
 
-
+        })) {
             // проверяем зарегестрировался ли пользователь через ОК:
-            if (Odnoklassniki.Companion.of(this).isActivityRequestOAuth(requestCode)) {  // web
+            if (Odnoklassniki.Companion.of(activity).isActivityRequestOAuth(requestCode)) {  // web
                 boolean isAuthCompleted = !TextUtils.isEmpty(data.getStringExtra("access_token"));
                 if (isAuthCompleted) {
 
@@ -152,10 +159,7 @@ public class ChatPresenter {
                             // Log.d(TAG, "requestAsync: onSuccess " + jsonObject.toString());
 
                             // очищаем временные списки (или происходит дублирование всех сообщений)
-                            fireBaseMessages.clear();
-                            fireBaseIds.clear();
-                            vkMessages.clear();
-                            okMessages.clear();
+                            model.clearMessages();
 
 
                             // берём информацию о текущем юзере ОК и записываем в SharedPreference:
@@ -172,7 +176,7 @@ public class ChatPresenter {
                                                 String jsonId = jsonObject.getString("uid");
 
                                                 SharedPreferences.Editor editor = App.get().getPrefs().edit();
-                                                editor.putString(USER_Ok_ID, jsonId);
+                                                editor.putString(PrefsConstants.USER_Ok_ID, jsonId);
                                                 editor.apply();
 
                                             } catch (JSONException e) {
@@ -200,8 +204,7 @@ public class ChatPresenter {
                     Log.d(TAG, "isActivityRequestOAuth: авторизация через веб-форму Odnoklassniki НЕ ПРОШЛА !!!");
                 }
 
-
-            } else if (Odnoklassniki.Companion.of(this).isActivityRequestViral(requestCode)) { // native
+            } else if (Odnoklassniki.Companion.of(activity).isActivityRequestViral(requestCode)) { // native
                 boolean isAuthCompleted = !TextUtils.isEmpty(data.getStringExtra("access_token"));
                 if (isAuthCompleted) {
                     Log.d(TAG, "isActivityRequestViral: Пользователь успешно авторизовался через мобильное приложение Odnoklassniki (native)");
@@ -212,10 +215,7 @@ public class ChatPresenter {
                             Log.d(TAG, "requestAsync: onSuccess " + jsonObject.toString());
 
                             // очищаем временные списки (или происходит дублирование всех сообщений)
-                            fireBaseMessages.clear();
-                            fireBaseIds.clear();
-                            vkMessages.clear();
-                            okMessages.clear();
+                            model.clearMessages();
 
 
                             // берём информацию о текущем юзере ОК и записываем в SharedPreference:
@@ -232,7 +232,7 @@ public class ChatPresenter {
                                                 String jsonId = jsonObject.getString("uid");
 
                                                 SharedPreferences.Editor editor = App.get().getPrefs().edit();
-                                                editor.putString(USER_Ok_ID, jsonId);
+                                                editor.putString(PrefsConstants.USER_Ok_ID, jsonId);
                                                 editor.apply();
 
                                             } catch (JSONException e) {
@@ -259,8 +259,9 @@ public class ChatPresenter {
                 } else {
                     Log.d(TAG, "isActivityRequestViral: авторизация через мобильное приложение Odnoklassniki НЕ ПРОШЛА !!!");
                 }
-            } else {
-                super.onActivityResult(requestCode, resultCode, data);
             }
+        }
+        // todo resolve
+        return false;
     }
 }
