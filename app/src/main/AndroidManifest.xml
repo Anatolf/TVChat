@@ -24,7 +24,7 @@
         <activity
             android:name="com.anatolf.tvchat.ui.chat.ChatActivity"
             android:windowSoftInputMode="stateHidden|adjustPan"/>
-        <activity android:name="com.anatolf.tvchat.ui.UploadChannelsToFirebaseActivity" />
+        <activity android:name="com.anatolf.tvchat.ui.uploadchannels.UploadChannelsToFirebaseActivity" />
 
 
         <activity

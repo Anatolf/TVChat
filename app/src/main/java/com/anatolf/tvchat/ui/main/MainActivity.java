@@ -13,7 +13,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.anatolf.tvchat.R;
 import com.anatolf.tvchat.model.Channel;
-import com.anatolf.tvchat.ui.UploadChannelsToFirebaseActivity;
+import com.anatolf.tvchat.ui.uploadchannels.UploadChannelsToFirebaseActivity;
 import com.anatolf.tvchat.ui.chat.ChatActivity;
 import com.google.firebase.database.DataSnapshot;
 import com.squareup.picasso.Picasso;
