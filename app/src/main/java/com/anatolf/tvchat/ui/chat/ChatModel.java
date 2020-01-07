@@ -4,8 +4,8 @@ import android.text.TextUtils;
 
 import com.anatolf.tvchat.App;
 import com.anatolf.tvchat.BuildConfig;
-import com.anatolf.tvchat.model.FireBaseChatMessage;
-import com.anatolf.tvchat.model.Message;
+import com.anatolf.tvchat.net.model.FireBaseChatMessage;
+import com.anatolf.tvchat.net.model.Message;
 import com.anatolf.tvchat.utils.FirebaseConstants;
 import com.anatolf.tvchat.utils.PrefsConstants;
 import com.google.firebase.database.ChildEventListener;
@@ -19,6 +19,7 @@ import com.vk.sdk.api.VKParameters;
 import com.vk.sdk.api.VKRequest;
 import com.vk.sdk.api.VKResponse;
 
+import org.jetbrains.annotations.NotNull;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -30,6 +31,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Locale;
 import java.util.Set;
 import java.util.TimeZone;
 import java.util.Timer;
@@ -66,7 +68,6 @@ public class ChatModel {
     private GetMessageListener listener;
 
     ChatModel(String channel_id, String firebase_channel_id) {
-        // подключили базу для отправки сообщения на fireBase в методе sendMessage()
 
         this.channel_id = channel_id;
         this.firebase_channel_id = firebase_channel_id;
@@ -77,7 +78,6 @@ public class ChatModel {
     }
 
     void setLike(Message message, boolean enabled) {
-
 
         final String current_user_id_vk = App.get().getPrefs().getString(PrefsConstants.USER_VK_ID, "");
         final String current_user_id_ok = App.get().getPrefs().getString(PrefsConstants.USER_Ok_ID, "");
@@ -151,8 +151,7 @@ public class ChatModel {
 
                 final FireBaseChatMessage fireBaseChatMessage = dataSnapshot.getValue(FireBaseChatMessage.class);
 
-                // общая проверка приходящих сообщений на дубликат (String s - это уникальный код предыдущего сообщения, но при дублировании можно ловить по нему)
-                if (!blockIds.contains(s)) { // не пропускает дубликат (s пример: "LqbDjO_PdRZ9EI_o-V1")
+                if (!blockIds.contains(s)) { // blocked duplicate messages 
                     blockIds.add(s);
 
                     if (!TextUtils.isEmpty(fireBaseChatMessage.user_id)) {
@@ -160,16 +159,11 @@ public class ChatModel {
                         fireBaseIds.add(dataSnapshot.getKey());
                     }
 
-
-                    // если пользователь ещё не прошёл регистрацию Через ВК или ОК то:
                     if (!VKSdk.isLoggedIn() && TextUtils.isEmpty(odnoklassniki.getMAccessToken())) {
 
-                        Date date = new Date(fireBaseChatMessage.timeStamp);
-                        DateFormat formatter = new SimpleDateFormat("HH:mm:ss");
-                        formatter.setTimeZone(TimeZone.getTimeZone("Europe/Moscow"));
-                        String currentTime = formatter.format(date);
+                        String currentTime = getCurrentTime(fireBaseChatMessage);
 
-                        //  конструктор № 1: создаёт сообщения с рандомными Именами собеседников и рандомным Цветом сообщения:
+                        // without registration, make messages with incognito names and avatars
                         Message singleMessage = new Message(
                                 fireBaseChatMessage.message,
                                 currentTime,
@@ -179,7 +173,6 @@ public class ChatModel {
                         listener.onUpdateSingleMessage(singleMessage);
                     } else {
 
-                        // Таймер с задержкой 0,5 секунды, чтобы получить ответы Vk, Ok (аватарки, имена)
                         if (timer != null && timerWaitTaskForSocialResponses != null) {
                             timer.cancel();
                             timerWaitTaskForSocialResponses.cancel();
@@ -240,11 +233,9 @@ public class ChatModel {
 
 
     private void createMessagesToShow() {
-        // Делаем запрос, получаем ответ от ВК, заполняем временные Списки:
         getVkMessages(new OnCompleteMessagesListener() {
             @Override
             public void onComplete() {
-                // Делаем запрос, получаем ответ от Ок и заполняем временные Списки:
                 getOkMessages(new OnCompleteMessagesListener() {
                     @Override
                     public void onComplete() {
@@ -257,30 +248,26 @@ public class ChatModel {
 
 
     private void mergeAllMessages() {
-        // Log.d(TAG, "in mergeAllMessages()");
 
         for (int i = 0; i < fireBaseMessages.size(); i++) {
 
             if (fireBaseMessages.get(i).social_tag.equals("VK")) {
                 for (int j = 0; j < vkMessages.size(); j++) {
 
-                    Date date = new Date(fireBaseMessages.get(i).timeStamp);
-                    DateFormat formatter = new SimpleDateFormat("HH:mm:ss");
-                    formatter.setTimeZone(TimeZone.getTimeZone("Europe/Moscow"));
-                    String timeToCompare = formatter.format(date);
+                    String timeToCompare = getCurrentTime(fireBaseMessages.get(i));
 
-                    // сравниваем по id и по времени отправки сообщения перед отображением
                     if (fireBaseMessages.get(i).user_id.equals(vkMessages.get(j).getId())
                             && timeToCompare.equals(vkMessages.get(j).getTime())) {
-
 
                         if (listener != null) {
                             listener.onUpdateSingleMessage(vkMessages.get(j));
                         }
 
-                        final String current_user_id_vk = App.get().getPrefs().getString(PrefsConstants.USER_VK_ID, "");  // достали из SharedPreferences id_vk  пользователя
+                        final String current_user_id_vk = App.get().getPrefs()
+                                .getString(PrefsConstants.USER_VK_ID, "");
 
-                        if (vkMessages.get(j).getId().equals(current_user_id_vk)) {  // для скролла вниз при добавлении юзером нового сообщения
+                        // to scroll down when user adds a new message
+                        if (vkMessages.get(j).getId().equals(current_user_id_vk)) {
                             if (listener != null) {
                                 listener.onAddMyNewMessage();
                             }
@@ -292,12 +279,8 @@ public class ChatModel {
             if (fireBaseMessages.get(i).social_tag.equals("OK")) {
                 for (int j = 0; j < okMessages.size(); j++) {
 
-                    Date date = new Date(fireBaseMessages.get(i).timeStamp);
-                    DateFormat formatter = new SimpleDateFormat("HH:mm:ss");
-                    formatter.setTimeZone(TimeZone.getTimeZone("Europe/Moscow"));
-                    String timeToCompare = formatter.format(date);
+                    String timeToCompare = getCurrentTime(fireBaseMessages.get(i));
 
-                    // сравниваем по id и по времени отправки сообщения перед отображением
                     if (fireBaseMessages.get(i).user_id.equals(okMessages.get(j).getId())
                             && timeToCompare.equals(okMessages.get(j).getTime())) {
 
@@ -306,9 +289,11 @@ public class ChatModel {
                             listener.onUpdateSingleMessage(okMessages.get(j));
                         }
 
-                        final String current_user_id_ok = App.get().getPrefs().getString(PrefsConstants.USER_Ok_ID, "");  // достали из SharedPreferences id_Ok  пользователя
+                        final String current_user_id_ok = App.get().getPrefs()
+                                .getString(PrefsConstants.USER_Ok_ID, "");
 
-                        if (okMessages.get(j).getId().equals(current_user_id_ok)) {   // для скролла вниз при добавлении юзером нового сообщения
+                        // to scroll down when user adds a new message
+                        if (okMessages.get(j).getId().equals(current_user_id_ok)) {
                             if (listener != null) {
                                 listener.onAddMyNewMessage();
                             }
@@ -318,23 +303,17 @@ public class ChatModel {
             }
         }
 
-        // очищаем временные списки:
-        fireBaseMessages.clear();
-        fireBaseIds.clear();
-        vkMessages.clear();
-        okMessages.clear();
-
+        clearMessages();
     }
 
     private void getOkMessages(final OnCompleteMessagesListener listener) {
         final ArrayList<String> jsonIdsOk = new ArrayList<>();
         final ArrayList<String> jsonFirstNamesOk = new ArrayList<>();
-        //final ArrayList<String> jsonLastNamesOk = new ArrayList<>();
         final ArrayList<String> jsonAvatarsOk = new ArrayList<>();
 
 
         String okUsersIdsStr = "";
-        for (int j = 0; j < fireBaseMessages.size(); j++) { // проверяем - если от Oк, то добавляем id к запросу
+        for (int j = 0; j < fireBaseMessages.size(); j++) {
             if (fireBaseMessages.get(j).social_tag.equals("OK")) {
                 okUsersIdsStr = okUsersIdsStr + fireBaseMessages.get(j).user_id + ",";
             }
@@ -369,66 +348,23 @@ public class ChatModel {
                 //Log.d(TAG, "Odnoklassniki - from my application, with Global Key, onResponse: " + response.toString());
 
                 try {
-
                     JSONArray jsonArray = new JSONArray((ArrayList) response.body());
                     for (int i = 0; i < jsonArray.length(); i++) {
                         JSONObject userInfo = jsonArray.getJSONObject(i);
 
                         String jsonId = userInfo.getString("uid");
                         String firstName = userInfo.getString("first_name");
-                        String lastName = userInfo.getString("last_name");
                         String avatarPhoto = userInfo.getString("pic_1");
 
                         jsonIdsOk.add(jsonId);
                         jsonFirstNamesOk.add(firstName);
-                        //jsonLastNamesOk.add(lastName);
                         jsonAvatarsOk.add(avatarPhoto);
-                        //Log.d(TAG, "Одноклассники requestAsync: onSuccess, jsonId=  " + jsonId + ", firstName = " + firstName + ", lastName = " + lastName + ", avatarPhoto = " + avatarPhoto);
                     }
 
-                    // достали из SharedPreferences id_vk  пользователя, для проверки Юзер (я/не я?)
+                    addMessages(okMessages, jsonIdsOk, jsonFirstNamesOk, jsonAvatarsOk,
+                            PrefsConstants.USER_Ok_ID);
 
-                    final String current_user_id_ok = App.get().getPrefs().getString(PrefsConstants.USER_Ok_ID, "");
-
-                    // второй цикл сравнивает каждый проход с id полученными от OК jsonId
-                    for (int i = 0; i < fireBaseMessages.size(); i++) {
-                        for (int j = 0; j < jsonIdsOk.size(); j++) {
-                            if (fireBaseMessages.get(i).user_id.equals(jsonIdsOk.get(j))) {
-
-                                String id = fireBaseMessages.get(i).user_id;
-                                String message = fireBaseMessages.get(i).message;
-                                HashMap<String, Boolean> liked_users = fireBaseMessages.get(i).liked_users;
-                                String fire_base_Id = fireBaseIds.get(i);
-
-                                Date date = new Date(fireBaseMessages.get(i).timeStamp);
-                                DateFormat formatter = new SimpleDateFormat("HH:mm:ss");
-                                formatter.setTimeZone(TimeZone.getTimeZone("Europe/Moscow"));
-                                String currentTime = formatter.format(date);
-
-                                String name = jsonFirstNamesOk.get(j);
-                                String ava = jsonAvatarsOk.get(j);
-
-                                boolean belongToCurrentUser; // флаг Юзер я, не я?
-                                if (id.equals(current_user_id_ok)) {
-                                    belongToCurrentUser = true;
-                                } else {
-                                    belongToCurrentUser = false;
-                                }
-
-                                Message singleMessage = new Message(
-                                        id, message, currentTime, belongToCurrentUser,
-                                        name, ava, liked_users, fire_base_Id);
-                                okMessages.add(singleMessage);
-                            }
-                        }
-                    }
-                    // очищаем временные списки:
-                    jsonIdsOk.clear();
-                    jsonFirstNamesOk.clear();
-                    //jsonLastNamesOk.clear();
-                    jsonAvatarsOk.clear();
-
-                    // Odnoklassniki messages Ready !!!
+                    // Odnoklassniki messages Ready:
                     if (listener != null) {
                         listener.onComplete();
                     }
@@ -436,27 +372,66 @@ public class ChatModel {
                 } catch (JSONException e) {
                     e.printStackTrace();
                 }
-
             }
 
             @Override
             public void onFailure(Call call, Throwable t) {
-                // todo view.sendError(t)
-                //Log.d(TAG, "Odnoklassniki - from my application, with Global Key, ERROR onFailure:  " + t.getMessage());
+                t.printStackTrace();
             }
         });
+    }
 
+
+    private void addMessages(ArrayList<Message> messages, ArrayList<String> ids,
+                             ArrayList<String> names, ArrayList<String> avatars, String userId) {
+
+        final String current_user_id_ok = App.get().getPrefs().getString(userId, "");
+
+        for (int i = 0; i < fireBaseMessages.size(); i++) {
+            for (int j = 0; j < ids.size(); j++) {
+                if (fireBaseMessages.get(i).user_id.equals(ids.get(j))) {
+
+                    String id = fireBaseMessages.get(i).user_id;
+                    String message = fireBaseMessages.get(i).message;
+                    HashMap<String, Boolean> liked_users = fireBaseMessages.get(i).liked_users;
+                    String fire_base_Id = fireBaseIds.get(i);
+
+                    String currentTime = getCurrentTime(fireBaseMessages.get(i));
+
+                    String name = names.get(j);
+                    String ava = avatars.get(j);
+
+                    boolean belongToCurrentUser = id.equals(current_user_id_ok);
+
+                    Message singleMessage = new Message(
+                            id, message, currentTime, belongToCurrentUser,
+                            name, ava, liked_users, fire_base_Id);
+                    messages.add(singleMessage);
+
+                }
+            }
+        }
+        ids.clear();
+        names.clear();
+        avatars.clear();
+    }
+
+    @NotNull
+    private String getCurrentTime(FireBaseChatMessage fireBaseChatMessage) {
+        Date date = new Date(fireBaseChatMessage.timeStamp);
+        DateFormat formatter = new SimpleDateFormat("HH:mm:ss", Locale.ENGLISH);
+        formatter.setTimeZone(TimeZone.getTimeZone("Europe/Moscow"));
+        return formatter.format(date);
     }
 
     private void getVkMessages(final OnCompleteMessagesListener listener) {
 
         final ArrayList<String> jsonIdsVk = new ArrayList<>();
         final ArrayList<String> jsonFirstNamesVk = new ArrayList<>();
-        //final ArrayList<String> jsonLastNamesVk = new ArrayList<>();
         final ArrayList<String> jsonAvatarsVk = new ArrayList<>();
 
         String vkUsersIdsStr = "";
-        for (int i = 0; i < fireBaseMessages.size(); i++) { // проверяем - если от Вк, то добавляем id к запросу
+        for (int i = 0; i < fireBaseMessages.size(); i++) {
             if (fireBaseMessages.get(i).social_tag.equals("VK")) {
                 vkUsersIdsStr = vkUsersIdsStr + fireBaseMessages.get(i).user_id + ",";
             }
@@ -479,8 +454,6 @@ public class ChatModel {
         vkRequest.executeWithListener(new VKRequest.VKRequestListener() {
             @Override
             public void onComplete(VKResponse response) {
-                //Log.d(TAG, "VK - from my application, with Global Key, onComplete: " + response.responseString);
-                // получаем ответ от ApiVk и парсим json каждого участника чата
                 try {
                     JSONObject jsonResponse = new JSONObject(response.responseString);
                     JSONArray jsonArray = jsonResponse.getJSONArray("response");
@@ -488,66 +461,22 @@ public class ChatModel {
                         JSONObject userInfo = jsonArray.getJSONObject(i);
                         String jsonId = userInfo.getString("id");
                         String firstName = userInfo.getString("first_name");
-                        //String lastName = userInfo.getString("last_name");
                         String avatarPhoto = userInfo.getString("photo_50");
 
                         jsonIdsVk.add(jsonId);
                         jsonFirstNamesVk.add(firstName);
-                        //jsonLastNamesVk.add(lastName);
                         jsonAvatarsVk.add(avatarPhoto);
-                        //Log.d(TAG, "в Цикле getVkUsersInfo: jsonId = " + jsonId + ", Имя = " + firstName + ", АВА = " + avatarPhoto);
                     }
 
+                    addMessages(vkMessages, jsonIdsVk, jsonFirstNamesVk, jsonAvatarsVk,
+                            PrefsConstants.USER_VK_ID);
 
-                    // достали из SharedPreferences id_vk  пользователя, для проверки Юзер (я/не я?)
-                    final String current_user_id_vk = App.get().getPrefs().getString(PrefsConstants.USER_VK_ID, "");
-
-                    // второй цикл сравнивает каждый проход с id полученными от ВК jsonId
-                    for (int i = 0; i < fireBaseMessages.size(); i++) {
-                        for (int j = 0; j < jsonIdsVk.size(); j++) {
-                            if (fireBaseMessages.get(i).user_id.equals(jsonIdsVk.get(j))) {
-
-                                String id = fireBaseMessages.get(i).user_id;
-                                String message = fireBaseMessages.get(i).message;
-                                HashMap<String, Boolean> liked_users = fireBaseMessages.get(i).liked_users;
-                                String fire_base_Id = fireBaseIds.get(i);
-
-                                Date date = new Date(fireBaseMessages.get(i).timeStamp);
-                                DateFormat formatter = new SimpleDateFormat("HH:mm:ss");
-                                formatter.setTimeZone(TimeZone.getTimeZone("Europe/Moscow"));
-                                String currentTime = formatter.format(date);
-
-                                String name = jsonFirstNamesVk.get(j);
-                                String ava = jsonAvatarsVk.get(j);
-
-                                boolean belongToCurrentUser; // флаг Юзер я, не я?
-                                if (id.equals(current_user_id_vk)) {
-                                    belongToCurrentUser = true;
-                                } else {
-                                    belongToCurrentUser = false;
-                                }
-
-                                Message singleMessage = new Message(
-                                        id, message, currentTime, belongToCurrentUser,
-                                        name, ava, liked_users, fire_base_Id);
-
-                                vkMessages.add(singleMessage);
-                            }
-                        }
-                    }
-                    // очищаем временные списки:
-                    jsonIdsVk.clear();
-                    jsonFirstNamesVk.clear();
-                    //jsonLastNamesVk.clear();
-                    jsonAvatarsVk.clear();
-
-                    // vk messages Ready !!!
+                    // vk messages Ready:
                     if (listener != null) {
                         listener.onComplete();
                     }
 
                 } catch (JSONException e) {
-                    // todo view.sendError(t)
                     e.printStackTrace();
                 }
             }
@@ -596,7 +525,6 @@ public class ChatModel {
         final String current_user_id_vk = App.get().getPrefs().getString(PrefsConstants.USER_VK_ID, "");
         final String current_user_id_ok = App.get().getPrefs().getString(PrefsConstants.USER_Ok_ID, "");
 
-        //отправляет введённое сообщение в Firebase c тегом ВК
         if (message.length() > 0 && !TextUtils.isEmpty(current_user_id_vk)) {
             long time_stamp = System.currentTimeMillis();
 
@@ -610,7 +538,6 @@ public class ChatModel {
             commentsRef.push().setValue(fireBaseChatMessage);
         }
 
-        //отправляет введённое сообщение в Firebase c тегом ОК
         if (message.length() > 0 && !TextUtils.isEmpty(current_user_id_ok)) {
             long time_stamp = System.currentTimeMillis();
 

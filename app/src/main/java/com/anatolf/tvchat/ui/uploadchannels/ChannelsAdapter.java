@@ -6,11 +6,11 @@ import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.TextView;
 
-import com.anatolf.tvchat.R;
-import com.anatolf.tvchat.model.Channel;
-
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+
+import com.anatolf.tvchat.R;
+import com.anatolf.tvchat.net.model.Channel;
 
 class ChannelsAdapter extends ArrayAdapter<Channel> {
     private Activity activity;

@@ -1,4 +1,4 @@
-package com.anatolf.tvchat.model;
+package com.anatolf.tvchat.net.model;
 
 import java.io.Serializable;
 import java.util.HashMap;

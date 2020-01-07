@@ -1,6 +1,6 @@
 package com.anatolf.tvchat.ui.chat;
 
-import com.anatolf.tvchat.model.Message;
+import com.anatolf.tvchat.net.model.Message;
 import com.google.firebase.database.DataSnapshot;
 
 public interface ChatContractView {

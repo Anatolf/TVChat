@@ -5,6 +5,7 @@ import android.content.SharedPreferences;
 
 import com.anatolf.tvchat.net.OdnoklassnikiService;
 import com.anatolf.tvchat.net.VkService;
+import com.anatolf.tvchat.ui.main.MainPresenter;
 import com.vk.sdk.VKSdk;
 
 import retrofit2.Retrofit;
@@ -17,6 +18,7 @@ public class App extends Application {
     private static Retrofit retrofitOk;
     private static VkService service;
     private static OdnoklassnikiService odnoklassnikiService;
+    private MainPresenter mainPresenter;
 
     private Odnoklassniki odnoklassniki;
     private SharedPreferences preferences;
@@ -77,11 +79,12 @@ public class App extends Application {
         return odnoklassnikiService;
     }
 
-
-
-
-
-
+    public MainPresenter getMainPresenter() {
+        if (mainPresenter == null) {
+            mainPresenter = new MainPresenter();
+        }
+        return mainPresenter;
+    }
 
     public SharedPreferences getPrefs() {
         if (preferences == null) {

@@ -1,6 +1,6 @@
 package com.anatolf.tvchat.ui.main;
 
-import com.anatolf.tvchat.model.Channel;
+import com.anatolf.tvchat.net.model.Channel;
 import com.anatolf.tvchat.utils.FirebaseConstants;
 import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
@@ -18,7 +18,7 @@ class MainModel {
         channelsRef = database.getReference(FirebaseConstants.CHANNELS);
     }
 
-    void downloadChannelsFromFireBase(final FireBaseListener listener) {  // слой модели в котором идёт загрузка
+    void downloadChannelsFromFireBase(final FireBaseListener listener) {
 
         channelsRef.addChildEventListener(new ChildEventListener() {
 
@@ -26,12 +26,12 @@ class MainModel {
             public void onChildAdded(DataSnapshot dataSnapshot, String s) {
                 Channel channel = dataSnapshot.getValue(Channel.class);
                 channel.setFirebaseChannelId(dataSnapshot.getKey());
-                listener.onGetChannel(channel);   // оповещение презентера о завершении загрузки через листенер
+                listener.onGetChannel(channel);
             }
 
             @Override
             public void onChildChanged(DataSnapshot dataSnapshot, String s) {
-                listener.onGetUsersCountOnline(dataSnapshot);   // оповещение презентера о завершении загрузки через листенер
+                listener.onGetUsersCountOnline(dataSnapshot);
             }
 
             @Override

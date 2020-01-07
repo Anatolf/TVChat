@@ -1,21 +1,15 @@
 package com.anatolf.tvchat.ui.uploadchannels;
 
-import androidx.appcompat.app.AppCompatActivity;
-
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ListView;
 
+import androidx.appcompat.app.AppCompatActivity;
+
 import com.anatolf.tvchat.R;
-import com.anatolf.tvchat.model.Channel;
-import com.anatolf.tvchat.ui.main.MainPresenter;
-import com.google.firebase.database.ChildEventListener;
-import com.google.firebase.database.DataSnapshot;
-import com.google.firebase.database.DatabaseError;
-import com.google.firebase.database.DatabaseReference;
-import com.google.firebase.database.FirebaseDatabase;
+import com.anatolf.tvchat.net.model.Channel;
 
 /**
  * Activity for create new TV-channels
@@ -32,7 +26,7 @@ public class UploadChannelsToFirebaseActivity extends AppCompatActivity
         setContentView(R.layout.activity_upload_channels_to_firebase);
 
         presenter = new UploadChannelsToFirebasePresenter();
-        presenter.attachView(this); // связывает вью и презентер
+        presenter.attachView(this);
 
         final EditText id_Channel = findViewById(R.id.id_channel_et);
         final EditText nameChannel = findViewById(R.id.channel_et);
@@ -49,7 +43,7 @@ public class UploadChannelsToFirebaseActivity extends AppCompatActivity
             public void onClick(View v) {
 
                 Channel channel = new Channel("9TV", "ch", "111"); // todo set real data
-                presenter.createChannel(channel); // передаёт действие пользователя в презентер
+                presenter.createChannel(channel);
             }
         });
     }

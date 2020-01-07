@@ -1,4 +1,11 @@
 <resources>
     <string name="app_name">TvChat</string>
     <string name="enter">Войти:</string>
+    <string name="you_can_send_message">Теперь вы можете отправлять сообщения!</string>
+    <string name="to_send_message_register">Чтобы отправлять сообщения, зарегестрируйтесь:</string>
+    <string name="cancel">Отменить</string>
+    <string name="Without_registration_you_can_only_watch">Без регистрации Вы можете только наблюдать</string>
+    <string name="feature_not_available">Функция пока не доступна</string>
+    <string name="error_ok_auth">Ошибка: Авторизация через Odnoklassniki не прошла.</string>
+    <string name="error_general">Ошибка: %1$s</string>
 </resources>

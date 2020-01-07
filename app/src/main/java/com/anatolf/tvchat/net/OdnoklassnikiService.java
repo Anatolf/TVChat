@@ -6,7 +6,6 @@ import retrofit2.http.Query;
 
 public interface OdnoklassnikiService {
 
-
     @GET("fb.do")
     Call<Object> fbDo(@Query("application_key") String applicationKey,
                            @Query("fields") String fields,

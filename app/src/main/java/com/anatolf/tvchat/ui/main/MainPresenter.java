@@ -1,18 +1,15 @@
 package com.anatolf.tvchat.ui.main;
 
-import com.anatolf.tvchat.model.Channel;
+import com.anatolf.tvchat.net.model.Channel;
 import com.google.firebase.database.DataSnapshot;
 
-/**
- * Связывает слой вью и слой модель
- */
 public class MainPresenter {
 
     private MainContractView view;
     private final MainModel model;
 
     public MainPresenter() {
-        this.model = new MainModel(); // создаём модель (получает данные из FB)
+        this.model = new MainModel();
     }
 
     public void attachView(MainContractView view) {
@@ -24,20 +21,20 @@ public class MainPresenter {
     }
 
 
-    public void autoDownloadChannels() {  // произошло пользовательское действие (типа нажал на лайк) // загружает каналы через модель
-        model.downloadChannelsFromFireBase(new MainModel.FireBaseListener() {  // модель сообщает о завершении загрузки презентеру
+    public void autoDownloadChannels() {
+        model.downloadChannelsFromFireBase(new MainModel.FireBaseListener() {
 
             @Override
             public void onGetChannel(Channel channel) {
                 if (view != null) {
-                    view.showAddedChannel(channel);  // презентер оповещает вью о новых данных после завершения загрузки данных моделью
+                    view.showAddedChannel(channel);
                 }
             }
 
             @Override
             public void onGetUsersCountOnline(DataSnapshot dataSnapshot) {
                 if (view != null) {
-                    view.showUsersCountOnline(dataSnapshot);  // презентер оповещает вью о новых данных после завершения загрузки данных моделью
+                    view.showUsersCountOnline(dataSnapshot);
                 }
             }
         });

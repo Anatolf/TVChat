@@ -1,11 +1,10 @@
-package com.anatolf.tvchat.model;
+package com.anatolf.tvchat.net.model;
 
 import com.google.firebase.database.IgnoreExtraProperties;
 
 import java.io.Serializable;
 import java.util.HashMap;
 
-// Класс Channel - один элемент с тремя параметрами (для добавления в базу данных firebase)
 @IgnoreExtraProperties
 public class Channel implements Serializable {
     public String channel_id;

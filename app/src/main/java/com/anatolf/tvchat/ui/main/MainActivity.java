@@ -11,10 +11,11 @@ import androidx.appcompat.widget.Toolbar;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.anatolf.tvchat.App;
 import com.anatolf.tvchat.R;
-import com.anatolf.tvchat.model.Channel;
-import com.anatolf.tvchat.ui.uploadchannels.UploadChannelsToFirebaseActivity;
+import com.anatolf.tvchat.net.model.Channel;
 import com.anatolf.tvchat.ui.chat.ChatActivity;
+import com.anatolf.tvchat.ui.uploadchannels.UploadChannelsToFirebaseActivity;
 import com.google.firebase.database.DataSnapshot;
 import com.squareup.picasso.Picasso;
 
@@ -36,9 +37,9 @@ public class MainActivity extends AppCompatActivity implements MainContractView 
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         initView();
-        presenter = new MainPresenter();
-        presenter.attachView(this); // связывает вью и презентер
-        presenter.autoDownloadChannels(); // передаёт действие пользователя в презентер
+        presenter = App.get().getMainPresenter();
+        presenter.attachView(this);
+        presenter.autoDownloadChannels();
     }
 
     private void initView() {
@@ -72,7 +73,6 @@ public class MainActivity extends AppCompatActivity implements MainContractView 
         getSupportActionBar().setDisplayShowTitleEnabled(false);
     }
 
-
     private void initChannelsRecyclerView() {
 
         RecyclerView.LayoutManager rvLayoutManager = new GridLayoutManager(this, 2);
@@ -93,14 +93,13 @@ public class MainActivity extends AppCompatActivity implements MainContractView 
         rvTvChannels.setAdapter(tvChannelsAdapter);
     }
 
-
     @Override
-    public void showAddedChannel(Channel channel) { // оповещает вью об изменениях из презентера
-        tvChannelsAdapter.setChannelsList(channel);
+    public void showAddedChannel(Channel channel) {
+        tvChannelsAdapter.setChannel(channel);
     }
 
     @Override
-    public void showUsersCountOnline(DataSnapshot dataSnapshot) { // оповещает вью об изменениях из презентера
+    public void showUsersCountOnline(DataSnapshot dataSnapshot) {
         updateUsersCountOnline(dataSnapshot);
     }
 

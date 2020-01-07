@@ -1,6 +1,6 @@
 package com.anatolf.tvchat.ui.uploadchannels;
 
-import com.anatolf.tvchat.model.Channel;
+import com.anatolf.tvchat.net.model.Channel;
 
 
 public class UploadChannelsToFirebasePresenter {

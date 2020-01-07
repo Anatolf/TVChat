@@ -1,6 +1,6 @@
 package com.anatolf.tvchat.ui.chat;
 
-import com.anatolf.tvchat.model.Message;
+import com.anatolf.tvchat.net.model.Message;
 import com.google.firebase.database.DataSnapshot;
 
 public class ChatPresenter {
@@ -17,7 +17,7 @@ public class ChatPresenter {
 
 
     public ChatPresenter(String channel_id, String firebase_channel_id) {
-        this.model = new ChatModel(channel_id, firebase_channel_id); // создаём модель (получает данные из FB)
+        this.model = new ChatModel(channel_id, firebase_channel_id);
     }
 
     public void attachView(ChatContractView view) {
