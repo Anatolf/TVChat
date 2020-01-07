@@ -1,6 +1,5 @@
 package com.anatolf.tvchat.ui.chat;
 
-import android.content.Context;
 import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.graphics.drawable.GradientDrawable;
@@ -38,22 +37,16 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.BaseView
     private OnCancelLikeClickListener onCancelLikeClickListener;  // для передачи сообщения которому отменили лайк в ChatActivity
 
     List<Message> messages = new ArrayList<Message>();
-    private Context context;
-    private String current_user_id;
 
-    public MessageAdapter(Context context,
-                          OnLikeClickListener onLikeClickListener,
-                          OnCancelLikeClickListener onCancelLikeClickListener) {
+    MessageAdapter(OnLikeClickListener onLikeClickListener,
+                   OnCancelLikeClickListener onCancelLikeClickListener) {
 
-        this.context = context;
         this.onLikeClickListener = onLikeClickListener;
         this.onCancelLikeClickListener = onCancelLikeClickListener;
-        this.current_user_id = getCurrentUserId();
     }
 
 
-    public void add(Message message) {
-        // Log.d(TAG, "Мы в Адаптере, мессадж = " + message.getText());
+    void add(Message message) {
         this.messages.add(message);
         notifyDataSetChanged();
     }
@@ -71,8 +64,6 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.BaseView
         }
         return "";
     }
-
-    // todo clear()
 
     @NonNull
     @Override
@@ -151,7 +142,7 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.BaseView
 
     public class TheirMessageViewHolder extends BaseViewHolder {
 
-        public TheirMessageViewHolder(View itemView) {
+        TheirMessageViewHolder(View itemView) {
             super(itemView);
         }
 
@@ -178,7 +169,7 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.BaseView
 
     public class UnknownMessageViewHolder extends BaseViewHolder {
 
-        public UnknownMessageViewHolder(View itemView) {
+        UnknownMessageViewHolder(View itemView) {
             super(itemView);
         }
 
@@ -199,17 +190,16 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.BaseView
 
     abstract class BaseViewHolder extends RecyclerView.ViewHolder {
 
-        public View avatar;
-        public ImageView avatarPhoto;
+        View avatar;
+        ImageView avatarPhoto;
+        TextView name;
+        TextView messageBody;
+        TextView time;
+        ImageView whiteHeart;
+        ImageView redHeart;
+        TextView countHeart;
 
-        public TextView name;
-        public TextView messageBody;
-        public TextView time;
-        public ImageView whiteHeart;
-        public ImageView redHeart;
-        public TextView countHeart;
-
-        public BaseViewHolder(View itemView) {
+        BaseViewHolder(View itemView) {
             super(itemView);
 
             avatar = itemView.findViewById(R.id.avatar);
@@ -234,7 +224,7 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.BaseView
             if (message.getLiked_users() != null) {
                 HashMap<String, Boolean> liked_users = message.getLiked_users();
 
-                if (liked_users.containsKey(current_user_id)) {
+                if (liked_users.containsKey(getCurrentUserId())) {
                     whiteHeart.setVisibility(View.INVISIBLE);
                     redHeart.setVisibility(View.VISIBLE);
                 } else {
@@ -261,7 +251,7 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.BaseView
 
         protected void setOnLikeClick(final Message message) {
 
-            if (!TextUtils.isEmpty(current_user_id)) {
+            if (!TextUtils.isEmpty(getCurrentUserId())) {
 
                 whiteHeart.setOnClickListener(new View.OnClickListener() {
                     @Override
@@ -292,9 +282,7 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.BaseView
                 });
             }
         }
-
     }
-
 }
 
 

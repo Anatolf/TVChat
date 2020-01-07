@@ -1,8 +1,11 @@
 package com.anatolf.tvchat.ui.chat;
 
+import android.app.Activity;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.EditText;
@@ -13,24 +16,44 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.anatolf.tvchat.App;
+import com.anatolf.tvchat.BuildConfig;
 import com.anatolf.tvchat.R;
 import com.anatolf.tvchat.model.Channel;
 import com.anatolf.tvchat.model.FireBaseChatMessage;
 import com.anatolf.tvchat.model.Message;
 import com.anatolf.tvchat.ui.main.MainActivity;
+import com.anatolf.tvchat.utils.PrefsConstants;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.snackbar.Snackbar;
 import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.annotations.NotNull;
 import com.squareup.picasso.Picasso;
+import com.vk.sdk.VKAccessToken;
+import com.vk.sdk.VKCallback;
+import com.vk.sdk.VKScope;
+import com.vk.sdk.VKSdk;
+import com.vk.sdk.api.VKError;
+
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import ru.ok.android.sdk.Odnoklassniki;
+import ru.ok.android.sdk.OkListener;
+import ru.ok.android.sdk.OkRequestMode;
+import ru.ok.android.sdk.util.OkAuthType;
+import ru.ok.android.sdk.util.OkScope;
 
 public class ChatActivity extends AppCompatActivity implements ChatContractView {
 
+    public static final String TAG = "Chat Activity";
     private Toolbar toolbar;
     private ImageView icon_toolbar;
     private TextView head_text_toolbar;
@@ -63,7 +86,7 @@ public class ChatActivity extends AppCompatActivity implements ChatContractView 
             Channel channel = (Channel) intentFromMain
                     .getSerializableExtra(MainActivity.CHANNEL_OBJECT_EXTRA);
 
-            presenter = new ChatPresenter(channel.channel_id, channel.firebase_channel_id); // todo check channel & fb ids
+            presenter = new ChatPresenter(channel.channel_id, channel.firebase_channel_id);
             presenter.attachView(this); // связывает вью и презентер
 
             presenter.channel_name = channel.name;
@@ -149,19 +172,107 @@ public class ChatActivity extends AppCompatActivity implements ChatContractView 
             }
         };
 
-        messageAdapter = new MessageAdapter(
-                this, onLikeClickListener, onCancelLikeClickListener);
+        messageAdapter = new MessageAdapter(onLikeClickListener, onCancelLikeClickListener);
         messagesRecyclerView.setAdapter(messageAdapter);
     }
 
 
+    public void loginVk(Activity activity) {
+        VKSdk.login(activity, VKScope.EMAIL, VKScope.FRIENDS, VKScope.PHOTOS);
+    }
+
+    public void loginOk(Activity activity) {
+        App.getOdnoklassniki().requestAuthorization(activity,
+                "okauth://ok" + BuildConfig.OK_APP_ID,
+                OkAuthType.ANY,
+                (OkScope.VALUABLE_ACCESS + ";" + OkScope.LONG_ACCESS_TOKEN));
+    }
+
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        if (!presenter.onAuthResult(this, requestCode, resultCode, data)) {
-            super.onActivityResult(requestCode, resultCode, data);
+        //Log.d(TAG, "in onActivityResult before registration Vk & Ok ");
+
+        // проверяем зарегестрировался ли пользователь через ВК:
+
+        boolean isVkAuth = VKSdk.onActivityResult(requestCode, resultCode, data, new VKCallback<VKAccessToken>() {
+            @Override
+            public void onResult(VKAccessToken res) {
+                // Пользователь успешно авторизовался через VK
+                // Сохраняем его Id, email, access_token в SharedPreferences
+                SharedPreferences.Editor editor = App.get().getPrefs().edit();
+                editor.putString(PrefsConstants.USER_VK_ID, res.userId);
+                editor.putString(PrefsConstants.USER_VK_EMAIL, res.email);
+                editor.putString(PrefsConstants.USER_VK_ACCESS_TOKEN, res.accessToken);
+                editor.apply();
+                showText("Теперь вы можете отправлять сообщения!");
+                presenter.getAllMessages();
+            }
+
+            @Override
+            public void onError(VKError error) {
+                showText("Ошибка: " + error.errorMessage);
+            }
+        });
+
+
+        if (!isVkAuth) {
+            // проверяем зарегестрировался ли пользователь через ОК:
+            if (Odnoklassniki.Companion.of(this).isActivityRequestOAuth(requestCode) // Ok native
+                    || Odnoklassniki.Companion.of(this).isActivityRequestViral(requestCode)) {  // Ok web
+                onOkAuthCompleted(requestCode, resultCode, data);
+            } else {
+                super.onActivityResult(requestCode, resultCode, data);
+            }
         }
     }
 
+    private void onOkAuthCompleted(int requestCode, int resultCode, Intent data) {
+        boolean isAuthCompleted = !TextUtils.isEmpty(data.getStringExtra("access_token"));
+        if (isAuthCompleted) {
+            App.getOdnoklassniki().onAuthActivityResult(requestCode, resultCode, data, new OkListener() {
+                @Override
+                public void onSuccess(@NotNull JSONObject jsonObject) {
+                    presenter.cleanTempLists();
+
+                    // берём информацию о текущем юзере ОК и записываем в SharedPreference:
+                    App.getOdnoklassniki().requestAsync(
+                            "users.getCurrentUser",
+                            null,
+                            OkRequestMode.getDEFAULT(),  // EnumSet.of(OkRequestMode.SDK_SESSION)
+                            new OkListener() {
+                                @Override
+                                public void onSuccess(@NotNull JSONObject jsonObject) {
+                                    // Log.d(TAG, "Одноклассники, ответ при регистрации (web) onSuccess, jsonObject= " + jsonObject.toString());
+                                    try {
+                                        String jsonId = jsonObject.getString("uid");
+                                        SharedPreferences.Editor editor = App.get().getPrefs().edit();
+                                        editor.putString(PrefsConstants.USER_Ok_ID, jsonId);
+                                        editor.apply();
+                                        presenter.getAllMessages();
+                                        showText("Теперь вы можете отправлять сообщения!");
+                                    } catch (JSONException e) {
+                                        e.printStackTrace();
+                                    }
+                                }
+
+                                @Override
+                                public void onError(@Nullable String error) {
+                                    showText("Ошибка: " + error);
+                                }
+                            });
+                }
+
+                @Override
+                public void onError(@Nullable String error) {
+                    showText("Ошибка: " + error);
+                }
+            });
+
+
+        } else {
+            showText("Ошибка: Авторизация через веб-форму Odnoklassniki НЕ ПРОШЛА");
+        }
+    }
 
     @Override
     protected void onStop() {
@@ -201,7 +312,7 @@ public class ChatActivity extends AppCompatActivity implements ChatContractView 
             btnRegVk.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    presenter.loginVk(ChatActivity.this);
+                    loginVk(ChatActivity.this);
                     adTrueDialog.dismiss();
                 }
             });
@@ -210,7 +321,7 @@ public class ChatActivity extends AppCompatActivity implements ChatContractView 
             btnRegOk.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    presenter.loginOk(ChatActivity.this);
+                    loginOk(ChatActivity.this);
                     adTrueDialog.dismiss();
                 }
             });
@@ -220,7 +331,7 @@ public class ChatActivity extends AppCompatActivity implements ChatContractView 
                 @Override
                 public void onClick(View v) {
                     Toast.makeText(ChatActivity.this,
-                            "функция пока не доступна",
+                            "Функция пока не доступна",
                             Toast.LENGTH_SHORT).show();
                     adTrueDialog.dismiss();
                 }

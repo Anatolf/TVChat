@@ -46,24 +46,22 @@ public class ChatModel {
     private DatabaseReference commentsRef;
     private DatabaseReference usersInChannelRef;
 
-    private ArrayList<FireBaseChatMessage> fireBaseMessages = new ArrayList<>();
-    private ArrayList<String> fireBaseIds = new ArrayList<>();
+    private final ArrayList<FireBaseChatMessage> fireBaseMessages = new ArrayList<>();
 
+    private final ArrayList<String> fireBaseIds = new ArrayList<>();
+    private final Set<String> blockIds = new HashSet<>();
     private final ArrayList<Message> vkMessages = new ArrayList<>();
     private final ArrayList<Message> okMessages = new ArrayList<>();
 
     private Odnoklassniki odnoklassniki;
 
-
-    private Set<String> blockIds = new HashSet<>();
-
-    private String channel_id = "";
-    private String firebase_channel_id = "";
+    private String channel_id;
+    private String firebase_channel_id;
 
     private Timer timer;
-    private TimerTask timerTask;
+    private TimerTask timerWaitTaskForSocialResponses;
     private Timer timer2;
-    private TimerTask timerTask2;
+    private TimerTask timerWaitTaskAfterSendNewMessage;
 
     private GetMessageListener listener;
 
@@ -182,34 +180,34 @@ public class ChatModel {
                     } else {
 
                         // Таймер с задержкой 0,5 секунды, чтобы получить ответы Vk, Ok (аватарки, имена)
-                        if (timer != null && timerTask != null) {
+                        if (timer != null && timerWaitTaskForSocialResponses != null) {
                             timer.cancel();
-                            timerTask.cancel();
+                            timerWaitTaskForSocialResponses.cancel();
                         }
-                        timerTask = new TimerTask() {
+                        timerWaitTaskForSocialResponses = new TimerTask() {
                             @Override
                             public void run() {
                                 createMessagesToShow();
                             }
                         };
                         timer = new Timer();
-                        timer.schedule(timerTask, 500);
+                        timer.schedule(timerWaitTaskForSocialResponses, 500);
                     }
                 }
 
 
-                if (timer2 != null && timerTask2 != null) {
+                if (timer2 != null && timerWaitTaskAfterSendNewMessage != null) {
                     timer2.cancel();
-                    timerTask2.cancel();
+                    timerWaitTaskAfterSendNewMessage.cancel();
                 }
-                timerTask2 = new TimerTask() {
+                timerWaitTaskAfterSendNewMessage = new TimerTask() {
                     @Override
                     public void run() {
                         listener.onShowNewMessages();
                     }
                 };
                 timer2 = new Timer();
-                timer2.schedule(timerTask2, 2000);
+                timer2.schedule(timerWaitTaskAfterSendNewMessage, 2000);
 
             }
 
@@ -237,6 +235,7 @@ public class ChatModel {
         fireBaseIds.clear();
         vkMessages.clear();
         okMessages.clear();
+        blockIds.clear();
     }
 
 

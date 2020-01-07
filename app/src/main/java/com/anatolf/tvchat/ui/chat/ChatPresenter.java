@@ -1,32 +1,7 @@
 package com.anatolf.tvchat.ui.chat;
 
-import android.app.Activity;
-import android.content.Intent;
-import android.content.SharedPreferences;
-import android.text.TextUtils;
-import android.util.Log;
-
-import com.anatolf.tvchat.App;
-import com.anatolf.tvchat.BuildConfig;
 import com.anatolf.tvchat.model.Message;
-import com.anatolf.tvchat.utils.PrefsConstants;
 import com.google.firebase.database.DataSnapshot;
-import com.vk.sdk.VKAccessToken;
-import com.vk.sdk.VKCallback;
-import com.vk.sdk.VKScope;
-import com.vk.sdk.VKSdk;
-import com.vk.sdk.api.VKError;
-
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
-import org.json.JSONException;
-import org.json.JSONObject;
-
-import ru.ok.android.sdk.Odnoklassniki;
-import ru.ok.android.sdk.OkListener;
-import ru.ok.android.sdk.OkRequestMode;
-import ru.ok.android.sdk.util.OkAuthType;
-import ru.ok.android.sdk.util.OkScope;
 
 public class ChatPresenter {
 
@@ -37,10 +12,8 @@ public class ChatPresenter {
 
     int countUnreadMessages = 0;
 
-    String channel_id = "";
     String channel_name = "";
     String channel_image_url = "";
-    String firebase_channel_id = "";
 
 
     public ChatPresenter(String channel_id, String firebase_channel_id) {
@@ -113,155 +86,7 @@ public class ChatPresenter {
         model.sendMessage(message);
     }
 
-    public void loginVk(Activity activity) {
-        VKSdk.login(activity, VKScope.EMAIL, VKScope.FRIENDS, VKScope.PHOTOS);
-    }
-
-    public void loginOk(Activity activity) {
-        App.getOdnoklassniki().requestAuthorization(activity,
-                "okauth://ok" + BuildConfig.OK_APP_ID,
-                OkAuthType.ANY,
-                (OkScope.VALUABLE_ACCESS + ";" + OkScope.LONG_ACCESS_TOKEN));
-    }
-
-    public boolean onAuthResult(Activity activity, int requestCode, int resultCode, Intent data) {
-        // проверяем зарегестрировался ли пользователь через ВК:
-        if (!VKSdk.onActivityResult(requestCode, resultCode, data, new VKCallback<VKAccessToken>() {
-            @Override
-            public void onResult(VKAccessToken res) {
-                // Пользователь успешно авторизовался через VK
-                // Сохраняем его Id, email, access_token в SharedPreferences
-                SharedPreferences.Editor editor = App.get().getPrefs().edit();
-                editor.putString(PrefsConstants.USER_VK_ID, res.userId);
-                editor.putString(PrefsConstants.USER_VK_EMAIL, res.email);
-                editor.putString(PrefsConstants.USER_VK_ACCESS_TOKEN, res.accessToken);
-                editor.apply();
-
-                if (view != null) {
-                    view.showText("Теперь вы можете отправлять сообщения!");
-                }
-            }
-
-            @Override
-            public void onError(VKError error) {
-                // Произошла ошибка авторизации (например, пользователь запретил авторизацию)
-            }
-
-        })) {
-            // проверяем зарегестрировался ли пользователь через ОК:
-            if (Odnoklassniki.Companion.of(activity).isActivityRequestOAuth(requestCode)) {  // web
-                boolean isAuthCompleted = !TextUtils.isEmpty(data.getStringExtra("access_token"));
-                if (isAuthCompleted) {
-
-                    App.getOdnoklassniki().onAuthActivityResult(requestCode, resultCode, data, new OkListener() {
-                        @Override
-                        public void onSuccess(@NotNull JSONObject jsonObject) {
-                            // Log.d(TAG, "requestAsync: onSuccess " + jsonObject.toString());
-
-                            // очищаем временные списки (или происходит дублирование всех сообщений)
-                            model.clearMessages();
-
-
-                            // берём информацию о текущем юзере ОК и записываем в SharedPreference:
-                            App.getOdnoklassniki().requestAsync(
-                                    "users.getCurrentUser",
-                                    null,
-                                    OkRequestMode.getDEFAULT(),
-                                    new OkListener() {
-                                        @Override
-                                        public void onSuccess(@NotNull JSONObject jsonObject) {
-                                            // Log.d(TAG, "Одноклассники, ответ при регистрации (web) onSuccess, jsonObject= " + jsonObject.toString());
-
-                                            try {
-                                                String jsonId = jsonObject.getString("uid");
-
-                                                SharedPreferences.Editor editor = App.get().getPrefs().edit();
-                                                editor.putString(PrefsConstants.USER_Ok_ID, jsonId);
-                                                editor.apply();
-
-                                            } catch (JSONException e) {
-                                                e.printStackTrace();
-                                            }
-                                        }
-
-                                        @Override
-                                        public void onError(@Nullable String s) {
-                                            // Log.d(TAG, "Odnoklassniki RequestAsync: onError " + s);
-                                        }
-                                    });
-
-                        }
-
-                        @Override
-                        public void onError(@Nullable String s) {
-                            Log.d(TAG, "Odnoklassniki RequestAsync: Error " + s);
-
-                        }
-                    });
-
-
-                } else {
-                    Log.d(TAG, "isActivityRequestOAuth: авторизация через веб-форму Odnoklassniki НЕ ПРОШЛА !!!");
-                }
-
-            } else if (Odnoklassniki.Companion.of(activity).isActivityRequestViral(requestCode)) { // native
-                boolean isAuthCompleted = !TextUtils.isEmpty(data.getStringExtra("access_token"));
-                if (isAuthCompleted) {
-                    Log.d(TAG, "isActivityRequestViral: Пользователь успешно авторизовался через мобильное приложение Odnoklassniki (native)");
-
-                    App.getOdnoklassniki().onAuthActivityResult(requestCode, resultCode, data, new OkListener() {
-                        @Override
-                        public void onSuccess(@NotNull JSONObject jsonObject) {
-                            Log.d(TAG, "requestAsync: onSuccess " + jsonObject.toString());
-
-                            // очищаем временные списки (или происходит дублирование всех сообщений)
-                            model.clearMessages();
-
-
-                            // берём информацию о текущем юзере ОК и записываем в SharedPreference:
-                            App.getOdnoklassniki().requestAsync(
-                                    "users.getCurrentUser",
-                                    null,
-                                    OkRequestMode.getDEFAULT(),  // EnumSet.of(OkRequestMode.SDK_SESSION)
-                                    new OkListener() {
-                                        @Override
-                                        public void onSuccess(@NotNull JSONObject jsonObject) {
-                                            Log.d(TAG, "Одноклассники, ответ при регистрации (native) onSuccess, jsonObject= " + jsonObject.toString());
-
-                                            try {
-                                                String jsonId = jsonObject.getString("uid");
-
-                                                SharedPreferences.Editor editor = App.get().getPrefs().edit();
-                                                editor.putString(PrefsConstants.USER_Ok_ID, jsonId);
-                                                editor.apply();
-
-                                            } catch (JSONException e) {
-                                                e.printStackTrace();
-                                            }
-                                        }
-
-                                        @Override
-                                        public void onError(@Nullable String s) {
-                                            Log.d(TAG, "Odnoklassniki, requestAsync: onError " + s);
-                                        }
-                                    });
-
-                        }
-
-                        @Override
-                        public void onError(@Nullable String s) {
-                            Log.d(TAG, "requestAsync: Error " + s);
-
-                        }
-                    });
-
-
-                } else {
-                    Log.d(TAG, "isActivityRequestViral: авторизация через мобильное приложение Odnoklassniki НЕ ПРОШЛА !!!");
-                }
-            }
-        }
-        // todo resolve
-        return false;
+    public void cleanTempLists() {
+        model.clearMessages();
     }
 }
