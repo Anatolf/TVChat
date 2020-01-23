@@ -15,7 +15,7 @@ import com.anatolf.tvchat.App;
 import com.anatolf.tvchat.R;
 import com.anatolf.tvchat.net.model.Channel;
 import com.anatolf.tvchat.ui.chat.ChatActivity;
-import com.anatolf.tvchat.ui.uploadchannels.UploadChannelsToFirebaseActivity;
+import com.anatolf.tvchat.ui.fragment.MainActivityNew;
 import com.google.firebase.database.DataSnapshot;
 import com.squareup.picasso.Picasso;
 
@@ -51,6 +51,7 @@ public class MainActivity extends AppCompatActivity implements MainContractView 
 
         // Developers method
         // startActivityFillDb();
+        startActivityFragmentsTest();
 
         initTitleBar();
         initChannelsRecyclerView();
@@ -113,8 +114,13 @@ public class MainActivity extends AppCompatActivity implements MainContractView 
         }
     }
 
-    private void startActivityFillDb() {
-        Intent intent = new Intent(this, UploadChannelsToFirebaseActivity.class);
+//    private void startActivityFillDb() {
+//        Intent intent = new Intent(this, UploadChannelsToFirebaseActivity.class);
+//        startActivity(intent);
+//    }
+
+    private void startActivityFragmentsTest() {
+        Intent intent = new Intent(this, MainActivityNew.class);
         startActivity(intent);
     }
 }

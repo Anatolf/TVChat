@@ -1,5 +1,7 @@
 package com.anatolf.tvchat.ui.main;
 
+import android.util.Log;
+
 import com.anatolf.tvchat.net.model.Channel;
 import com.google.firebase.database.DataSnapshot;
 
@@ -22,6 +24,7 @@ public class MainPresenter {
 
 
     public void autoDownloadChannels() {
+        Log.d("dfghjkl", "autoDownloadChannels: ");
         model.downloadChannelsFromFireBase(new MainModel.FireBaseListener() {
 
             @Override

@@ -27,7 +27,7 @@ public class TvChannelsAdapter extends RecyclerView.Adapter<TvChannelsAdapter.Vi
 
     private final Context context;
 
-    ArrayList<Channel> tvChannelsList = new ArrayList<>();
+    public ArrayList<Channel> tvChannelsList = new ArrayList<>();
 
     private OnChannelClickListener onChannelClickListener;
 

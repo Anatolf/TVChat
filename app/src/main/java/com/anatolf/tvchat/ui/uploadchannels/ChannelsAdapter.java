@@ -12,10 +12,10 @@ import androidx.annotation.Nullable;
 import com.anatolf.tvchat.R;
 import com.anatolf.tvchat.net.model.Channel;
 
-class ChannelsAdapter extends ArrayAdapter<Channel> {
+public class ChannelsAdapter extends ArrayAdapter<Channel> {
     private Activity activity;
 
-    ChannelsAdapter(Activity activity) {
+    public ChannelsAdapter(Activity activity) {
         super(activity, R.layout.item_upload_to_firebase);
         this.activity = activity;
     }

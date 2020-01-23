@@ -14,7 +14,7 @@ public class UploadChannelsToFirebaseModel {
 
     UploadChannelsToFirebaseModel(final FireBaseListener listener) {
         FirebaseDatabase database = FirebaseDatabase.getInstance();
-        database.setPersistenceEnabled(true);
+       // database.setPersistenceEnabled(true);
         channelsRef = database.getReference(FirebaseConstants.CHANNELS);
 
 
