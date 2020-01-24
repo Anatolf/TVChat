@@ -1,126 +1,99 @@
 package com.anatolf.tvchat.ui.main;
 
-
-import android.content.Intent;
+import android.app.FragmentTransaction;
 import android.os.Bundle;
+import android.view.View;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.appcompat.widget.Toolbar;
-import androidx.recyclerview.widget.GridLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
+import androidx.core.view.GravityCompat;
+import androidx.drawerlayout.widget.DrawerLayout;
 
-import com.anatolf.tvchat.App;
 import com.anatolf.tvchat.R;
-import com.anatolf.tvchat.net.model.Channel;
-import com.anatolf.tvchat.ui.chat.ChatActivity;
-import com.anatolf.tvchat.ui.fragment.MainActivityNew;
-import com.google.firebase.database.DataSnapshot;
+import com.anatolf.tvchat.ui.fragment.FragmentAboutProgram;
+import com.anatolf.tvchat.ui.fragment.FragmentFeedback;
+import com.anatolf.tvchat.ui.fragment.FragmentMain;
+import com.anatolf.tvchat.ui.fragment.FragmentSettings;
+import com.anatolf.tvchat.ui.fragment.FragmentUploadChannelsToFirebase;
 import com.squareup.picasso.Picasso;
 
-
-public class MainActivity extends AppCompatActivity implements MainContractView {
+public class MainActivity extends AppCompatActivity {
 
     public static final String CHANNEL_OBJECT_EXTRA = "channel_object_extra";
 
-    private Toolbar toolbar;
-    private ImageView icon_toolbar;
-    private TextView head_text_toolbar;
-    private RecyclerView rvTvChannels;
-    private TvChannelsAdapter tvChannelsAdapter;
-
-    private MainPresenter presenter;
-
+    private FragmentMain fragMain;
+    private FragmentAboutProgram fragAboutProgram;
+    private FragmentFeedback fragFeedback;
+    private FragmentSettings fragSettings;
+    private FragmentTransaction fTrans;
+    private LinearLayout leftDrawer;
+    private DrawerLayout mDrawerLayout;
+    private FragmentUploadChannelsToFirebase fragUploadChannelsToFirebase;
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
+    public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        initView();
-        presenter = App.get().getMainPresenter();
-        presenter.attachView(this);
-        presenter.autoDownloadChannels();
-    }
-
-    private void initView() {
         setContentView(R.layout.activity_main);
 
-        toolbar = findViewById(R.id.custom_tool_bar);
-        icon_toolbar = findViewById(R.id.image_tool_bar);
-        head_text_toolbar = findViewById(R.id.head_text_tool_bar);
+        mDrawerLayout = findViewById(R.id.drawer_layout);
+        leftDrawer = findViewById(R.id.left_drawer);
 
-        // Developers method
-        // startActivityFillDb();
-        //startActivityFragmentsTest();
-
-        initTitleBar();
-        initChannelsRecyclerView();
-    }
-
-    @Override
-    protected void onDestroy() {
-        super.onDestroy();
-        presenter.detachView();
-    }
-
-    private void initTitleBar() {
+        ImageView icon_toolbar = findViewById(R.id.image_tool_bar);
+        TextView head_text_toolbar = findViewById(R.id.head_text_tool_bar);
         head_text_toolbar.setText(R.string.app_name);
 
         Picasso.get()
                 .load(R.drawable.ic_tvchat_255)
                 .into(icon_toolbar);
 
-        setSupportActionBar(toolbar);
-        getSupportActionBar().setDisplayShowTitleEnabled(false);
+        fTrans = getFragmentManager().beginTransaction();
+
+        fragMain = new FragmentMain();
+        fragAboutProgram = new FragmentAboutProgram();
+        fragFeedback = new FragmentFeedback();
+        fragSettings = new FragmentSettings();
+        fragUploadChannelsToFirebase = new FragmentUploadChannelsToFirebase();
+
+        fTrans.add(R.id.frgmCont, fragMain);
+        // Developers fragment
+        //fTrans.add(R.id.frgmCont, fragUploadChannelsToFirebase);
+        fTrans.commit();
     }
 
-    private void initChannelsRecyclerView() {
 
-        RecyclerView.LayoutManager rvLayoutManager = new GridLayoutManager(this, 2);
-        rvTvChannels = findViewById(R.id.rv_tv_channels);
-        rvTvChannels.setLayoutManager(rvLayoutManager);
-
-        TvChannelsAdapter.OnChannelClickListener onChannelClickListener = new TvChannelsAdapter.OnChannelClickListener() {
-            @Override
-            public void onChannelClick(Channel channel) {
-
-                Intent intent = new Intent(MainActivity.this, ChatActivity.class);
-                intent.putExtra(CHANNEL_OBJECT_EXTRA, channel);
-                startActivity(intent);
-            }
-        };
-
-        tvChannelsAdapter = new TvChannelsAdapter(MainActivity.this, onChannelClickListener);
-        rvTvChannels.setAdapter(tvChannelsAdapter);
-    }
-
-    @Override
-    public void showAddedChannel(Channel channel) {
-        tvChannelsAdapter.setChannel(channel);
-    }
-
-    @Override
-    public void showUsersCountOnline(DataSnapshot dataSnapshot) {
-        updateUsersCountOnline(dataSnapshot);
-    }
-
-    private void updateUsersCountOnline(DataSnapshot dataSnapshot) {
-        for (Channel ch : tvChannelsAdapter.tvChannelsList) {
-            if(ch.firebase_channel_id.equals(dataSnapshot.getKey())){
-                Channel channel = dataSnapshot.getValue(Channel.class);
-                ch.setCount_users(channel.count_users);
-                tvChannelsAdapter.notifyDataSetChanged();
-            }
+    public void onClick(View v) {
+        fTrans = getFragmentManager().beginTransaction();
+        switch (v.getId()) {
+            case R.id.image_tool_bar:
+                if (mDrawerLayout.isDrawerOpen(GravityCompat.START)){
+                    mDrawerLayout.closeDrawers();
+                } else {
+                    mDrawerLayout.openDrawer(leftDrawer);
+                }
+                break;
+            case R.id.btnAboutProgram:
+                fTrans.replace(R.id.frgmCont, fragAboutProgram);
+                if (mDrawerLayout.isDrawerOpen(GravityCompat.START)){
+                    mDrawerLayout.closeDrawers();
+                }
+                break;
+            case R.id.btnFeedback:
+                fTrans.replace(R.id.frgmCont, fragFeedback);
+                if (mDrawerLayout.isDrawerOpen(GravityCompat.START)){
+                    mDrawerLayout.closeDrawers();
+                }
+                break;
+            case R.id.btnSettings:
+                fTrans.replace(R.id.frgmCont, fragSettings);
+                if (mDrawerLayout.isDrawerOpen(GravityCompat.START)){
+                    mDrawerLayout.closeDrawers();
+                }
+            default:
+                break;
         }
-    }
-
-//    private void startActivityFillDb() {
-//        Intent intent = new Intent(this, UploadChannelsToFirebaseActivity.class);
-//        startActivity(intent);
-//    }
-
-    private void startActivityFragmentsTest() {
-        Intent intent = new Intent(this, MainActivityNew.class);
-        startActivity(intent);
+        fTrans.addToBackStack(null);
+        fTrans.commit();
     }
 }

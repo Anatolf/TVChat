@@ -14,7 +14,7 @@
         android:theme="@style/AppTheme"
         android:windowSoftInputMode="stateHidden|adjustPan">
 
-        <activity android:name="com.anatolf.tvchat.ui.fragment.MainActivityNew">
+        <activity android:name="com.anatolf.tvchat.ui.main.MainActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
@@ -37,6 +37,7 @@
             android:name="com.vk.sdk.VKServiceActivity"
             android:label="ServiceActivity"
             android:theme="@style/VK.Transparent" />
+
         <activity
             android:name="ru.ok.android.sdk.OkAuthActivity"
             android:configChanges="orientation|screenSize"
@@ -52,6 +53,6 @@
                     android:scheme="okauth" />
             </intent-filter>
         </activity>
-    </application>
 
+    </application>
 </manifest>
