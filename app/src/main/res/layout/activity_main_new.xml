@@ -48,9 +48,7 @@
                     android:gravity="center_vertical"
                     android:text="header_name"/>
 
-
             </androidx.appcompat.widget.Toolbar>
-
         </com.google.android.material.appbar.AppBarLayout>
 
         <androidx.constraintlayout.widget.ConstraintLayout
@@ -68,8 +66,6 @@
                 app:layout_constraintTop_toTopOf="parent" />
 
         </androidx.constraintlayout.widget.ConstraintLayout>
-
-
     </androidx.coordinatorlayout.widget.CoordinatorLayout>
 
 
@@ -81,6 +77,7 @@
         android:background="@drawable/side_nav_bar"
         android:choiceMode="singleChoice"
         android:divider="@android:color/transparent"
+        android:padding="8dp"
         android:dividerHeight="0dp"
         android:orientation="vertical">
 
@@ -95,38 +92,34 @@
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:paddingTop="@dimen/nav_header_vertical_spacing"
-            android:text="@string/nav_header_title"
+            android:text="TvChat"
             android:textAppearance="@style/TextAppearance.AppCompat.Body1" />
 
-        <Button
-            android:id="@+id/btnAdd"
-            android:layout_width="wrap_content"
+        <TextView
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:onClick="onClick"
-            android:text="@string/add"></Button>
+            android:text="gertz.promo@gmail.com" />
 
         <Button
-            android:id="@+id/btnRemove"
-            android:layout_width="wrap_content"
+            android:id="@+id/btnAboutProgram"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:onClick="onClick"
-            android:text="@string/remove"></Button>
+            android:text="О программе" />
 
         <Button
-            android:id="@+id/btnReplace"
-            android:layout_width="wrap_content"
+            android:id="@+id/btnFeedback"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:onClick="onClick"
-            android:text="@string/replace"></Button>
+            android:text="Обратная связь" />
 
-        <CheckBox
-            android:id="@+id/chbStack"
-            android:layout_width="wrap_content"
+        <Button
+            android:id="@+id/btnSettings"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="@string/stack"></CheckBox>
+            android:onClick="onClick"
+            android:text="Настройки" />
 
     </LinearLayout>
-
-
 </androidx.drawerlayout.widget.DrawerLayout>

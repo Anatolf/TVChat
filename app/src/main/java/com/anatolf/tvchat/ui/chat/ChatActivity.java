@@ -29,7 +29,7 @@ import com.anatolf.tvchat.R;
 import com.anatolf.tvchat.net.model.Channel;
 import com.anatolf.tvchat.net.model.FireBaseChatMessage;
 import com.anatolf.tvchat.net.model.Message;
-import com.anatolf.tvchat.ui.main.MainActivity;
+import com.anatolf.tvchat.ui.fragment.MainActivityNew;
 import com.anatolf.tvchat.utils.PrefsConstants;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.snackbar.Snackbar;
@@ -82,9 +82,9 @@ public class ChatActivity extends AppCompatActivity implements ChatContractView 
         root_chat = findViewById(R.id.root_element_chat);
         Intent intentFromMain = getIntent();
 
-        if (intentFromMain.hasExtra(MainActivity.CHANNEL_OBJECT_EXTRA)) {
+        if (intentFromMain.hasExtra(MainActivityNew.CHANNEL_OBJECT_EXTRA)) {
             Channel channel = (Channel) intentFromMain
-                    .getSerializableExtra(MainActivity.CHANNEL_OBJECT_EXTRA);
+                    .getSerializableExtra(MainActivityNew.CHANNEL_OBJECT_EXTRA);
 
             presenter = new ChatPresenter(channel.channel_id, channel.firebase_channel_id);
             presenter.attachView(this);

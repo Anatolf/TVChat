@@ -13,10 +13,6 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme"
         android:windowSoftInputMode="stateHidden|adjustPan">
-        <activity android:name="com.anatolf.tvchat.ui.main.MainActivity">
-
-        </activity>
-        <activity android:name="com.anatolf.tvchat.ui.main.TvChannelsAdapter" />
 
         <activity android:name="com.anatolf.tvchat.ui.fragment.MainActivityNew">
             <intent-filter>
@@ -24,14 +20,18 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
+        <activity android:name="com.anatolf.tvchat.ui.main.TvChannelsAdapter" />
+
         <activity android:name="com.anatolf.tvchat.ui.fragment.FragmentMain" />
+        <activity android:name="com.anatolf.tvchat.ui.fragment.FragmentAboutProgram" />
+        <activity android:name="com.anatolf.tvchat.ui.fragment.FragmentFeedback" />
+        <activity android:name="com.anatolf.tvchat.ui.fragment.FragmentSettings" />
         <activity android:name="com.anatolf.tvchat.ui.fragment.FragmentUploadChannelsToFirebase" />
 
         <activity
             android:name="com.anatolf.tvchat.ui.chat.ChatActivity"
             android:windowSoftInputMode="stateHidden|adjustPan" />
-        <activity android:name="com.anatolf.tvchat.ui.uploadchannels.UploadChannelsToFirebaseActivity" />
-
 
         <activity
             android:name="com.vk.sdk.VKServiceActivity"

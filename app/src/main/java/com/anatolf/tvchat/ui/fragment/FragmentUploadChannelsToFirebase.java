@@ -32,9 +32,7 @@ public class FragmentUploadChannelsToFirebase extends Fragment implements Upload
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        //return super.onCreateView(inflater, container, savedInstanceState);
-        //View view = inflater.inflate(R.layout.fragment_upload_channels_to_firebase,container,false);
-        View view = inflater.inflate(R.layout.activity_upload_channels_to_firebase, container,false);
+        View view = inflater.inflate(R.layout.fragment_upload_channels_to_firebase, container,false);
 
         presenter = new UploadChannelsToFirebasePresenter();
         presenter.attachView(this);

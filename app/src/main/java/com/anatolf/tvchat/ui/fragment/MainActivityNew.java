@@ -6,7 +6,6 @@ import android.view.View;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.view.GravityCompat;
@@ -16,13 +15,17 @@ import com.anatolf.tvchat.R;
 import com.squareup.picasso.Picasso;
 
 public class MainActivityNew extends AppCompatActivity {
-    // https://startandroid.ru/ru/uroki/vse-uroki-spiskom/175-urok-105-android-3-fragments-dinamicheskaja-rabota.html
+
+    public static final String CHANNEL_OBJECT_EXTRA = "channel_object_extra";
 
     private FragmentMain fragMain;
-    private FragmentUploadChannelsToFirebase fragUploadChannelsToFirebase;
+    private FragmentAboutProgram fragAboutProgram;
+    private FragmentFeedback fragFeedback;
+    private FragmentSettings fragSettings;
     private FragmentTransaction fTrans;
     private LinearLayout leftDrawer;
     private DrawerLayout mDrawerLayout;
+    private FragmentUploadChannelsToFirebase fragUploadChannelsToFirebase;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -30,9 +33,10 @@ public class MainActivityNew extends AppCompatActivity {
         setContentView(R.layout.activity_main_new);
 
         mDrawerLayout = findViewById(R.id.drawer_layout);
-        TextView head_text_toolbar = findViewById(R.id.head_text_tool_bar);
-        ImageView icon_toolbar = findViewById(R.id.image_tool_bar);
         leftDrawer = findViewById(R.id.left_drawer);
+
+        ImageView icon_toolbar = findViewById(R.id.image_tool_bar);
+        TextView head_text_toolbar = findViewById(R.id.head_text_tool_bar);
         head_text_toolbar.setText(R.string.app_name);
 
         Picasso.get()
@@ -42,9 +46,14 @@ public class MainActivityNew extends AppCompatActivity {
         fTrans = getFragmentManager().beginTransaction();
 
         fragMain = new FragmentMain();
+        fragAboutProgram = new FragmentAboutProgram();
+        fragFeedback = new FragmentFeedback();
+        fragSettings = new FragmentSettings();
         fragUploadChannelsToFirebase = new FragmentUploadChannelsToFirebase();
+
         fTrans.add(R.id.frgmCont, fragMain);
-        fTrans.addToBackStack(null);
+        // Developers fragment
+        //fTrans.add(R.id.frgmCont, fragUploadChannelsToFirebase);
         fTrans.commit();
     }
 
@@ -52,30 +61,33 @@ public class MainActivityNew extends AppCompatActivity {
     public void onClick(View v) {
         fTrans = getFragmentManager().beginTransaction();
         switch (v.getId()) {
-            case R.id.btnAdd:
-                fTrans.add(R.id.frgmCont, fragMain);
-                break;
-            case R.id.btnRemove:
-                fTrans.remove(fragMain);
-                break;
-            case R.id.btnReplace:
-                fTrans.replace(R.id.frgmCont, fragUploadChannelsToFirebase);
             case R.id.image_tool_bar:
-                Toast.makeText(MainActivityNew.this,
-                        "тут будет выпадающее меню!",
-                        Toast.LENGTH_SHORT).show();
-
                 if (mDrawerLayout.isDrawerOpen(GravityCompat.START)){
                     mDrawerLayout.closeDrawers();
                 } else {
                     mDrawerLayout.openDrawer(leftDrawer);
                 }
-
                 break;
+            case R.id.btnAboutProgram:
+                fTrans.replace(R.id.frgmCont, fragAboutProgram);
+                if (mDrawerLayout.isDrawerOpen(GravityCompat.START)){
+                    mDrawerLayout.closeDrawers();
+                }
+                break;
+            case R.id.btnFeedback:
+                fTrans.replace(R.id.frgmCont, fragFeedback);
+                if (mDrawerLayout.isDrawerOpen(GravityCompat.START)){
+                    mDrawerLayout.closeDrawers();
+                }
+                break;
+            case R.id.btnSettings:
+                fTrans.replace(R.id.frgmCont, fragSettings);
+                if (mDrawerLayout.isDrawerOpen(GravityCompat.START)){
+                    mDrawerLayout.closeDrawers();
+                }
             default:
                 break;
         }
-        //if (chbStack.isChecked())
         fTrans.addToBackStack(null);
         fTrans.commit();
     }

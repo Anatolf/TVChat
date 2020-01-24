@@ -51,7 +51,7 @@ public class MainActivity extends AppCompatActivity implements MainContractView 
 
         // Developers method
         // startActivityFillDb();
-        startActivityFragmentsTest();
+        //startActivityFragmentsTest();
 
         initTitleBar();
         initChannelsRecyclerView();
